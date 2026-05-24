@@ -1,0 +1,200 @@
+﻿.home-hero {
+  position: relative;
+  display: grid;
+  min-height: 520px;
+  overflow: hidden;
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-xl);
+  isolation: isolate;
+  box-shadow: var(--shadow-2);
+  place-items: center;
+}
+
+.home-hero::after {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  content: "";
+  background:
+    radial-gradient(circle at 28% 24%, rgba(255, 255, 255, 0.26), transparent 22%),
+    radial-gradient(circle at 76% 68%, rgba(255, 228, 184, 0.18), transparent 30%);
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+
+.home-hero-bg,
+.article-background {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.home-hero-bg {
+  filter: blur(44px) saturate(1.28) brightness(0.92);
+  transform: scale(1.14);
+  animation: hero-ambient-drift 18s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+.home-hero-scrim,
+.article-hero::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: linear-gradient(180deg, rgba(10, 14, 12, 0.18), rgba(10, 14, 12, 0.62));
+}
+
+.home-hero-content {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  max-width: 720px;
+  padding: 40px 24px;
+  color: #fffdf7;
+  text-align: center;
+}
+
+.home-hero-content > * {
+  animation: hero-content-in var(--motion-enter) both;
+}
+
+.home-hero-content > :nth-child(2) {
+  animation-delay: 70ms;
+}
+
+.home-hero-content > :nth-child(3) {
+  animation-delay: 130ms;
+}
+
+.home-hero-content > :nth-child(4) {
+  animation-delay: 190ms;
+}
+
+.home-hero-content > :nth-child(5) {
+  animation-delay: 250ms;
+}
+
+.avatar {
+  width: 110px;
+  height: 110px;
+  border: 2px solid rgba(255, 255, 255, 0.54);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  object-fit: cover;
+}
+
+.home-hero h1,
+.page-header h1,
+.article-hero h1 {
+  margin: 0;
+  max-width: 980px;
+  font-weight: 850;
+  letter-spacing: 0;
+  line-height: 1.08;
+}
+
+.home-hero h1 {
+  margin-top: 14px;
+  font-size: 4rem;
+}
+
+.home-hero p {
+  margin: 14px 0 0;
+  font-size: 1.08rem;
+}
+
+.hero-links {
+  justify-content: center;
+  margin-top: 28px;
+  --social-bg: rgba(255, 253, 247, 0.18);
+  --social-bg-hover: rgba(255, 253, 247, 0.28);
+  --social-border: rgba(255, 253, 247, 0.28);
+  --social-color: #fffdf7;
+}
+
+.portable-button {
+  background: rgba(255, 253, 247, 0.18);
+  border: 1px solid rgba(255, 253, 247, 0.28);
+  color: #fffdf7;
+  padding: 10px 16px;
+}
+
+.social-links {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.social-link {
+  --social-size: 44px;
+  --social-motion-collapse: 620ms cubic-bezier(0, 0, 0.2, 1);
+  --social-motion-expand: 620ms cubic-bezier(0.4, 0, 1, 1);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--social-size);
+  min-height: var(--social-size);
+  overflow: hidden;
+  border: 1px solid var(--social-border, var(--outline));
+  border-radius: 999px;
+  background: var(--social-bg, var(--surface-container-high));
+  color: var(--social-color, var(--on-surface));
+  gap: 0;
+  line-height: 1;
+  padding: 0 12px;
+  white-space: nowrap;
+  transition:
+    background var(--motion-hover),
+    border-color var(--motion-hover),
+    color var(--motion-hover),
+    gap var(--social-motion-collapse),
+    min-width var(--social-motion-collapse);
+}
+
+.social-link .icon {
+  width: 1.14em;
+  height: 1.14em;
+}
+
+.social-link__label {
+  display: inline-block;
+  max-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateX(-6px);
+  transition:
+    max-width var(--social-motion-collapse),
+    opacity var(--motion-hover),
+    transform var(--social-motion-collapse);
+  vertical-align: middle;
+}
+
+.social-link:hover,
+.social-link:focus-visible {
+  gap: 8px;
+  min-width: calc(var(--social-size) + 4ch);
+  background: var(--social-bg-hover, var(--primary-container));
+  border-color: var(--social-border-hover, var(--primary));
+  transition:
+    background var(--motion-hover),
+    border-color var(--motion-hover),
+    color var(--motion-hover),
+    gap var(--social-motion-expand),
+    min-width var(--social-motion-expand);
+}
+
+.social-link:hover .social-link__label,
+.social-link:focus-visible .social-link__label {
+  max-width: 16ch;
+  opacity: 1;
+  transform: translateX(0);
+  transition:
+    max-width var(--social-motion-expand),
+    opacity 260ms ease 160ms,
+    transform var(--social-motion-expand);
+}

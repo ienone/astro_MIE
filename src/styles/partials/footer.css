@@ -1,0 +1,75 @@
+﻿.site-footer {
+  width: min(var(--content-width), calc(100% - 32px));
+  margin: 72px auto 24px;
+}
+
+.footer-inner {
+  display: flex;
+  justify-content: space-between;
+  gap: 28px;
+  border-top: 1px solid var(--outline);
+  padding: 28px 0;
+  color: var(--on-surface-muted);
+}
+
+.footer-title {
+  color: var(--on-surface);
+  font-weight: 800;
+  margin: 0 0 8px;
+}
+
+.footer-inner p {
+  margin: 0;
+}
+
+.footer-links {
+  display: grid;
+  justify-items: end;
+  gap: 10px;
+}
+
+.footer-actions,
+.footer-social {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.footer-actions a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  border-radius: 999px;
+  background: var(--surface-container-high);
+  line-height: 1;
+  padding: 8px 12px;
+  transition:
+    background var(--motion-hover),
+    color var(--motion-hover),
+    transform var(--motion-hover);
+}
+
+.footer-actions a:hover,
+.footer-actions a:focus-visible {
+  background: var(--primary-container);
+  color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.footer-actions a .icon,
+.footer-social .icon {
+  width: 1.08em;
+  height: 1.08em;
+}
+
+.footer-social {
+  --social-size: 38px;
+  --social-bg: var(--surface-container-high);
+  --social-bg-hover: var(--primary-container);
+  --social-border: var(--outline);
+  --social-border-hover: color-mix(in srgb, var(--primary) 42%, var(--outline));
+  --social-color: var(--on-surface-muted);
+}

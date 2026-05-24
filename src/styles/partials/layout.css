@@ -1,0 +1,19 @@
+﻿main {
+  width: min(var(--content-width), calc(100% - 32px));
+  margin: 36px auto 0;
+}
+
+[data-reveal="ready"] {
+  opacity: 0;
+  transform: translateY(22px) scale(0.985);
+  transition:
+    opacity var(--motion-enter),
+    transform var(--motion-enter);
+  transition-delay: calc(var(--reveal-index, 0) * 46ms);
+  will-change: opacity, transform;
+}
+
+[data-reveal="ready"].is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
