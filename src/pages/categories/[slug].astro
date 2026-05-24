@@ -2,13 +2,13 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PageHeader from "../../components/PageHeader.astro";
 import PostList from "../../components/PostList.astro";
-import { getAllPosts, getPostsByTerm, getTerms } from "../../lib/posts";
+import { getAllPosts, getPostsByTermSlug, getTerms } from "../../lib/posts";
 
 export async function getStaticPaths() {
   const posts = await getAllPosts();
   return getTerms(posts, "categories").map((item) => ({
     params: { slug: item.slug },
-    props: { term: item.term, posts: getPostsByTerm(posts, "categories", item.term) }
+    props: { term: item.term, posts: getPostsByTermSlug(posts, "categories", item.slug) }
   }));
 }
 

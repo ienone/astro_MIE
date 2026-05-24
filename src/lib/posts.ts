@@ -96,22 +96,32 @@ export function slugToTerm(slug: string) {
 }
 
 export function getTerms(posts: PostEntry[], kind: TaxonomyKind) {
-  const counts = new Map<string, number>();
+  const terms = new Map<string, { term: string; count: number; values: Set<string> }>();
 
   for (const post of posts) {
     for (const term of post.data[kind] ?? []) {
       if (!term) continue;
-      counts.set(term, (counts.get(term) ?? 0) + 1);
+      const slug = termToSlug(term);
+      if (!slug) continue;
+
+      const entry = terms.get(slug) ?? { term, count: 0, values: new Set<string>() };
+      entry.count += 1;
+      entry.values.add(term);
+      terms.set(slug, entry);
     }
   }
 
-  return [...counts.entries()]
-    .map(([term, count]) => ({ term, count, slug: termToSlug(term) }))
+  return [...terms.entries()]
+    .map(([slug, { term, count, values }]) => ({ term, count, slug, values: [...values] }))
     .sort((a, b) => b.count - a.count || a.term.localeCompare(b.term, "en-US"));
 }
 
 export function getPostsByTerm(posts: PostEntry[], kind: TaxonomyKind, term: string) {
   return posts.filter((post) => (post.data[kind] ?? []).includes(term));
+}
+
+export function getPostsByTermSlug(posts: PostEntry[], kind: TaxonomyKind, slug: string) {
+  return posts.filter((post) => (post.data[kind] ?? []).some((term) => termToSlug(term) === slug));
 }
 
 export function getArchiveGroups(posts: PostEntry[]) {
