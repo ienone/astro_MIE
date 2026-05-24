@@ -653,13 +653,14 @@ main {
 }
 
 .hero-links {
-  flex-wrap: wrap;
   justify-content: center;
-  gap: 10px;
   margin-top: 28px;
+  --social-bg: rgba(255, 253, 247, 0.18);
+  --social-bg-hover: rgba(255, 253, 247, 0.28);
+  --social-border: rgba(255, 253, 247, 0.28);
+  --social-color: #fffdf7;
 }
 
-.hero-links a,
 .portable-button {
   background: rgba(255, 253, 247, 0.18);
   border: 1px solid rgba(255, 253, 247, 0.28);
@@ -667,34 +668,81 @@ main {
   padding: 10px 16px;
 }
 
-.hero-links a {
+.social-links {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.social-link {
+  --social-size: 44px;
+  --social-motion-collapse: 620ms cubic-bezier(0, 0, 0.2, 1);
+  --social-motion-expand: 620ms cubic-bezier(0.4, 0, 1, 1);
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  min-width: var(--social-size);
+  min-height: var(--social-size);
   overflow: hidden;
-}
-
-.hero-links a::before {
-  position: absolute;
-  inset: 0;
-  content: "";
-  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.22), transparent);
-  opacity: 0;
-  transform: translateX(-80%);
+  border: 1px solid var(--social-border, var(--outline));
+  border-radius: 999px;
+  background: var(--social-bg, var(--surface-container-high));
+  color: var(--social-color, var(--on-surface));
+  gap: 0;
+  line-height: 1;
+  padding: 0 12px;
+  white-space: nowrap;
   transition:
+    background var(--motion-hover),
+    border-color var(--motion-hover),
+    color var(--motion-hover),
+    gap var(--social-motion-collapse),
+    min-width var(--social-motion-collapse);
+}
+
+.social-link .icon {
+  width: 1.14em;
+  height: 1.14em;
+}
+
+.social-link__label {
+  display: inline-block;
+  max-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateX(-6px);
+  transition:
+    max-width var(--social-motion-collapse),
     opacity var(--motion-hover),
-    transform var(--motion-emphasized);
+    transform var(--social-motion-collapse);
+  vertical-align: middle;
 }
 
-.hero-links a:hover {
-  transform: translateY(-3px) scale(1.02);
-  background: rgba(255, 253, 247, 0.28);
+.social-link:hover,
+.social-link:focus-visible {
+  gap: 8px;
+  min-width: calc(var(--social-size) + 4ch);
+  background: var(--social-bg-hover, var(--primary-container));
+  border-color: var(--social-border-hover, var(--primary));
+  transition:
+    background var(--motion-hover),
+    border-color var(--motion-hover),
+    color var(--motion-hover),
+    gap var(--social-motion-expand),
+    min-width var(--social-motion-expand);
 }
 
-.hero-links a:hover::before {
+.social-link:hover .social-link__label,
+.social-link:focus-visible .social-link__label {
+  max-width: 16ch;
   opacity: 1;
-  transform: translateX(80%);
+  transform: translateX(0);
+  transition:
+    max-width var(--social-motion-expand),
+    opacity 260ms ease 160ms,
+    transform var(--social-motion-expand);
 }
 
 .content-section,
@@ -1561,14 +1609,55 @@ main {
 }
 
 .footer-links {
+  display: grid;
+  justify-items: end;
+  gap: 10px;
+}
+
+.footer-actions,
+.footer-social {
+  display: flex;
+  align-items: center;
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 8px;
 }
 
-.footer-links a {
+.footer-actions a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  border-radius: 999px;
   background: var(--surface-container-high);
+  line-height: 1;
   padding: 8px 12px;
+  transition:
+    background var(--motion-hover),
+    color var(--motion-hover),
+    transform var(--motion-hover);
+}
+
+.footer-actions a:hover,
+.footer-actions a:focus-visible {
+  background: var(--primary-container);
+  color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.footer-actions a .icon,
+.footer-social .icon {
+  width: 1.08em;
+  height: 1.08em;
+}
+
+.footer-social {
+  --social-size: 38px;
+  --social-bg: var(--surface-container-high);
+  --social-bg-hover: var(--primary-container);
+  --social-border: var(--outline);
+  --social-border-hover: color-mix(in srgb, var(--primary) 42%, var(--outline));
+  --social-color: var(--on-surface-muted);
 }
 
 .search-overlay {
@@ -1966,6 +2055,11 @@ main {
   }
 
   .footer-links {
+    justify-items: start;
+  }
+
+  .footer-actions,
+  .footer-social {
     justify-content: flex-start;
   }
 }

@@ -4,6 +4,7 @@ export interface LinkConfig {
   label: string;
   href: string;
   icon?: string;
+  displayLabel?: string;
   external?: boolean;
   rel?: string;
 }

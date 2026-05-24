@@ -2,8 +2,23 @@
 import Icon from "./Icon.astro";
 import { isExternalLink, siteConfig } from "../lib/site";
 
-const footerLinks = siteConfig.footer?.links ?? [];
-const showSearch = siteConfig.features?.search !== false;
+const defaultFooterLinks = [
+  { label: "RSS", href: "/rss.xml", icon: "rss" },
+  ...(siteConfig.features?.search !== false ? [{ label: "Search", href: "/search/", icon: "search" }] : [])
+];
+const seenFooterHrefs = new Set<string>();
+const footerLinks = [...defaultFooterLinks, ...(siteConfig.footer?.links ?? [])].filter((link) => {
+  if (seenFooterHrefs.has(link.href)) return false;
+  seenFooterHrefs.add(link.href);
+  return true;
+});
+const footerActionHrefs = new Set(footerLinks.map((link) => link.href));
+const footerSocialLinks = siteConfig.author.links.filter((link) => !footerActionHrefs.has(link.href));
+const showFooterSocial = Astro.url.pathname !== "/";
+
+function getSocialText(link: { label: string; displayLabel?: string }) {
+  return link.displayLabel || link.label;
+}
 ---
 
 <footer class="site-footer">
@@ -12,24 +27,35 @@ const showSearch = siteConfig.features?.search !== false;
       <p class="footer-title">{siteConfig.name}</p>
       <p>{siteConfig.description}</p>
     </div>
-    <div class="footer-links" aria-label="Footer links">
-      <a href="/rss.xml"><Icon name="rss" /><span>RSS</span></a>
-      {showSearch && <a href="/search/"><Icon name="search" /><span>Search</span></a>}
+    <div class="footer-links">
+      <div class="footer-actions" aria-label="Footer links">
+        {
+          footerLinks.map((link) => (
+            <a href={link.href} target={isExternalLink(link.href) ? "_blank" : undefined} rel={isExternalLink(link.href) ? "noopener noreferrer" : undefined}>
+              <Icon name={link.icon} />
+              <span>{link.label}</span>
+            </a>
+          ))
+        }
+      </div>
       {
-        footerLinks.map((link) => (
-          <a href={link.href} target={isExternalLink(link.href) ? "_blank" : undefined} rel={isExternalLink(link.href) ? "noopener noreferrer" : undefined}>
-            <Icon name={link.icon} />
-            <span>{link.label}</span>
-          </a>
-        ))
-      }
-      {
-        siteConfig.author.links.map((link) => (
-          <a href={link.href} target={isExternalLink(link.href) ? "_blank" : undefined} rel={isExternalLink(link.href) ? "noopener noreferrer" : undefined}>
-            <Icon name={link.icon} />
-            <span>{link.label}</span>
-          </a>
-        ))
+        showFooterSocial && footerSocialLinks.length > 0 && (
+          <div class="footer-social social-links" aria-label="社交平台">
+            {footerSocialLinks.map((link) => (
+              <a
+                class="social-link"
+                href={link.href}
+                target={isExternalLink(link.href) ? "_blank" : undefined}
+                rel={isExternalLink(link.href) ? "noopener noreferrer" : undefined}
+                aria-label={link.displayLabel ? `${link.label}: ${link.displayLabel}` : link.label}
+                title={getSocialText(link)}
+              >
+                <Icon name={link.icon} />
+                <span class="social-link__label">{getSocialText(link)}</span>
+              </a>
+            ))}
+          </div>
+        )
       }
     </div>
   </div>

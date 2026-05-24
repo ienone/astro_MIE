@@ -9,6 +9,10 @@ const posts = await getAllPosts();
 const homepage = siteConfig.homepage ?? {};
 const recent = posts.slice(0, homepage.showRecentItems ?? 6);
 const tags = getTerms(posts, "tags").slice(0, 12);
+
+function getSocialText(link: { label: string; displayLabel?: string }) {
+  return link.displayLabel || link.label;
+}
 ---
 
 <BaseLayout>
@@ -20,12 +24,19 @@ const tags = getTerms(posts, "tags").slice(0, 12);
       <p class="eyebrow">{homepage.eyebrow ?? "Personal static blog"}</p>
       <h1>{siteConfig.name}</h1>
       <p>{siteConfig.author.headline}</p>
-      <div class="hero-links">
+      <div class="hero-links social-links" aria-label="社交平台">
         {
           siteConfig.author.links.map((link) => (
-            <a href={link.href} target={isExternalLink(link.href) ? "_blank" : undefined} rel={isExternalLink(link.href) ? "noopener noreferrer" : undefined}>
+            <a
+              class="social-link"
+              href={link.href}
+              target={isExternalLink(link.href) ? "_blank" : undefined}
+              rel={isExternalLink(link.href) ? "noopener noreferrer" : undefined}
+              aria-label={link.displayLabel ? `${link.label}: ${link.displayLabel}` : link.label}
+              title={getSocialText(link)}
+            >
               <Icon name={link.icon} />
-              <span>{link.label}</span>
+              <span class="social-link__label">{getSocialText(link)}</span>
             </a>
           ))
         }
