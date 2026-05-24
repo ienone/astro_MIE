@@ -103,6 +103,12 @@ html {
   animation: page-new-in var(--motion-page) both;
 }
 
+html.theme-transitioning::view-transition-old(root),
+html.theme-transitioning::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
 @keyframes hero-ambient-drift {
   from {
     transform: scale(1.14) translate3d(-1.2%, -0.8%, 0);
@@ -179,6 +185,14 @@ input {
   z-index: 20;
   width: min(var(--content-width), calc(100% - 32px));
   margin: 16px auto 0;
+  transition:
+    top var(--motion-emphasized),
+    transform var(--motion-emphasized),
+    width var(--motion-emphasized);
+}
+
+:root[data-scrolled="true"] .site-header {
+  top: 10px;
 }
 
 .nav-shell,
@@ -198,6 +212,18 @@ input {
   min-height: 66px;
   border-radius: 999px;
   padding: 10px 12px 10px 18px;
+  transition:
+    background var(--motion-emphasized),
+    box-shadow var(--motion-emphasized),
+    min-height var(--motion-emphasized),
+    padding var(--motion-emphasized);
+}
+
+:root[data-scrolled="true"] .nav-shell {
+  min-height: 56px;
+  background: color-mix(in srgb, var(--surface-glass) 82%, var(--surface-container));
+  box-shadow: var(--shadow-2);
+  padding: 7px 10px 7px 16px;
 }
 
 .brand,
@@ -250,11 +276,51 @@ input {
   width: 34px;
   height: 34px;
   border-radius: 50%;
+  transition:
+    height var(--motion-emphasized),
+    transform var(--motion-hover),
+    width var(--motion-emphasized);
+}
+
+.brand:hover img,
+.brand:focus-visible img {
+  transform: scale(1.06) rotate(-3deg);
+}
+
+:root[data-scrolled="true"] .brand img {
+  width: 30px;
+  height: 30px;
 }
 
 .nav-links {
+  position: relative;
   justify-content: center;
   gap: 6px;
+  isolation: isolate;
+  --nav-indicator-height: 0px;
+  --nav-indicator-opacity: 0;
+  --nav-indicator-width: 0px;
+  --nav-indicator-x: 0px;
+  --nav-indicator-y: 0px;
+}
+
+.nav-links::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  width: var(--nav-indicator-width);
+  height: var(--nav-indicator-height);
+  border-radius: 999px;
+  background: var(--primary-container);
+  content: "";
+  opacity: var(--nav-indicator-opacity);
+  transform: translate3d(var(--nav-indicator-x), var(--nav-indicator-y), 0);
+  transition:
+    opacity var(--motion-hover),
+    transform var(--motion-emphasized),
+    width var(--motion-emphasized),
+    height var(--motion-emphasized);
 }
 
 .nav-links a,
@@ -271,11 +337,16 @@ input {
 
 .nav-link,
 .nav-trigger {
+  position: relative;
+  z-index: 1;
   display: inline-flex;
   align-items: center;
   gap: 7px;
   padding: 10px 14px;
   color: var(--on-surface-muted);
+  transition:
+    color var(--motion-hover),
+    transform var(--motion-hover);
 }
 
 .nav-link:hover,
@@ -284,6 +355,16 @@ input {
 .nav-trigger:focus-visible {
   background: var(--primary-container);
   color: var(--primary);
+}
+
+.nav-link[aria-current="page"],
+.nav-trigger[data-active="true"] {
+  color: var(--primary);
+}
+
+.nav-link:active,
+.nav-trigger:active {
+  transform: scale(0.97);
 }
 
 .nav-menu {
@@ -369,22 +450,52 @@ input {
   color: var(--on-surface);
   cursor: pointer;
   padding: 0;
+  transition:
+    background var(--motion-hover),
+    color var(--motion-hover),
+    transform var(--motion-hover);
 }
 
 .icon-button:hover,
 .menu-button:hover {
   background: var(--secondary-container);
+  transform: translateY(-1px);
 }
 
 .menu-button {
   display: none;
 }
 
+.menu-button .icon {
+  transition: transform var(--motion-emphasized);
+}
+
+.menu-button[aria-expanded="true"] .icon {
+  transform: rotate(90deg) scale(1.04);
+}
+
 .mobile-nav {
   display: none;
   margin-top: 10px;
   border-radius: var(--radius-lg);
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  padding: 0 10px;
+  transform: translateY(-8px) scale(0.985);
+  transform-origin: top center;
+  transition:
+    max-height var(--motion-emphasized),
+    opacity var(--motion-emphasized),
+    padding var(--motion-emphasized),
+    transform var(--motion-emphasized);
+}
+
+.mobile-nav[data-open="true"] {
+  max-height: min(72vh, 620px);
+  opacity: 1;
   padding: 10px;
+  transform: translateY(0) scale(1);
 }
 
 .mobile-nav a,
@@ -400,6 +511,13 @@ input {
   cursor: pointer;
   color: var(--on-surface-muted);
   list-style: none;
+}
+
+.mobile-nav a[aria-current="page"],
+.mobile-nav summary:hover,
+.mobile-nav summary:focus-visible {
+  background: var(--primary-container);
+  color: var(--primary);
 }
 
 .mobile-nav summary::-webkit-details-marker {
