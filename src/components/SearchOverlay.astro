@@ -15,25 +15,18 @@ import Icon from "./Icon.astro";
 
 <script>
   // @ts-nocheck
-  const dialog = document.querySelector("[data-search-dialog]");
-  const openers = document.querySelectorAll("[data-search-open]");
-  const input = document.querySelector("[data-search-input]");
-  const results = document.querySelector("[data-search-results]");
-  const pageInput = document.querySelector("[data-search-page-input]");
-  const pageResults = document.querySelector("[data-search-page-results]");
   const htmlEntities = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" };
-  let pagefind;
   let previousFocus;
 
   const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) => htmlEntities[char] ?? char);
 
   async function ensurePagefind() {
-    if (!pagefind) {
+    if (!window.__astroMiePagefind) {
       const pagefindPath = "/pagefind/pagefind.js";
-      pagefind = import(/* @vite-ignore */ pagefindPath);
+      window.__astroMiePagefind = import(/* @vite-ignore */ pagefindPath);
     }
 
-    return pagefind;
+    return window.__astroMiePagefind;
   }
 
   function renderMessage(container, message) {
@@ -55,7 +48,7 @@ import Icon from "./Icon.astro";
           const excerpt = item.excerpt || escapeHtml(item.meta?.description || item.url);
 
           return `
-          <a class="search-result" href="${escapeHtml(item.url)}">
+          <a class="search-result" href="${escapeHtml(item.url)}" style="--result-index: ${item.index ?? 0}">
             <span>${escapeHtml(title)}</span>
             <small>${excerpt}</small>
           </a>
@@ -67,6 +60,8 @@ import Icon from "./Icon.astro";
 
   function setupSearch(searchInput, searchResults, limit) {
     if (!(searchInput instanceof HTMLInputElement) || !(searchResults instanceof HTMLElement)) return;
+    if (searchInput.dataset.searchReady === "true") return;
+    searchInput.dataset.searchReady = "true";
 
     let searchId = 0;
 
@@ -85,45 +80,89 @@ import Icon from "./Icon.astro";
       try {
         const pagefindApi = await ensurePagefind();
         const search = await pagefindApi.search(query, { excerptLength: 30 });
-        const items = await Promise.all(search.results.slice(0, limit).map((result) => result.data()));
+        const items = await Promise.all(search.results.slice(0, limit).map(async (result, index) => ({ ...(await result.data()), index })));
 
         if (currentSearch === searchId) renderResults(searchResults, items);
       } catch (error) {
-        pagefind = undefined;
+        window.__astroMiePagefind = undefined;
         if (currentSearch === searchId) renderMessage(searchResults, "搜索索引尚未生成，请先运行 npm run build。");
       }
     });
   }
 
   function openSearch() {
+    const dialog = document.querySelector("[data-search-dialog]");
+    const input = document.querySelector("[data-search-input]");
+    const results = document.querySelector("[data-search-results]");
     if (!(dialog instanceof HTMLDialogElement)) return;
     previousFocus = document.activeElement;
+    delete dialog.dataset.closing;
     if (!dialog.open) dialog.showModal();
     if (input instanceof HTMLInputElement) {
       input.value = "";
-      input.focus();
+      window.setTimeout(() => input.focus(), 40);
     }
     if (results instanceof HTMLElement) results.innerHTML = "";
   }
 
   function closeSearch() {
-    if (dialog instanceof HTMLDialogElement && dialog.open) dialog.close();
+    const dialog = document.querySelector("[data-search-dialog]");
+    if (!(dialog instanceof HTMLDialogElement) || !dialog.open || dialog.dataset.closing === "true") return;
+
+    dialog.dataset.closing = "true";
+    window.setTimeout(() => {
+      if (dialog.open) dialog.close();
+      delete dialog.dataset.closing;
+    }, 220);
   }
 
-  setupSearch(input, results, 12);
-  setupSearch(pageInput, pageResults, 30);
-  openers.forEach((button) => button.addEventListener("click", openSearch));
-  dialog?.addEventListener("click", (event) => {
-    if (event.target === dialog) closeSearch();
-  });
-  dialog?.addEventListener("close", () => {
-    if (previousFocus instanceof HTMLElement) previousFocus.focus();
-  });
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") closeSearch();
-    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
-      event.preventDefault();
-      openSearch();
+  function setupSearchOverlay() {
+    const dialog = document.querySelector("[data-search-dialog]");
+    const openers = document.querySelectorAll("[data-search-open]");
+    const input = document.querySelector("[data-search-input]");
+    const results = document.querySelector("[data-search-results]");
+    const pageInput = document.querySelector("[data-search-page-input]");
+    const pageResults = document.querySelector("[data-search-page-results]");
+
+    setupSearch(input, results, 12);
+    setupSearch(pageInput, pageResults, 30);
+
+    openers.forEach((button) => {
+      if (!(button instanceof HTMLElement) || button.dataset.searchOpenReady === "true") return;
+      button.dataset.searchOpenReady = "true";
+      button.addEventListener("click", openSearch);
+    });
+
+    if (dialog instanceof HTMLDialogElement && dialog.dataset.searchDialogReady !== "true") {
+      dialog.dataset.searchDialogReady = "true";
+      dialog.addEventListener("click", (event) => {
+        if (event.target === dialog) closeSearch();
+      });
+      dialog.addEventListener("cancel", (event) => {
+        event.preventDefault();
+        closeSearch();
+      });
+      dialog.addEventListener("close", () => {
+        if (previousFocus instanceof HTMLElement) previousFocus.focus();
+      });
+      dialog.querySelector("form")?.addEventListener("submit", (event) => {
+        event.preventDefault();
+        closeSearch();
+      });
     }
-  });
+  }
+
+  if (!window.__astroMieSearchBound) {
+    window.__astroMieSearchBound = true;
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeSearch();
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        openSearch();
+      }
+    });
+    document.addEventListener("astro:page-load", setupSearchOverlay);
+  }
+
+  setupSearchOverlay();
 </script>
