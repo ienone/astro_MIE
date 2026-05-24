@@ -1,0 +1,62 @@
+---
+interface ActionLink {
+  href: string;
+  label: string;
+  target?: string;
+  rel?: string;
+}
+
+interface Props {
+  links: ActionLink[];
+  label?: string;
+}
+
+const { links = [], label = "Related links" } = Astro.props;
+---
+
+<nav class="action-links" aria-label={label}>
+  {
+    links.map((link) => {
+      const target = link.target ?? (link.href.startsWith("http") ? "_blank" : undefined);
+      const rel = link.rel ?? (target === "_blank" ? "noopener noreferrer" : undefined);
+
+      return (
+        <a class="action-links__item" href={link.href} target={target} rel={rel}>
+          {link.label}
+        </a>
+      );
+    })
+  }
+</nav>
+
+<style>
+  .action-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 1.5rem 0;
+  }
+
+  .action-links__item {
+    border: 1px solid var(--primary);
+    border-radius: 999px;
+    background: var(--primary-container);
+    color: var(--primary);
+    font-family: var(--font-sans);
+    font-weight: 700;
+    line-height: 1.2;
+    padding: 0.7rem 1rem;
+    text-decoration: none;
+    transition:
+      background var(--motion-fast),
+      color var(--motion-fast),
+      transform var(--motion-fast);
+  }
+
+  .action-links__item:hover,
+  .action-links__item:focus-visible {
+    background: var(--primary);
+    color: var(--on-primary);
+    transform: translateY(-1px);
+  }
+</style>

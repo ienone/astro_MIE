@@ -1,0 +1,15 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageHeader from "../../components/PageHeader.astro";
+import TermCloud from "../../components/TermCloud.astro";
+import { getAllPosts, getTerms } from "../../lib/posts";
+
+const terms = getTerms(await getAllPosts(), "series");
+---
+
+<BaseLayout title="Series" description="All post series and collections.">
+  <PageHeader eyebrow="Series" title="Series" description="Series are organized through front matter `series` and `seriesOrder` fields." />
+  <section class="content-section">
+    <TermCloud terms={terms} basePath="/series" />
+  </section>
+</BaseLayout>

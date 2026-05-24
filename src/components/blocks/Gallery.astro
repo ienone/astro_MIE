@@ -1,0 +1,24 @@
+---
+interface ImageItem {
+  src: string;
+  alt?: string;
+  caption?: string;
+}
+
+interface Props {
+  images: ImageItem[];
+}
+
+const { images = [] } = Astro.props;
+---
+
+<div class="portable-gallery">
+  {
+    images.map((image) => (
+      <figure>
+        <img src={image.src} alt={image.alt || ""} loading="lazy" />
+        {image.caption && <figcaption>{image.caption}</figcaption>}
+      </figure>
+    ))
+  }
+</div>

@@ -1,0 +1,85 @@
+---
+import {
+  Archive,
+  ChevronDown,
+  Circle,
+  Code,
+  Copy,
+  FileText,
+  Film,
+  Folder,
+  GitBranch,
+  House,
+  ListTree,
+  Mail,
+  Menu,
+  MessageCircle,
+  MonitorPlay,
+  Notebook,
+  SquarePen,
+  Rss,
+  Search,
+  Send,
+  SquarePlay,
+  Star,
+  SunMoon,
+  Tags,
+  Tv,
+  WandSparkles,
+  X
+} from "@lucide/astro";
+
+interface Props {
+  name?: string;
+  label?: string;
+}
+
+const { name = "circle", label } = Astro.props;
+const sourceIcons = import.meta.glob("../icons/custom/*.svg", {
+  query: "?raw",
+  import: "default",
+  eager: true
+}) as Record<string, string>;
+const sourceIcon = sourceIcons[`../icons/custom/${name}.svg`];
+
+const icons = {
+  archive: Archive,
+  "chevron-down": ChevronDown,
+  circle: Circle,
+  code: Code,
+  copy: Copy,
+  edit: SquarePen,
+  "file-text": FileText,
+  film: Film,
+  folder: Folder,
+  github: GitBranch,
+  home: House,
+  "list-tree": ListTree,
+  mail: Mail,
+  menu: Menu,
+  "message-circle": MessageCircle,
+  "monitor-play": MonitorPlay,
+  notebook: Notebook,
+  "play-square": SquarePlay,
+  rss: Rss,
+  search: Search,
+  send: Send,
+  star: Star,
+  "sun-moon": SunMoon,
+  tags: Tags,
+  tv: Tv,
+  "wand-magic-sparkles": WandSparkles,
+  "wand-sparkles": WandSparkles,
+  x: X
+};
+
+const IconComponent = icons[name as keyof typeof icons] ?? Circle;
+---
+
+{
+  sourceIcon ? (
+    <span class="icon icon-source" aria-hidden={label ? undefined : "true"} aria-label={label} role={label ? "img" : undefined} set:html={sourceIcon} />
+  ) : (
+    <IconComponent class="icon" aria-hidden={label ? undefined : "true"} aria-label={label} role={label ? "img" : undefined} />
+  )
+}

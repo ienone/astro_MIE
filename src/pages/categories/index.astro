@@ -1,0 +1,15 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageHeader from "../../components/PageHeader.astro";
+import TermCloud from "../../components/TermCloud.astro";
+import { getAllPosts, getTerms } from "../../lib/posts";
+
+const terms = getTerms(await getAllPosts(), "categories");
+---
+
+<BaseLayout title="Categories" description="All configured post categories.">
+  <PageHeader eyebrow="Categories" title="Categories" description="Categories are generated from explicit front matter fields." />
+  <section class="content-section">
+    <TermCloud terms={terms} basePath="/categories" />
+  </section>
+</BaseLayout>

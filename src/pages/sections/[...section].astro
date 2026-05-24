@@ -1,0 +1,36 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageHeader from "../../components/PageHeader.astro";
+import PostList from "../../components/PostList.astro";
+import {
+  getAllPosts,
+  getConfiguredSectionKeys,
+  getSectionDescription,
+  getSectionLabel,
+  postMatchesSection
+} from "../../lib/posts";
+
+export async function getStaticPaths() {
+  const posts = await getAllPosts();
+  const sections = getConfiguredSectionKeys(posts);
+
+  return sections.map((section) => ({
+    params: { section },
+    props: {
+      section,
+      posts: posts.filter((post) => postMatchesSection(post, section))
+    }
+  }));
+}
+
+const { section, posts } = Astro.props;
+const title = getSectionLabel(section);
+const description = getSectionDescription(section) || `Posts in the ${title} section.`;
+---
+
+<BaseLayout title={title} description={description}>
+  <PageHeader eyebrow="Section" title={title} description={`${description} ${posts.length} posts.`} />
+  <section class="content-section">
+    <PostList posts={posts} compact />
+  </section>
+</BaseLayout>

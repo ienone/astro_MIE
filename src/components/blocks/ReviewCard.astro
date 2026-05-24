@@ -1,0 +1,114 @@
+---
+interface Props {
+  title: string;
+  href?: string;
+  score?: string | number;
+  poster?: string;
+  posterAlt?: string;
+  meta?: string;
+  accent?: string;
+}
+
+const { title, href, score, poster, posterAlt = title, meta, accent } = Astro.props;
+const style = accent ? { "--review-accent": accent } : undefined;
+---
+
+<article class="review-card" style={style}>
+  {
+    poster && (
+      <a class="review-card__poster" href={href} target={href?.startsWith("http") ? "_blank" : undefined} rel={href?.startsWith("http") ? "noopener noreferrer" : undefined}>
+        <img src={poster} alt={posterAlt} loading="lazy" />
+      </a>
+    )
+  }
+  <div class="review-card__content">
+    <h3 class="review-card__title">
+      {
+        href ? (
+          <a href={href} target={href.startsWith("http") ? "_blank" : undefined} rel={href.startsWith("http") ? "noopener noreferrer" : undefined}>
+            {title}
+          </a>
+        ) : (
+          title
+        )
+      }
+    </h3>
+    {(score || meta) && (
+      <p class="review-card__meta">
+        {score && <strong>{score}</strong>}
+        {score && meta && <span aria-hidden="true"> · </span>}
+        {meta}
+      </p>
+    )}
+    <div class="review-card__body">
+      <slot />
+    </div>
+  </div>
+</article>
+
+<style>
+  .review-card {
+    --review-accent: var(--primary);
+    display: grid;
+    grid-template-columns: minmax(120px, 180px) minmax(0, 1fr);
+    gap: 18px;
+    border: 1px solid color-mix(in srgb, var(--review-accent) 36%, var(--outline));
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--review-accent) 8%, var(--surface-container));
+    margin: 1.5rem 0;
+    padding: 16px;
+  }
+
+  .review-card__poster {
+    align-self: start;
+  }
+
+  .review-card__poster img {
+    width: 100%;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+  }
+
+  .review-card__title {
+    color: var(--on-surface);
+    font-family: var(--font-sans);
+    font-size: 1.25rem;
+    line-height: 1.25;
+    margin: 0;
+  }
+
+  .review-card__title a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .review-card__title a:hover,
+  .review-card__title a:focus-visible {
+    color: var(--review-accent);
+    text-decoration: underline;
+  }
+
+  .review-card__meta {
+    color: var(--on-surface-muted);
+    font-family: var(--font-sans);
+    margin: 0.35rem 0 0;
+  }
+
+  .review-card__body {
+    margin-top: 0.75rem;
+  }
+
+  .review-card__body :global(p:last-child) {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 640px) {
+    .review-card {
+      grid-template-columns: 1fr;
+    }
+
+    .review-card__poster img {
+      max-height: 320px;
+    }
+  }
+</style>

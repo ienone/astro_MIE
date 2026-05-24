@@ -1,0 +1,15 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageHeader from "../../components/PageHeader.astro";
+import PostList from "../../components/PostList.astro";
+import { getAllPosts } from "../../lib/posts";
+
+const posts = await getAllPosts();
+---
+
+<BaseLayout title="All posts" description="Browse all Markdown and MDX posts by publication date.">
+  <PageHeader eyebrow="Posts" title="All posts" description="Browse content in reverse chronological order." />
+  <section class="content-section">
+    <PostList posts={posts} />
+  </section>
+</BaseLayout>

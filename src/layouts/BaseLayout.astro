@@ -1,0 +1,103 @@
+---
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import SearchOverlay from "../components/SearchOverlay.astro";
+import Icon from "../components/Icon.astro";
+import { siteConfig } from "../lib/site";
+import "katex/dist/katex.min.css";
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  type?: "website" | "article";
+}
+
+const {
+  title = siteConfig.title,
+  description = siteConfig.description,
+  image = siteConfig.assets.homeBackground,
+  type = "website"
+} = Astro.props;
+
+const pageTitle = title === siteConfig.title ? title : `${title} | ${siteConfig.name}`;
+const canonical = new URL(Astro.url.pathname, siteConfig.url).toString();
+const ogImage = image.startsWith("http") ? image : new URL(image, siteConfig.url).toString();
+---
+
+<!doctype html>
+<html lang={siteConfig.language || "en"}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href={siteConfig.branding.favicon} sizes="any" />
+    <link rel="alternate" type="application/rss+xml" title={`${siteConfig.name} RSS`} href="/rss.xml" />
+    <meta property="og:type" content={type} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#f8f3e7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#171b18" media="(prefers-color-scheme: dark)" />
+  </head>
+  <body>
+    <script is:inline>
+      const storedTheme = localStorage.getItem("theme");
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      document.documentElement.dataset.theme = storedTheme || (prefersDark ? "dark" : "light");
+    </script>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Header />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+    <SearchOverlay />
+    <template data-code-copy-icon><Icon name="copy" /></template>
+    <script is:inline>
+      function enhanceCodeBlocks() {
+        const iconTemplate = document.querySelector("[data-code-copy-icon]");
+
+        document.querySelectorAll("pre[data-language]").forEach((pre) => {
+          if (!(pre instanceof HTMLElement) || pre.dataset.enhanced === "true") return;
+          pre.dataset.enhanced = "true";
+          const language = pre.dataset.language || "text";
+          pre.setAttribute("aria-label", `${language} code block`);
+
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "code-copy";
+          button.dataset.codeCopy = "";
+          button.setAttribute("aria-label", "Copy code");
+          if (iconTemplate instanceof HTMLTemplateElement) {
+            button.append(iconTemplate.content.cloneNode(true));
+          } else {
+            button.textContent = "Copy";
+          }
+          pre.append(button);
+        });
+      }
+
+      document.addEventListener("click", async (event) => {
+        const button = event.target instanceof Element ? event.target.closest("[data-code-copy]") : null;
+        if (!(button instanceof HTMLButtonElement)) return;
+        const pre = button.closest("pre");
+        const code = pre?.querySelector("code")?.textContent || "";
+        if (!code) return;
+
+        await navigator.clipboard.writeText(code);
+        button.dataset.copied = "true";
+        window.setTimeout(() => delete button.dataset.copied, 1200);
+      });
+
+      if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", enhanceCodeBlocks);
+      else enhanceCodeBlocks();
+    </script>
+  </body>
+</html>

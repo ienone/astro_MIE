@@ -1,0 +1,25 @@
+---
+interface Term {
+  term: string;
+  slug: string;
+  count: number;
+}
+
+interface Props {
+  terms: Term[];
+  basePath: string;
+}
+
+const { terms, basePath } = Astro.props;
+---
+
+<div class="term-grid">
+  {
+    terms.map((item) => (
+      <a class="term-card" href={`${basePath}/${item.slug}/`}>
+        <span>{item.term}</span>
+        <strong>{item.count}</strong>
+      </a>
+    ))
+  }
+</div>

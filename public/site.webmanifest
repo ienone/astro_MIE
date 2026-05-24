@@ -1,0 +1,14 @@
+{
+  "name": "Astro MIE",
+  "short_name": "Astro MIE",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "theme_color": "#146b5b",
+  "background_color": "#fffdf7",
+  "display": "standalone"
+}

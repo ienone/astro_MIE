@@ -1,0 +1,63 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Icon from "../components/Icon.astro";
+import PostList from "../components/PostList.astro";
+import { getAllPosts, getTerms } from "../lib/posts";
+import { isExternalLink, siteConfig } from "../lib/site";
+
+const posts = await getAllPosts();
+const homepage = siteConfig.homepage ?? {};
+const recent = posts.slice(0, homepage.showRecentItems ?? 6);
+const tags = getTerms(posts, "tags").slice(0, 12);
+---
+
+<BaseLayout>
+  <section class="home-hero">
+    <img class="home-hero-bg" src={siteConfig.assets.homeBackground} alt="" loading="eager" />
+    <div class="home-hero-scrim"></div>
+    <div class="home-hero-content">
+      {siteConfig.author.avatar && <img class="avatar" src={siteConfig.author.avatar} alt="" width="110" height="110" />}
+      <p class="eyebrow">{homepage.eyebrow ?? "Personal static blog"}</p>
+      <h1>{siteConfig.name}</h1>
+      <p>{siteConfig.author.headline}</p>
+      <div class="hero-links">
+        {
+          siteConfig.author.links.map((link) => (
+            <a href={link.href} target={isExternalLink(link.href) ? "_blank" : undefined} rel={isExternalLink(link.href) ? "noopener noreferrer" : undefined}>
+              <Icon name={link.icon} />
+              <span>{link.label}</span>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  {
+    homepage.showRecent !== false && (
+      <section class="content-section">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Latest</p>
+            <h2>Latest posts</h2>
+          </div>
+          <a class="text-link" href={homepage.showMoreLinkDest ?? "/posts/"}>View all</a>
+        </div>
+        <PostList posts={recent} />
+      </section>
+    )
+  }
+
+  <section class="content-section">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Browse</p>
+        <h2>Popular tags</h2>
+      </div>
+      <a class="text-link" href="/tags/">All tags</a>
+    </div>
+    <div class="tag-strip">
+      {tags.map((tag) => <a href={`/tags/${tag.slug}/`}>{tag.term}<span>{tag.count}</span></a>)}
+    </div>
+  </section>
+</BaseLayout>

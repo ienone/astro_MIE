@@ -1,0 +1,15 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageHeader from "../../components/PageHeader.astro";
+import TermCloud from "../../components/TermCloud.astro";
+import { getAllPosts, getTerms } from "../../lib/posts";
+
+const terms = getTerms(await getAllPosts(), "tags");
+---
+
+<BaseLayout title="Tags" description="All generated post tags.">
+  <PageHeader eyebrow="Tags" title="Tags" description="Tags are generated from post front matter." />
+  <section class="content-section">
+    <TermCloud terms={terms} basePath="/tags" />
+  </section>
+</BaseLayout>

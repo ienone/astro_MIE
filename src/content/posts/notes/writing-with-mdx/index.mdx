@@ -1,0 +1,72 @@
+---
+title: "Writing with MDX, math, and spoilers"
+description: "A technical note demonstrating code fences, KaTeX, spoiler syntax, and reusable article blocks."
+date: 2026-01-14
+draft: false
+slug: "writing-with-mdx"
+section: "notes/frontend"
+tags: ["mdx", "katex", "code"]
+categories: ["Notes"]
+series: ["Theme basics"]
+seriesOrder: 2
+themeColor: "#2f6096"
+media:
+  featured: "/img/featured.svg"
+  background: "/img/background.svg"
+  alt: "Abstract MDX note preview"
+seo:
+  title: "Writing with MDX, math, and spoilers"
+  description: "A generic MDX example for the Astro MIE theme."
+  ogImage: "/img/featured.svg"
+---
+
+import Figure from "../../../../components/blocks/Figure.astro";
+import ActionLinks from "../../../../components/blocks/ActionLinks.astro";
+
+This note exercises the content renderer that a real blog post would use.
+It includes headings for the collapsible table of contents, math, code, and a masked spoiler.
+
+## Math rendering
+
+Inline math such as $E = mc^2$ should render through KaTeX.
+
+Block math works as well:
+
+$$
+\int_0^1 x^2\,dx = \frac{1}{3}
+$$
+
+## Code fences
+
+The renderer adds a language badge and a copy button to fenced code blocks.
+
+```ts
+type PostTheme = {
+  title: string;
+  themeColor: `#${string}`;
+};
+
+export function accentStyle(post: PostTheme) {
+  return { "--post-theme": post.themeColor };
+}
+```
+
+## Spoiler syntax
+
+Use `:spoiler[hidden text]` when content should be blurred until hover or keyboard focus.
+For example, :spoiler[this sentence starts hidden and becomes readable on interaction].
+
+## Portable blocks
+
+<Figure
+  src="/img/featured.svg"
+  alt="Example featured artwork"
+  caption="A generic example figure rendered through an Astro block."
+/>
+
+<ActionLinks
+  links={[
+    { href: "/posts/getting-started/", label: "Read the guide" },
+    { href: "/tags/mdx/", label: "Browse MDX posts" }
+  ]}
+/>

@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Astro build output and generated cache
+dist/
+.astro/
+
+# Local environment files
+.env
+.env.*
+!.env.example
+*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Deployment/tooling state
+.vercel/
+.netlify/
+.wrangler/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

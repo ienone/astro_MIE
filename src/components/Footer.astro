@@ -1,0 +1,36 @@
+---
+import Icon from "./Icon.astro";
+import { isExternalLink, siteConfig } from "../lib/site";
+
+const footerLinks = siteConfig.footer?.links ?? [];
+const showSearch = siteConfig.features?.search !== false;
+---
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div>
+      <p class="footer-title">{siteConfig.name}</p>
+      <p>{siteConfig.description}</p>
+    </div>
+    <div class="footer-links" aria-label="Footer links">
+      <a href="/rss.xml"><Icon name="rss" /><span>RSS</span></a>
+      {showSearch && <a href="/search/"><Icon name="search" /><span>Search</span></a>}
+      {
+        footerLinks.map((link) => (
+          <a href={link.href} target={isExternalLink(link.href) ? "_blank" : undefined} rel={isExternalLink(link.href) ? "noopener noreferrer" : undefined}>
+            <Icon name={link.icon} />
+            <span>{link.label}</span>
+          </a>
+        ))
+      }
+      {
+        siteConfig.author.links.map((link) => (
+          <a href={link.href} target={isExternalLink(link.href) ? "_blank" : undefined} rel={isExternalLink(link.href) ? "noopener noreferrer" : undefined}>
+            <Icon name={link.icon} />
+            <span>{link.label}</span>
+          </a>
+        ))
+      }
+    </div>
+  </div>
+</footer>

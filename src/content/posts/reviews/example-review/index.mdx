@@ -1,0 +1,53 @@
+---
+title: "Example structured review"
+description: "A de-identified review post showing how reusable article blocks can model repeated content."
+date: 2026-01-18
+draft: false
+slug: "example-review"
+section: "reviews"
+tags: ["review", "blocks", "example"]
+categories: ["Reviews"]
+series: []
+themeColor: "#934966"
+media:
+  featured: "/img/featured.svg"
+  background: "/img/background.svg"
+  alt: "Abstract review preview"
+seo:
+  title: "Example structured review"
+  description: "A generic review post for the Astro MIE theme."
+  ogImage: "/img/featured.svg"
+---
+
+import ReviewCard from "../../../../components/blocks/ReviewCard.astro";
+import Gallery from "../../../../components/blocks/Gallery.astro";
+
+This post demonstrates content-level blocks.
+The example is intentionally generic so a theme repository can stay free of personal reviews or private media.
+
+## Review cards
+
+<ReviewCard
+  title="Example item"
+  score="8.4"
+  meta="Reusable block"
+  poster="/img/featured.svg"
+  accent="#934966"
+>
+  A review card is useful when a post repeats the same structured shape many times.
+  Keep the block content-level: titles, scores, links, media, and short prose should survive a future theme change.
+</ReviewCard>
+
+## Galleries
+
+<Gallery
+  images={[
+    { src: "/img/featured.svg", alt: "Example image one", caption: "Featured image placeholder." },
+    { src: "/img/background.svg", alt: "Example image two", caption: "Background image placeholder." }
+  ]}
+/>
+
+## Summary
+
+Use reusable blocks for repeated article structures.
+Use Markdown syntax enhancements, such as spoilers, for inline writing behavior.

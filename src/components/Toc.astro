@@ -1,0 +1,61 @@
+---
+import Icon from "./Icon.astro";
+
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface TocGroup {
+  heading: Heading;
+  children: Heading[];
+}
+
+interface Props {
+  headings: Heading[];
+}
+
+const source = Astro.props.headings.filter((heading) => heading.depth > 1 && heading.depth < 4);
+const groups: TocGroup[] = [];
+
+for (const heading of source) {
+  if (heading.depth === 2 || groups.length === 0) {
+    groups.push({ heading, children: [] });
+    continue;
+  }
+
+  groups.at(-1)?.children.push(heading);
+}
+---
+
+{
+  groups.length > 1 && (
+    <aside class="toc" aria-label="Table of contents">
+      <p><Icon name="list-tree" />Contents</p>
+      <nav>
+        {groups.map((group) =>
+          group.children.length ? (
+            <details class="toc-group">
+              <summary>
+                <a href={`#${group.heading.slug}`}>{group.heading.text}</a>
+                <Icon name="chevron-down" />
+              </summary>
+              <div class="toc-children">
+                <div>
+                  {group.children.map((heading) => (
+                    <a class={`toc-depth-${heading.depth}`} href={`#${heading.slug}`}>
+                      {heading.text}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </details>
+          ) : (
+            <a class="toc-top-link" href={`#${group.heading.slug}`}>{group.heading.text}</a>
+          )
+        )}
+      </nav>
+    </aside>
+  )
+}

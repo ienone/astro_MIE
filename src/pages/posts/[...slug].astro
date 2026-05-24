@@ -1,0 +1,115 @@
+---
+import { render } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PostCard from "../../components/PostCard.astro";
+import Toc from "../../components/Toc.astro";
+import {
+  formatDate,
+  getAllPosts,
+  getPostImage,
+  getPostSlug,
+  getPostUrl,
+  getRelatedPosts,
+  readingTime,
+  termToSlug,
+  wordCount
+} from "../../lib/posts";
+
+export async function getStaticPaths() {
+  const posts = await getAllPosts();
+  return posts.map((post) => ({
+    params: { slug: getPostSlug(post) },
+    props: { post }
+  }));
+}
+
+const { post } = Astro.props;
+const { Content, headings } = await render(post);
+const posts = await getAllPosts();
+const index = posts.findIndex((item) => item.id === post.id);
+const newer = index > 0 ? posts[index - 1] : undefined;
+const older = index >= 0 ? posts[index + 1] : undefined;
+const related = getRelatedPosts(posts, post);
+const image = getPostImage(post);
+const articleStyle = { "--post-theme": post.data.themeColor };
+const seriesName = post.data.series[0];
+const seriesPosts = seriesName
+  ? posts
+      .filter((item) => item.data.series.includes(seriesName))
+      .sort((a, b) => (a.data.seriesOrder ?? 999) - (b.data.seriesOrder ?? 999) || a.data.date.getTime() - b.data.date.getTime())
+  : [];
+---
+
+<BaseLayout
+  title={post.data.seo?.title || post.data.title}
+  description={post.data.seo?.description || post.data.description}
+  image={post.data.seo?.ogImage || image}
+  type="article"
+>
+  <article class="article-shell" style={articleStyle}>
+    <header class="article-hero">
+      {post.data.media?.background && <img class="article-background" src={post.data.media.background} alt="" />}
+      <div class="article-hero-content">
+        <a class="breadcrumb" href="/posts/">Posts</a>
+        <h1>{post.data.title}</h1>
+        {post.data.description && <p class="article-description">{post.data.description}</p>}
+        <div class="article-meta">
+          <span>{formatDate(post.data.date)}</span>
+          {post.data.updatedDate && <span>Updated {formatDate(post.data.updatedDate)}</span>}
+          <span>{wordCount(post.body).toLocaleString("en-US")} words</span>
+          <span>{readingTime(post.body)}</span>
+        </div>
+        <div class="taxonomy-row">
+          {post.data.categories.map((category) => <a href={`/categories/${termToSlug(category)}/`}>{category}</a>)}
+          {post.data.tags.map((tag) => <a href={`/tags/${termToSlug(tag)}/`}>{tag}</a>)}
+        </div>
+      </div>
+      {image && (
+        <figure class="article-cover">
+          <img src={image} alt={post.data.media?.alt || post.data.title} loading="eager" />
+        </figure>
+      )}
+    </header>
+
+    <div class="article-layout">
+      <Toc headings={headings} />
+      <div class="article-main">
+        {seriesPosts.length > 1 && (
+          <aside class="series-callout">
+            <p>Series: <a href={`/series/${termToSlug(seriesName)}/`}>{seriesName}</a></p>
+            <ol>
+              {seriesPosts.map((item) => (
+                <li class={item.id === post.id ? "current" : ""}>
+                  <a href={getPostUrl(item)}>{item.data.title}</a>
+                </li>
+              ))}
+            </ol>
+          </aside>
+        )}
+
+        <div class="prose">
+          <Content />
+        </div>
+
+        <nav class="post-pagination" aria-label="Previous and next posts">
+          {newer && <a href={getPostUrl(newer)} style={{ "--post-theme": newer.data.themeColor }}><span>Newer post</span>{newer.data.title}</a>}
+          {older && <a href={getPostUrl(older)} style={{ "--post-theme": older.data.themeColor }}><span>Older post</span>{older.data.title}</a>}
+        </nav>
+
+        {related.length > 0 && (
+          <section class="related-section">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Related</p>
+                <h2>Related posts</h2>
+              </div>
+            </div>
+            <div class="post-grid compact">
+              {related.map((item) => <PostCard post={item} compact />)}
+            </div>
+          </section>
+        )}
+      </div>
+    </div>
+  </article>
+</BaseLayout>
