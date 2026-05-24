@@ -1,16 +1,16 @@
 /** @type {import("./src/lib/site").BlogConfig} */
 const blogConfig = {
-  name: "Astro MIE",
-  title: "Astro MIE",
-  description: "A configurable Astro theme for expressive long-form blogs.",
-  url: "https://example.com/",
-  language: "en",
-  languageName: "English",
+  name: "ienoneの站",
+  title: "ienoneの站",
+  description: "记录一下蒟蒻的成长",
+  url: "https://ienone.github.io/",
+  language: "zh-CN",
+  languageName: "简体中文",
 
   source: {
     type: "astro-content",
-    defaultContentLanguage: "en",
-    hasCJKLanguage: false,
+    defaultContentLanguage: "zh-cn",
+    hasCJKLanguage: true,
     enableRobotsTXT: true,
     summaryLength: 0,
     buildDrafts: false,
@@ -55,15 +55,17 @@ const blogConfig = {
   },
 
   author: {
-    name: "template-author",
-    displayName: "Template Author",
-    email: "hello@example.com",
-    headline: "Writing, notes, reviews, and experiments.",
-    bio: "A de-identified author profile for the Astro MIE theme template.",
+    name: "ienone",
+    displayName: "ienone",
+    email: "dsxhx1013@gmail.com",
+    headline: "ai|臭看番的|篮球|MESSI|科幻",
+    bio: "ai、臭看番的、篮球、MESSI、科幻",
     avatar: "/img/avatar.svg",
     links: [
-      { label: "GitHub", href: "https://github.com/example/astro-mie", icon: "github" },
-      { label: "Email", href: "mailto:hello@example.com", icon: "email" },
+      { label: "GitHub", href: "https://github.com/ienone", icon: "github" },
+      { label: "Email", href: "mailto:dsxhx1013@gmail.com", icon: "email" },
+      { label: "Telegram", href: "https://t.me/ie9ei10", icon: "telegram" },
+      { label: "知乎", href: "https://www.zhihu.com/people/ie9-53", icon: "zhihu" },
       { label: "RSS", href: "/rss.xml", icon: "rss" }
     ]
   },
@@ -78,7 +80,7 @@ const blogConfig = {
     cardView: true,
     cardViewScreenWidth: false,
     layoutBackgroundBlur: true,
-    eyebrow: "Configurable static blog theme"
+    eyebrow: "个人静态博客实验场"
   },
 
   mainSections: ["articles", "notes", "reviews"],
@@ -144,7 +146,7 @@ const blogConfig = {
         { label: "Archive", href: "/archives/", icon: "archive" }
       ]
     },
-    { label: "GitHub", href: "https://github.com/example/astro-mie", icon: "github", external: true }
+    { label: "GitHub", href: "https://github.com/ienone", icon: "github", external: true }
   ],
 
   footer: {

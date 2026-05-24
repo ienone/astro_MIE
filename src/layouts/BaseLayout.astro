@@ -22,8 +22,9 @@ const {
 } = Astro.props;
 
 const pageTitle = title === siteConfig.title ? title : `${title} | ${siteConfig.name}`;
-const canonical = new URL(Astro.url.pathname, siteConfig.url).toString();
-const ogImage = image.startsWith("http") ? image : new URL(image, siteConfig.url).toString();
+const siteUrl = Astro.site ?? new URL(siteConfig.url);
+const canonical = new URL(Astro.url.pathname, siteUrl).toString();
+const ogImage = image.startsWith("http") ? image : new URL(image, siteUrl).toString();
 ---
 
 <!doctype html>
