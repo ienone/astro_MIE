@@ -6,7 +6,10 @@ import Icon from "./Icon.astro";
   <div class="search-panel">
     <form class="search-panel-head" method="dialog">
       <label for="site-search">搜索文章</label>
-      <button class="icon-button" type="submit" data-search-close aria-label="关闭搜索"><Icon name="x" /></button>
+      <div class="search-panel-actions">
+        <a class="search-page-link" href="/search/" data-search-page-link hidden>在搜索页中显示结果</a>
+        <button class="icon-button" type="submit" data-search-close aria-label="关闭搜索"><Icon name="x" /></button>
+      </div>
     </form>
     <input id="site-search" data-search-input type="search" autocomplete="off" placeholder="搜索标题、标签或正文" />
     <div class="search-results" data-search-results></div>
@@ -32,6 +35,15 @@ import Icon from "./Icon.astro";
   function renderMessage(container, message) {
     if (!(container instanceof HTMLElement)) return;
     container.innerHTML = `<p class="search-empty">${escapeHtml(message)}</p>`;
+  }
+
+  function syncSearchPageLink(searchInput) {
+    const link = document.querySelector("[data-search-page-link]");
+    if (!(searchInput instanceof HTMLInputElement) || !(link instanceof HTMLAnchorElement)) return;
+
+    const query = searchInput.value.trim();
+    link.hidden = !query;
+    link.href = query ? `/search/?q=${encodeURIComponent(query)}` : "/search/";
   }
 
   function renderResults(container, items) {
@@ -70,6 +82,7 @@ import Icon from "./Icon.astro";
 
       const currentSearch = ++searchId;
       const query = event.target.value.trim();
+      syncSearchPageLink(searchInput);
       if (!query) {
         searchResults.innerHTML = "";
         return;
@@ -100,6 +113,7 @@ import Icon from "./Icon.astro";
     if (!dialog.open) dialog.showModal();
     if (input instanceof HTMLInputElement) {
       input.value = "";
+      syncSearchPageLink(input);
       window.setTimeout(() => input.focus(), 40);
     }
     if (results instanceof HTMLElement) results.innerHTML = "";
@@ -126,6 +140,15 @@ import Icon from "./Icon.astro";
 
     setupSearch(input, results, 12);
     setupSearch(pageInput, pageResults, 30);
+
+    if (pageInput instanceof HTMLInputElement && pageInput.dataset.searchQueryLoaded !== "true") {
+      const query = new URLSearchParams(window.location.search).get("q") || "";
+      if (query) {
+        pageInput.dataset.searchQueryLoaded = "true";
+        pageInput.value = query;
+        pageInput.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    }
 
     openers.forEach((button) => {
       if (!(button instanceof HTMLElement) || button.dataset.searchOpenReady === "true") return;

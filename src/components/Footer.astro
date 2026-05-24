@@ -3,8 +3,7 @@ import Icon from "./Icon.astro";
 import { isExternalLink, siteConfig } from "../lib/site";
 
 const defaultFooterLinks = [
-  { label: "RSS", href: "/rss.xml", icon: "rss" },
-  ...(siteConfig.features?.search !== false ? [{ label: "Search", href: "/search/", icon: "search" }] : [])
+  { label: "RSS", href: "/rss.xml", icon: "rss" }
 ];
 const seenFooterHrefs = new Set<string>();
 const footerLinks = [...defaultFooterLinks, ...(siteConfig.footer?.links ?? [])].filter((link) => {

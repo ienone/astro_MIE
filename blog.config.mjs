@@ -140,6 +140,7 @@ const blogConfig = {
       label: "Index",
       icon: "list-tree",
       children: [
+        { label: "Posts", href: "/posts/", icon: "file-text" },
         { label: "Categories", href: "/categories/", icon: "folder" },
         { label: "Tags", href: "/tags/", icon: "tags" },
         { label: "Series", href: "/series/", icon: "list-tree" },
@@ -155,10 +156,7 @@ const blogConfig = {
     showThemeAttribution: true,
     showAppearanceSwitcher: true,
     showScrollToTop: true,
-    links: [
-      { label: "Tags", href: "/tags/", icon: "tags" },
-      { label: "RSS", href: "/rss.xml", icon: "rss" }
-    ]
+    links: []
   },
 
   article: {

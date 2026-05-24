@@ -1811,9 +1811,38 @@ main {
   margin-bottom: 12px;
 }
 
+.search-panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .search-panel label {
   font-size: 1.2rem;
   font-weight: 800;
+}
+
+.search-page-link {
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary) 12%, var(--surface-container-high));
+  color: var(--primary);
+  font-size: 0.86rem;
+  font-weight: 800;
+  padding: 8px 12px;
+  transition:
+    background var(--motion-hover),
+    color var(--motion-hover),
+    transform var(--motion-hover);
+}
+
+.search-page-link:hover,
+.search-page-link:focus-visible {
+  background: var(--primary-container);
+  transform: translateY(-1px);
+}
+
+.search-page-link[hidden] {
+  display: none;
 }
 
 .search-panel input,
