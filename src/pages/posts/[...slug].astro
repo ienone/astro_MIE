@@ -50,6 +50,7 @@ const seriesPosts = seriesName
   description={post.data.seo?.description || post.data.description}
   image={post.data.seo?.ogImage || image}
   type="article"
+  currentSection={post.data.section}
 >
   <article class="article-shell" style={articleStyle} data-article-shell data-pagefind-body>
     <div class="reading-progress" data-reading-progress aria-hidden="true"></div>

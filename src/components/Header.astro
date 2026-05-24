@@ -109,6 +109,22 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
     return currentPath === targetPath || currentPath.startsWith(`${targetPath}/`);
   }
 
+  function getNavTargetPath(href: string) {
+    if (!href) return "";
+
+    const url = new URL(href, window.location.origin);
+    if (url.origin !== window.location.origin) return "";
+
+    return normalizePath(url.pathname);
+  }
+
+  function getCurrentNavPath() {
+    const currentSection = document.querySelector("[data-current-section]")?.getAttribute("data-current-section")?.trim();
+    if (currentSection) return normalizePath(`/sections/${currentSection}/`);
+
+    return normalizePath(window.location.pathname);
+  }
+
   function updateNavIndicator() {
     const navLinks = document.querySelector("[data-nav-links]");
     if (!(navLinks instanceof HTMLElement)) return;
@@ -129,11 +145,29 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
   }
 
   function updateActiveNav() {
-    const currentPath = normalizePath(window.location.pathname);
-    document.querySelectorAll("[data-nav-href]").forEach((link) => {
+    const currentPath = getCurrentNavPath();
+    const navHrefLinks = [...document.querySelectorAll("[data-nav-href]")];
+    let activeTargetPath = "";
+    let activeScore = -1;
+
+    navHrefLinks.forEach((link) => {
       if (!(link instanceof HTMLElement)) return;
       const href = link.getAttribute("data-nav-href") || link.getAttribute("href") || "";
-      const active = isSameArea(href, currentPath);
+      const targetPath = getNavTargetPath(href);
+      if (!targetPath || !isSameArea(href, currentPath)) return;
+
+      const exactBonus = targetPath === currentPath ? 10000 : 0;
+      const score = exactBonus + targetPath.length;
+      if (score > activeScore) {
+        activeTargetPath = targetPath;
+        activeScore = score;
+      }
+    });
+
+    navHrefLinks.forEach((link) => {
+      if (!(link instanceof HTMLElement)) return;
+      const href = link.getAttribute("data-nav-href") || link.getAttribute("href") || "";
+      const active = activeTargetPath !== "" && getNavTargetPath(href) === activeTargetPath;
       link.toggleAttribute("aria-current", active);
       if (active) link.setAttribute("aria-current", "page");
     });

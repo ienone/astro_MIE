@@ -13,13 +13,15 @@ interface Props {
   description?: string;
   image?: string;
   type?: "website" | "article";
+  currentSection?: string;
 }
 
 const {
   title = siteConfig.title,
   description = siteConfig.description,
   image = siteConfig.assets.homeBackground,
-  type = "website"
+  type = "website",
+  currentSection
 } = Astro.props;
 
 const pageTitle = title === siteConfig.title ? title : `${title} | ${siteConfig.name}`;
@@ -67,7 +69,7 @@ const ogImage = image.startsWith("http") ? image : new URL(image, siteUrl).toStr
     </script>
     <a class="skip-link" href="#main">Skip to content</a>
     <Header />
-    <main id="main" transition:animate="fade">
+    <main id="main" data-current-section={currentSection} transition:animate="fade">
       <slot />
     </main>
     <Footer />
