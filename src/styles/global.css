@@ -1860,6 +1860,23 @@ main {
     transform var(--motion-hover);
 }
 
+.search-page input {
+  contain: layout paint style;
+  view-transition-name: site-search-field;
+}
+
+::view-transition-group(site-search-field) {
+  animation-duration: var(--motion-page);
+  animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
+::view-transition-old(site-search-field),
+::view-transition-new(site-search-field) {
+  height: 100%;
+  overflow: clip;
+  mix-blend-mode: normal;
+}
+
 .search-panel input:focus,
 .search-page input:focus {
   border-color: var(--primary);
