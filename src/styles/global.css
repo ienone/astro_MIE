@@ -74,24 +74,20 @@ html {
 @keyframes page-old-out {
   from {
     opacity: 1;
-    transform: translateY(0) scale(1);
   }
 
   to {
     opacity: 0;
-    transform: translateY(-10px) scale(0.992);
   }
 }
 
 @keyframes page-new-in {
   from {
     opacity: 0;
-    transform: translateY(14px) scale(1.008);
   }
 
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
   }
 }
 
@@ -132,6 +128,7 @@ html.theme-transitioning::view-transition-new(root) {
 }
 
 body {
+  display: flow-root;
   min-height: 100%;
   margin: 0;
   background:
@@ -180,19 +177,26 @@ input {
 }
 
 .site-header {
+  --header-floating-offset: 16px;
   position: sticky;
-  top: 16px;
+  top: 0;
   z-index: 20;
   width: min(var(--content-width), calc(100% - 32px));
-  margin: 16px auto 0;
+  margin: 0 auto;
+  padding-top: var(--header-floating-offset);
   transition:
-    top var(--motion-emphasized),
+    padding-top var(--motion-emphasized),
     transform var(--motion-emphasized),
     width var(--motion-emphasized);
 }
 
+body > .site-header {
+  margin-block-start: 0;
+  margin-block-end: 0;
+}
+
 :root[data-scrolled="true"] .site-header {
-  top: 10px;
+  --header-floating-offset: 10px;
 }
 
 .nav-shell,
@@ -2093,8 +2097,7 @@ main {
   }
 
   .site-header {
-    top: 10px;
-    margin-top: 10px;
+    --header-floating-offset: 10px;
   }
 
   .nav-shell {
