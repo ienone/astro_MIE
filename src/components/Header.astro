@@ -11,7 +11,7 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
 }
 ---
 
-<header class="site-header" data-site-header>
+<header class="site-header" data-site-header transition:persist="site-header">
   <nav class="nav-shell" aria-label="Main navigation">
     <a class="brand" href="/" aria-label={`${siteConfig.name} home`}>
       <img src={siteConfig.branding.logo} alt="" width="34" height="34" loading="eager" />
