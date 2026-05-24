@@ -20,15 +20,15 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
 
     <div class="nav-links" data-nav-links>
       {
-        siteConfig.nav.map((item) =>
+        siteConfig.nav.map((item, index) =>
           Array.isArray(item.children) ? (
             <div class="nav-menu" data-nav-group>
-              <button class="nav-trigger" type="button" aria-haspopup="true" data-nav-trigger>
+              <button class="nav-trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls={`nav-dropdown-${index}`} data-nav-trigger>
                 <Icon name={item.icon} />
                 <span>{item.label}</span>
                 <Icon name="chevron-down" />
               </button>
-              <div class="nav-dropdown">
+              <div class="nav-dropdown" id={`nav-dropdown-${index}`} data-nav-dropdown>
                 {item.children.map((child) => (
                   <a class="nav-dropdown-link" href={child.href} data-nav-href={child.href} {...linkAttrs(child.href, child.external, child.rel)}>
                     <Icon name={child.icon} />
@@ -152,6 +152,40 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
     updateNavIndicator();
   }
 
+  function closeNavMenus(except?: Element) {
+    document.querySelectorAll("[data-nav-group]").forEach((group) => {
+      if (except && group === except) return;
+      if (!(group instanceof HTMLElement)) return;
+
+      delete group.dataset.open;
+      const trigger = group.querySelector("[data-nav-trigger]");
+      if (trigger instanceof HTMLElement) trigger.setAttribute("aria-expanded", "false");
+    });
+  }
+
+  function toggleNavGroup(trigger: HTMLElement) {
+    const group = trigger.closest("[data-nav-group]");
+    if (!(group instanceof HTMLElement)) return;
+
+    const shouldOpen = group.dataset.open !== "true";
+    closeNavMenus(shouldOpen ? group : undefined);
+
+    if (shouldOpen) {
+      group.dataset.open = "true";
+      trigger.setAttribute("aria-expanded", "true");
+    } else {
+      delete group.dataset.open;
+      trigger.setAttribute("aria-expanded", "false");
+    }
+
+    updateNavIndicator();
+  }
+
+  function markDropdownPress(link: HTMLElement) {
+    link.dataset.pressed = "true";
+    window.setTimeout(() => delete link.dataset.pressed, 220);
+  }
+
   async function toggleThemeFrom(button: HTMLElement) {
     const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
     const applyTheme = () => {
@@ -219,6 +253,20 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
     if (header instanceof HTMLElement && header.dataset.headerReady !== "true") {
       header.dataset.headerReady = "true";
 
+      header.querySelectorAll("[data-nav-trigger]").forEach((trigger) => {
+        if (!(trigger instanceof HTMLElement)) return;
+        trigger.addEventListener("click", (event) => {
+          event.stopPropagation();
+          toggleNavGroup(trigger);
+        });
+      });
+
+      header.querySelectorAll(".nav-dropdown-link").forEach((link) => {
+        if (!(link instanceof HTMLElement)) return;
+        link.addEventListener("pointerdown", () => markDropdownPress(link));
+        link.addEventListener("click", () => closeNavMenus());
+      });
+
       toggle?.addEventListener("click", () => {
         if (toggle instanceof HTMLElement) toggleThemeFrom(toggle);
       });
@@ -245,6 +293,15 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
       { passive: true }
     );
     window.addEventListener("resize", updateNavIndicator);
+    document.addEventListener("click", (event) => {
+      const target = event.target instanceof Element ? event.target : null;
+      if (target?.closest("[data-nav-group]")) return;
+      closeNavMenus();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
+      closeNavMenus();
+    });
     document.addEventListener("astro:page-load", setupHeader);
   }
 
