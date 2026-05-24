@@ -32,6 +32,9 @@
   --motion-fast: 160ms ease;
   --motion-medium: 260ms cubic-bezier(0.2, 0, 0, 1);
   --motion-page: 420ms cubic-bezier(0.2, 0, 0, 1);
+  --motion-hover: 180ms cubic-bezier(0.2, 0, 0, 1);
+  --motion-enter: 560ms cubic-bezier(0.2, 0, 0, 1);
+  --motion-emphasized: 460ms cubic-bezier(0.2, 0, 0, 1);
 }
 
 :root[data-theme="dark"] {
@@ -98,6 +101,28 @@ html {
 
 ::view-transition-new(root) {
   animation: page-new-in var(--motion-page) both;
+}
+
+@keyframes hero-ambient-drift {
+  from {
+    transform: scale(1.14) translate3d(-1.2%, -0.8%, 0);
+  }
+
+  to {
+    transform: scale(1.18) translate3d(1.2%, 0.8%, 0);
+  }
+}
+
+@keyframes hero-content-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 body {
@@ -386,6 +411,21 @@ main {
   margin: 36px auto 0;
 }
 
+[data-reveal="ready"] {
+  opacity: 0;
+  transform: translateY(22px) scale(0.985);
+  transition:
+    opacity var(--motion-enter),
+    transform var(--motion-enter);
+  transition-delay: calc(var(--reveal-index, 0) * 46ms);
+  will-change: opacity, transform;
+}
+
+[data-reveal="ready"].is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
 .home-hero {
   position: relative;
   display: grid;
@@ -393,8 +433,21 @@ main {
   overflow: hidden;
   border: 1px solid var(--outline);
   border-radius: var(--radius-xl);
+  isolation: isolate;
   box-shadow: var(--shadow-2);
   place-items: center;
+}
+
+.home-hero::after {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  content: "";
+  background:
+    radial-gradient(circle at 28% 24%, rgba(255, 255, 255, 0.26), transparent 22%),
+    radial-gradient(circle at 76% 68%, rgba(255, 228, 184, 0.18), transparent 30%);
+  mix-blend-mode: soft-light;
+  pointer-events: none;
 }
 
 .home-hero-bg,
@@ -409,6 +462,8 @@ main {
 .home-hero-bg {
   filter: blur(44px) saturate(1.28) brightness(0.92);
   transform: scale(1.14);
+  animation: hero-ambient-drift 18s ease-in-out infinite alternate;
+  will-change: transform;
 }
 
 .home-hero-scrim,
@@ -428,6 +483,26 @@ main {
   padding: 40px 24px;
   color: #fffdf7;
   text-align: center;
+}
+
+.home-hero-content > * {
+  animation: hero-content-in var(--motion-enter) both;
+}
+
+.home-hero-content > :nth-child(2) {
+  animation-delay: 70ms;
+}
+
+.home-hero-content > :nth-child(3) {
+  animation-delay: 130ms;
+}
+
+.home-hero-content > :nth-child(4) {
+  animation-delay: 190ms;
+}
+
+.home-hero-content > :nth-child(5) {
+  animation-delay: 250ms;
 }
 
 .avatar {
@@ -474,9 +549,34 @@ main {
   padding: 10px 16px;
 }
 
+.hero-links a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.hero-links a::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+  opacity: 0;
+  transform: translateX(-80%);
+  transition:
+    opacity var(--motion-hover),
+    transform var(--motion-emphasized);
+}
+
 .hero-links a:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px) scale(1.02);
   background: rgba(255, 253, 247, 0.28);
+}
+
+.hero-links a:hover::before {
+  opacity: 1;
+  transform: translateX(80%);
 }
 
 .content-section,
@@ -514,10 +614,17 @@ main {
   padding: 10px 16px;
 }
 
+.text-link:hover,
+.text-link:focus-visible {
+  background: color-mix(in srgb, var(--primary) 18%, var(--primary-container));
+  transform: translateY(-2px);
+}
+
 .post-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 20px;
+  perspective: 1400px;
 }
 
 .post-grid.compact {
@@ -529,6 +636,7 @@ main {
 }
 
 .post-card-link {
+  position: relative;
   display: grid;
   height: 100%;
   overflow: hidden;
@@ -536,13 +644,35 @@ main {
   border-radius: var(--radius-lg);
   background: var(--surface-container);
   box-shadow: var(--shadow-1);
-  transition: transform var(--motion-medium), box-shadow var(--motion-medium), border-color var(--motion-fast);
+  isolation: isolate;
+  transition:
+    transform var(--motion-emphasized),
+    box-shadow var(--motion-emphasized),
+    border-color var(--motion-hover),
+    background var(--motion-hover);
+}
+
+.post-card-link::before {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  content: "";
+  background:
+    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--post-theme, var(--primary)) 24%, transparent), transparent 42%),
+    linear-gradient(180deg, transparent 34%, color-mix(in srgb, var(--post-theme, var(--primary)) 8%, transparent));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-emphasized);
 }
 
 .post-card-link:hover {
-  transform: translateY(-4px);
+  transform: translateY(-6px) rotateX(1.2deg);
   box-shadow: var(--shadow-2);
   border-color: color-mix(in srgb, var(--post-theme, var(--primary)) 72%, var(--outline));
+}
+
+.post-card-link:hover::before {
+  opacity: 1;
 }
 
 .post-card-link:active {
@@ -551,6 +681,8 @@ main {
 }
 
 .post-card-media {
+  position: relative;
+  z-index: 2;
   aspect-ratio: 16 / 9;
   overflow: hidden;
   background: var(--surface-container-high);
@@ -560,9 +692,19 @@ main {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition:
+    filter var(--motion-emphasized),
+    transform var(--motion-emphasized);
+}
+
+.post-card-link:hover .post-card-media img {
+  filter: saturate(1.08) contrast(1.02);
+  transform: scale(1.045);
 }
 
 .post-card-body {
+  position: relative;
+  z-index: 2;
   display: grid;
   gap: 10px;
   padding: 18px;
@@ -572,6 +714,12 @@ main {
   margin: 0;
   font-size: 1.18rem;
   line-height: 1.3;
+  transition: color var(--motion-hover);
+}
+
+.post-card-link:hover h2,
+.post-card-link:focus-visible h2 {
+  color: color-mix(in srgb, var(--post-theme, var(--primary)) 78%, var(--on-surface));
 }
 
 .post-card p {
@@ -601,6 +749,16 @@ main {
   color: var(--on-surface-muted);
   font-size: 0.82rem;
   padding: 6px 10px;
+  transition:
+    background var(--motion-hover),
+    border-color var(--motion-hover),
+    color var(--motion-hover),
+    transform var(--motion-hover);
+}
+
+.post-card-link:hover .meta-row span {
+  border-color: color-mix(in srgb, var(--post-theme, var(--primary)) 38%, var(--outline));
+  background: color-mix(in srgb, var(--post-theme, var(--primary)) 12%, var(--surface-container-high));
 }
 
 .tag-strip a {
@@ -609,6 +767,13 @@ main {
   gap: 8px;
   color: var(--on-surface);
   font-weight: 700;
+}
+
+.tag-strip a:hover,
+.tag-strip a:focus-visible {
+  background: var(--primary-container);
+  color: var(--primary);
+  transform: translateY(-2px);
 }
 
 .tag-strip span {
@@ -645,6 +810,17 @@ main {
   background: var(--surface-container);
   box-shadow: var(--shadow-1);
   padding: 20px;
+  transition:
+    border-color var(--motion-hover),
+    box-shadow var(--motion-emphasized),
+    transform var(--motion-emphasized);
+}
+
+.term-card:hover,
+.term-card:focus-visible {
+  border-color: color-mix(in srgb, var(--accent) 48%, var(--outline));
+  box-shadow: var(--shadow-2);
+  transform: translateY(-4px);
 }
 
 .term-card strong {
@@ -655,6 +831,17 @@ main {
   background: var(--accent-container);
   color: var(--accent);
   place-items: center;
+  transition:
+    background var(--motion-hover),
+    color var(--motion-hover),
+    transform var(--motion-hover);
+}
+
+.term-card:hover strong,
+.term-card:focus-visible strong {
+  background: var(--accent);
+  color: var(--surface);
+  transform: scale(1.06);
 }
 
 .article-shell {
@@ -686,6 +873,7 @@ main {
   filter: blur(30px) saturate(1.25);
   opacity: 0.62;
   transform: scale(1.08);
+  will-change: transform;
 }
 
 .article-hero h1 {
@@ -708,6 +896,17 @@ main {
   color: color-mix(in srgb, var(--post-theme, var(--primary)) 72%, var(--on-surface));
   font-weight: 800;
   padding: 8px 12px;
+  transition:
+    background var(--motion-hover),
+    color var(--motion-hover),
+    transform var(--motion-hover);
+}
+
+.breadcrumb:hover,
+.breadcrumb:focus-visible {
+  background: color-mix(in srgb, var(--post-theme, var(--primary)) 30%, var(--surface-container-high));
+  color: color-mix(in srgb, var(--post-theme, var(--primary)) 88%, var(--on-surface));
+  transform: translateY(-1px);
 }
 
 .article-meta {
@@ -741,6 +940,14 @@ main {
   height: 100%;
   max-height: 360px;
   object-fit: cover;
+  transition:
+    filter var(--motion-emphasized),
+    transform var(--motion-emphasized);
+}
+
+.article-cover:hover img {
+  filter: saturate(1.08) contrast(1.02);
+  transform: scale(1.025);
 }
 
 .article-layout {
