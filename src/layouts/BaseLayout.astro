@@ -1,4 +1,5 @@
 ---
+import { ClientRouter } from "astro:transitions";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import SearchOverlay from "../components/SearchOverlay.astro";
@@ -46,6 +47,7 @@ const ogImage = image.startsWith("http") ? image : new URL(image, siteUrl).toStr
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="theme-color" content="#f8f3e7" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#171b18" media="(prefers-color-scheme: dark)" />
+    <ClientRouter fallback="animate" />
   </head>
   <body>
     <script is:inline>
@@ -55,7 +57,7 @@ const ogImage = image.startsWith("http") ? image : new URL(image, siteUrl).toStr
     </script>
     <a class="skip-link" href="#main">Skip to content</a>
     <Header />
-    <main id="main">
+    <main id="main" transition:animate="fade">
       <slot />
     </main>
     <Footer />

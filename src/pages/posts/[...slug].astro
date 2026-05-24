@@ -7,7 +7,9 @@ import {
   formatDate,
   getAllPosts,
   getPostImage,
+  getPostImagePosition,
   getPostSlug,
+  getPostTransitionName,
   getPostUrl,
   getRelatedPosts,
   readingTime,
@@ -32,6 +34,9 @@ const older = index >= 0 ? posts[index + 1] : undefined;
 const related = getRelatedPosts(posts, post);
 const image = getPostImage(post);
 const articleStyle = { "--post-theme": post.data.themeColor };
+const imagePosition = getPostImagePosition(post);
+const coverTransitionName = getPostTransitionName(post, "cover");
+const titleTransitionName = getPostTransitionName(post, "title");
 const seriesName = post.data.series[0];
 const seriesPosts = seriesName
   ? posts
@@ -51,7 +56,7 @@ const seriesPosts = seriesName
       {post.data.media?.background && <img class="article-background" src={post.data.media.background} alt="" />}
       <div class="article-hero-content">
         <a class="breadcrumb" href="/posts/">Posts</a>
-        <h1 data-pagefind-meta="title">{post.data.title}</h1>
+        <h1 data-pagefind-meta="title" transition:name={titleTransitionName}>{post.data.title}</h1>
         {post.data.description && <p class="article-description" data-pagefind-meta="description">{post.data.description}</p>}
         <div class="article-meta">
           <span>{formatDate(post.data.date)}</span>
@@ -66,7 +71,13 @@ const seriesPosts = seriesName
       </div>
       {image && (
         <figure class="article-cover">
-          <img src={image} alt={post.data.media?.alt || post.data.title} loading="eager" />
+          <img
+            src={image}
+            alt={post.data.media?.alt || post.data.title}
+            loading="eager"
+            style={{ objectPosition: imagePosition }}
+            transition:name={coverTransitionName}
+          />
         </figure>
       )}
     </header>

@@ -34,6 +34,26 @@ export function getPostImage(post: PostEntry) {
   );
 }
 
+export function getPostImagePosition(post: PostEntry) {
+  const focalPoint = post.data.media?.focalPoint;
+  if (!focalPoint) return "center";
+
+  const x = Math.min(100, Math.max(0, focalPoint.x));
+  const y = Math.min(100, Math.max(0, focalPoint.y));
+
+  return `${x}% ${y}%`;
+}
+
+export function getPostTransitionName(post: PostEntry, part: "cover" | "title") {
+  const slug = getPostSlug(post)
+    .normalize("NFKD")
+    .replace(/[^a-zA-Z0-9_-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .toLowerCase();
+
+  return `post-${part}-${slug || "entry"}`;
+}
+
 export function getSectionLabel(section: string) {
   return getSectionConfig(section).label;
 }
