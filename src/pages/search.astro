@@ -3,51 +3,10 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import PageHeader from "../components/PageHeader.astro";
 ---
 
-<BaseLayout title="Search" description="Search the generated static post index.">
-  <PageHeader eyebrow="Search" title="Search" description="The client loads a static index and searches titles, summaries, tags, and body text." />
+<BaseLayout title="搜索" description="使用 Pagefind 静态索引搜索文章。">
+  <PageHeader eyebrow="Search" title="搜索" description="搜索由 Pagefind 生成的静态文章索引，支持标题、摘要和正文匹配。" />
   <section class="content-section search-page">
-    <input id="search-page-input" type="search" placeholder="Enter keywords" autocomplete="off" />
-    <div id="search-page-results" class="search-results inline"></div>
+    <input data-search-page-input type="search" placeholder="输入关键词" autocomplete="off" />
+    <div class="search-results inline" data-search-page-results></div>
   </section>
 </BaseLayout>
-
-<script is:inline>
-  // @ts-nocheck
-  const input = document.querySelector("#search-page-input");
-  const results = document.querySelector("#search-page-results");
-  const htmlEntities = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" };
-  const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) => htmlEntities[char] ?? char);
-
-  async function runSearch(value) {
-    if (!(results instanceof HTMLElement)) return;
-    const query = value.trim().toLowerCase();
-    if (!query) {
-      results.innerHTML = "";
-      return;
-    }
-    const index = await fetch("/search-index.json").then((response) => response.json());
-    const matches = index.filter((item) =>
-      [item.title, item.description, item.tags.join(" "), item.categories.join(" "), item.series.join(" "), item.content]
-        .join(" ")
-        .toLowerCase()
-        .includes(query)
-    );
-
-    results.innerHTML = matches.length
-      ? matches
-          .map(
-            (item) => `
-              <a class="search-result" href="${item.url}">
-                <span>${escapeHtml(item.title)}</span>
-                <small>${escapeHtml(item.description || "")}</small>
-              </a>
-            `
-          )
-          .join("")
-      : '<p class="search-empty">No matching posts found.</p>';
-  }
-
-  input?.addEventListener("input", (event) => {
-    if (event.target instanceof HTMLInputElement) runSearch(event.target.value);
-  });
-</script>

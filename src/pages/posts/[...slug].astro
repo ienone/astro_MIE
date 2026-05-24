@@ -46,13 +46,13 @@ const seriesPosts = seriesName
   image={post.data.seo?.ogImage || image}
   type="article"
 >
-  <article class="article-shell" style={articleStyle}>
+  <article class="article-shell" style={articleStyle} data-pagefind-body>
     <header class="article-hero">
       {post.data.media?.background && <img class="article-background" src={post.data.media.background} alt="" />}
       <div class="article-hero-content">
         <a class="breadcrumb" href="/posts/">Posts</a>
-        <h1>{post.data.title}</h1>
-        {post.data.description && <p class="article-description">{post.data.description}</p>}
+        <h1 data-pagefind-meta="title">{post.data.title}</h1>
+        {post.data.description && <p class="article-description" data-pagefind-meta="description">{post.data.description}</p>}
         <div class="article-meta">
           <span>{formatDate(post.data.date)}</span>
           {post.data.updatedDate && <span>Updated {formatDate(post.data.updatedDate)}</span>}
@@ -75,7 +75,7 @@ const seriesPosts = seriesName
       <Toc headings={headings} />
       <div class="article-main">
         {seriesPosts.length > 1 && (
-          <aside class="series-callout">
+          <aside class="series-callout" data-pagefind-ignore>
             <p>Series: <a href={`/series/${termToSlug(seriesName)}/`}>{seriesName}</a></p>
             <ol>
               {seriesPosts.map((item) => (
@@ -91,13 +91,13 @@ const seriesPosts = seriesName
           <Content />
         </div>
 
-        <nav class="post-pagination" aria-label="Previous and next posts">
+        <nav class="post-pagination" aria-label="Previous and next posts" data-pagefind-ignore>
           {newer && <a href={getPostUrl(newer)} style={{ "--post-theme": newer.data.themeColor }}><span>Newer post</span>{newer.data.title}</a>}
           {older && <a href={getPostUrl(older)} style={{ "--post-theme": older.data.themeColor }}><span>Older post</span>{older.data.title}</a>}
         </nav>
 
         {related.length > 0 && (
-          <section class="related-section">
+          <section class="related-section" data-pagefind-ignore>
             <div class="section-heading">
               <div>
                 <p class="eyebrow">Related</p>

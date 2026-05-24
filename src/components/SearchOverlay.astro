@@ -2,94 +2,122 @@
 import Icon from "./Icon.astro";
 ---
 
-<div class="search-overlay" data-search-overlay hidden>
-  <div class="search-panel" role="dialog" aria-modal="true" aria-label="Site search">
-    <div class="search-panel-head">
-      <label for="site-search">Search posts</label>
-      <button class="icon-button" type="button" data-search-close aria-label="Close search"><Icon name="x" /></button>
-    </div>
-    <input id="site-search" data-search-input type="search" autocomplete="off" placeholder="Search titles, tags, or body text" />
+<dialog class="search-overlay" data-search-dialog aria-label="站内搜索" data-pagefind-ignore>
+  <div class="search-panel">
+    <form class="search-panel-head" method="dialog">
+      <label for="site-search">搜索文章</label>
+      <button class="icon-button" type="submit" data-search-close aria-label="关闭搜索"><Icon name="x" /></button>
+    </form>
+    <input id="site-search" data-search-input type="search" autocomplete="off" placeholder="搜索标题、标签或正文" />
     <div class="search-results" data-search-results></div>
   </div>
-</div>
+</dialog>
 
-<script is:inline>
+<script>
   // @ts-nocheck
-  const overlay = document.querySelector("[data-search-overlay]");
+  const dialog = document.querySelector("[data-search-dialog]");
   const openers = document.querySelectorAll("[data-search-open]");
-  const closer = document.querySelector("[data-search-close]");
   const input = document.querySelector("[data-search-input]");
   const results = document.querySelector("[data-search-results]");
-  let index = [];
+  const pageInput = document.querySelector("[data-search-page-input]");
+  const pageResults = document.querySelector("[data-search-page-results]");
   const htmlEntities = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" };
+  let pagefind;
+  let previousFocus;
 
   const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) => htmlEntities[char] ?? char);
 
-  async function ensureIndex() {
-    if (index.length) return index;
-    const response = await fetch("/search-index.json");
-    index = await response.json();
-    return index;
+  async function ensurePagefind() {
+    if (!pagefind) {
+      const pagefindPath = "/pagefind/pagefind.js";
+      pagefind = import(/* @vite-ignore */ pagefindPath);
+    }
+
+    return pagefind;
   }
 
-  function render(items) {
-    if (!(results instanceof HTMLElement)) return;
+  function renderMessage(container, message) {
+    if (!(container instanceof HTMLElement)) return;
+    container.innerHTML = `<p class="search-empty">${escapeHtml(message)}</p>`;
+  }
+
+  function renderResults(container, items) {
+    if (!(container instanceof HTMLElement)) return;
     if (!items.length) {
-      results.innerHTML = '<p class="search-empty">No matching posts found.</p>';
+      renderMessage(container, "没有找到匹配的文章。");
       return;
     }
 
-    results.innerHTML = items
-      .slice(0, 12)
+    container.innerHTML = items
       .map(
-        (item) => `
-          <a class="search-result" href="${item.url}">
-            <span>${escapeHtml(item.title)}</span>
-            <small>${escapeHtml(item.description || "")}</small>
+        (item) => {
+          const title = item.meta?.title || item.url;
+          const excerpt = item.excerpt || escapeHtml(item.meta?.description || item.url);
+
+          return `
+          <a class="search-result" href="${escapeHtml(item.url)}">
+            <span>${escapeHtml(title)}</span>
+            <small>${excerpt}</small>
           </a>
-        `
+        `;
+        }
       )
       .join("");
   }
 
-  async function search(value) {
-    const query = value.trim().toLowerCase();
-    if (!query) {
-      render([]);
-      return;
-    }
+  function setupSearch(searchInput, searchResults, limit) {
+    if (!(searchInput instanceof HTMLInputElement) || !(searchResults instanceof HTMLElement)) return;
 
-    const data = await ensureIndex();
-    render(
-      data.filter((item) =>
-        [item.title, item.description, item.tags.join(" "), item.categories.join(" "), item.series.join(" "), item.content]
-          .join(" ")
-          .toLowerCase()
-          .includes(query)
-      )
-    );
+    let searchId = 0;
+
+    searchInput.addEventListener("input", async (event) => {
+      if (!(event.target instanceof HTMLInputElement)) return;
+
+      const currentSearch = ++searchId;
+      const query = event.target.value.trim();
+      if (!query) {
+        searchResults.innerHTML = "";
+        return;
+      }
+
+      renderMessage(searchResults, "正在搜索…");
+
+      try {
+        const pagefindApi = await ensurePagefind();
+        const search = await pagefindApi.search(query, { excerptLength: 30 });
+        const items = await Promise.all(search.results.slice(0, limit).map((result) => result.data()));
+
+        if (currentSearch === searchId) renderResults(searchResults, items);
+      } catch (error) {
+        pagefind = undefined;
+        if (currentSearch === searchId) renderMessage(searchResults, "搜索索引尚未生成，请先运行 npm run build。");
+      }
+    });
   }
 
   function openSearch() {
-    if (overlay instanceof HTMLElement) overlay.hidden = false;
+    if (!(dialog instanceof HTMLDialogElement)) return;
+    previousFocus = document.activeElement;
+    if (!dialog.open) dialog.showModal();
     if (input instanceof HTMLInputElement) {
       input.value = "";
       input.focus();
     }
-    render([]);
+    if (results instanceof HTMLElement) results.innerHTML = "";
   }
 
   function closeSearch() {
-    if (overlay instanceof HTMLElement) overlay.hidden = true;
+    if (dialog instanceof HTMLDialogElement && dialog.open) dialog.close();
   }
 
+  setupSearch(input, results, 12);
+  setupSearch(pageInput, pageResults, 30);
   openers.forEach((button) => button.addEventListener("click", openSearch));
-  closer?.addEventListener("click", closeSearch);
-  overlay?.addEventListener("click", (event) => {
-    if (event.target === overlay) closeSearch();
+  dialog?.addEventListener("click", (event) => {
+    if (event.target === dialog) closeSearch();
   });
-  input?.addEventListener("input", (event) => {
-    if (event.target instanceof HTMLInputElement) search(event.target.value);
+  dialog?.addEventListener("close", () => {
+    if (previousFocus instanceof HTMLElement) previousFocus.focus();
   });
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") closeSearch();
