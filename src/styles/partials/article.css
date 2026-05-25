@@ -77,6 +77,55 @@
   line-height: 1.8;
 }
 
+.draft-label {
+  display: inline-flex;
+  width: max-content;
+  border: 1px solid color-mix(in srgb, var(--tertiary) 52%, var(--outline));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--tertiary) 18%, var(--surface-container-high));
+  color: var(--tertiary);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  margin: 12px 0 0;
+  padding: 6px 10px;
+  text-transform: uppercase;
+}
+
+.article-author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.article-author img {
+  width: 48px;
+  height: 48px;
+  border: 2px solid color-mix(in srgb, var(--post-theme, var(--primary)) 36%, var(--outline));
+  border-radius: 999px;
+  background: var(--surface-container-high);
+}
+
+.article-author span {
+  display: block;
+  color: var(--on-surface-muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.article-author strong {
+  display: block;
+  color: var(--on-surface);
+}
+
+.article-author p {
+  color: var(--on-surface-muted);
+  font-size: 0.9rem;
+  margin: 2px 0 0;
+}
+
 .breadcrumb {
   display: inline-flex;
   width: max-content;
@@ -603,6 +652,47 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
+}
+
+.share-links {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 36px;
+}
+
+.share-links > span {
+  color: var(--on-surface-muted);
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.share-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--outline);
+  border-radius: 999px;
+  background: var(--surface-container);
+  color: var(--on-surface);
+  font-size: 0.88rem;
+  font-weight: 800;
+  padding: 8px 12px;
+  transition:
+    background var(--motion-hover),
+    border-color var(--motion-hover),
+    color var(--motion-hover),
+    transform var(--motion-hover);
+}
+
+.share-links a:hover,
+.share-links a:focus-visible {
+  border-color: color-mix(in srgb, var(--post-theme, var(--primary)) 58%, var(--outline));
+  background: color-mix(in srgb, var(--post-theme, var(--primary)) 14%, var(--surface-container));
+  color: color-mix(in srgb, var(--post-theme, var(--primary)) 82%, var(--on-surface));
+  transform: translateY(-2px);
 }
 
 .post-pagination {

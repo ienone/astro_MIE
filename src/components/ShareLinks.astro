@@ -1,0 +1,59 @@
+---
+import Icon from "./Icon.astro";
+import { siteConfig } from "../lib/site";
+
+interface Props {
+  title: string;
+  url: string;
+  links?: string[];
+}
+
+const { title, url, links = [] } = Astro.props;
+const githubUrl = siteConfig.repository?.url || siteConfig.author.links.find((link) => link.icon === "github")?.href || "";
+const encodedTitle = encodeURIComponent(title);
+const encodedUrl = encodeURIComponent(url);
+const shareTargets = {
+  email: {
+    label: "Email",
+    icon: "email",
+    href: `mailto:?subject=${encodedTitle}&body=${encodedUrl}`
+  },
+  telegram: {
+    label: "Telegram",
+    icon: "telegram",
+    href: `https://t.me/share/url?url=${encodedUrl}&text=${encodedTitle}`
+  },
+  twitter: {
+    label: "Twitter",
+    icon: "twitter",
+    href: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`
+  },
+  reddit: {
+    label: "Reddit",
+    icon: "reddit",
+    href: `https://www.reddit.com/submit?url=${encodedUrl}&title=${encodedTitle}`
+  },
+  github: {
+    label: "GitHub",
+    icon: "github",
+    href: githubUrl
+  }
+};
+const shareLinks = links
+  .map((name) => shareTargets[name as keyof typeof shareTargets])
+  .filter((link): link is NonNullable<typeof link> => Boolean(link?.href));
+---
+
+{
+  shareLinks.length > 0 && (
+    <nav class="share-links" aria-label="分享文章" data-pagefind-ignore>
+      <span>Share</span>
+      {shareLinks.map((link) => (
+        <a href={link.href} target={link.href.startsWith("http") ? "_blank" : undefined} rel={link.href.startsWith("http") ? "noopener noreferrer" : undefined}>
+          <Icon name={link.icon} />
+          <span>{link.label}</span>
+        </a>
+      ))}
+    </nav>
+  )
+}
