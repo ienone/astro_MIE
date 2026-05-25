@@ -79,6 +79,112 @@ export interface FeatureConfig {
   [key: string]: unknown;
 }
 
+export interface ArticleConfig {
+  showDate?: boolean;
+  showViews?: boolean;
+  showLikes?: boolean;
+  showDateOnlyInArticle?: boolean;
+  showDateUpdated?: boolean;
+  showAuthor?: boolean;
+  showHero?: boolean;
+  heroStyle?: string;
+  layoutBackgroundBlur?: boolean;
+  layoutBackgroundHeaderSpace?: boolean;
+  showBreadcrumbs?: boolean;
+  showDraftLabel?: boolean;
+  showEdit?: boolean;
+  seriesOpened?: boolean;
+  showHeadingAnchors?: boolean;
+  showPagination?: boolean;
+  invertPagination?: boolean;
+  showReadingTime?: boolean;
+  showTableOfContents?: boolean;
+  showTaxonomies?: boolean;
+  showAuthorsBadges?: boolean;
+  showWordCount?: boolean;
+  showComments?: boolean;
+  sharingLinks?: string[];
+  showZenMode?: boolean;
+  [key: string]: unknown;
+}
+
+export interface ListConfig {
+  showHero?: boolean;
+  layoutBackgroundBlur?: boolean;
+  layoutBackgroundHeaderSpace?: boolean;
+  showBreadcrumbs?: boolean;
+  showSummary?: boolean;
+  showViews?: boolean;
+  showLikes?: boolean;
+  showTableOfContents?: boolean;
+  showCards?: boolean;
+  orderByWeight?: boolean;
+  groupByYear?: boolean;
+  cardView?: boolean;
+  cardViewScreenWidth?: boolean;
+  [key: string]: unknown;
+}
+
+export interface TaxonomyConfig {
+  showTermCount?: boolean;
+  showHero?: boolean;
+  showBreadcrumbs?: boolean;
+  showViews?: boolean;
+  showLikes?: boolean;
+  showTableOfContents?: boolean;
+  cardView?: boolean;
+  [key: string]: unknown;
+}
+
+export interface TermConfig {
+  showHero?: boolean;
+  showBreadcrumbs?: boolean;
+  showViews?: boolean;
+  showLikes?: boolean;
+  showTableOfContents?: boolean;
+  groupByYear?: boolean;
+  cardView?: boolean;
+  cardViewScreenWidth?: boolean;
+  [key: string]: unknown;
+}
+
+export interface PaginationConfig {
+  pagerSize?: number;
+  [key: string]: unknown;
+}
+
+export interface SitemapConfig {
+  changefreq?: string;
+  filename?: string;
+  priority?: number;
+  excludedKinds?: string[];
+  [key: string]: unknown;
+}
+
+export interface RelatedIndexConfig {
+  name: string;
+  type?: string;
+  weight?: number;
+  applyFilter?: boolean;
+  [key: string]: unknown;
+}
+
+export interface RelatedConfig {
+  threshold?: number;
+  toLower?: boolean;
+  indices?: RelatedIndexConfig[];
+  [key: string]: unknown;
+}
+
+export interface VerificationConfig {
+  google?: string;
+  bing?: string;
+  pinterest?: string;
+  yandex?: string;
+  fediverse?: string;
+  [key: string]: unknown;
+}
+
 export interface BlogConfig {
   name: string;
   title: string;
@@ -116,16 +222,16 @@ export interface BlogConfig {
   sections: Record<string, SectionConfig>;
   nav: NavConfig[];
   footer?: FooterConfig;
-  article?: Record<string, unknown>;
-  list?: Record<string, unknown>;
-  taxonomy?: Record<string, unknown>;
-  term?: Record<string, unknown>;
-  pagination?: Record<string, unknown>;
+  article?: ArticleConfig;
+  list?: ListConfig;
+  taxonomy?: TaxonomyConfig;
+  term?: TermConfig;
+  pagination?: PaginationConfig;
   taxonomies?: Record<string, unknown>;
-  sitemap?: Record<string, unknown>;
-  related?: Record<string, unknown>;
+  sitemap?: SitemapConfig;
+  related?: RelatedConfig;
   analytics?: Record<string, unknown>;
-  verification?: Record<string, unknown>;
+  verification?: VerificationConfig;
   rssnext?: Record<string, unknown>;
   [key: string]: unknown;
 }
@@ -149,4 +255,12 @@ export function isExternalLink(href = "") {
 
 export function isFeatureEnabled(name: keyof FeatureConfig, defaultValue = true) {
   return siteConfig.features?.[name] ?? defaultValue;
+}
+
+export function getPagerSize(defaultValue = 12) {
+  const configuredSize = siteConfig.pagination?.pagerSize;
+
+  return typeof configuredSize === "number" && Number.isFinite(configuredSize) && configuredSize > 0
+    ? Math.floor(configuredSize)
+    : defaultValue;
 }

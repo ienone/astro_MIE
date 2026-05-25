@@ -171,23 +171,73 @@ export function getArchiveGroups(posts: PostEntry[]) {
   return [...groups.entries()].sort((a, b) => b[0] - a[0]);
 }
 
+function normalizeRelatedTerm(value: string, toLower: boolean) {
+  const normalized = value.trim();
+
+  return toLower ? normalized.toLowerCase() : normalized;
+}
+
+function getRelatedValues(post: PostEntry, name: string, toLower: boolean) {
+  if (name === "tags" || name === "categories" || name === "series") {
+    return post.data[name].map((term) => normalizeRelatedTerm(term, toLower));
+  }
+
+  if (name === "authors") {
+    return [siteConfig.author.name, siteConfig.author.displayName]
+      .filter((author): author is string => Boolean(author))
+      .map((author) => normalizeRelatedTerm(author, toLower));
+  }
+
+  return [];
+}
+
+function getDateRelatedScore(post: PostEntry, current: PostEntry) {
+  const diffDays = Math.abs(post.data.date.getTime() - current.data.date.getTime()) / 86_400_000;
+
+  if (diffDays <= 30) return 1;
+  if (diffDays <= 90) return 0.5;
+  if (diffDays <= 365) return 0.2;
+  return 0;
+}
+
 export function getRelatedPosts(posts: PostEntry[], current: PostEntry, limit = 3) {
-  const currentTerms = new Set([
-    ...current.data.tags,
-    ...current.data.categories,
-    ...current.data.series
-  ]);
+  const relatedConfig = siteConfig.related;
+  const toLower = relatedConfig?.toLower ?? false;
+  const threshold = relatedConfig?.threshold ?? 0;
+  const indices = relatedConfig?.indices?.length
+    ? relatedConfig.indices
+    : [
+        { name: "tags", weight: 100 },
+        { name: "categories", weight: 100 },
+        { name: "series", weight: 50 }
+      ];
 
   return posts
     .filter((post) => post.id !== current.id)
     .map((post) => {
-      const score = [...post.data.tags, ...post.data.categories, ...post.data.series].filter((term) =>
-        currentTerms.has(term)
-      ).length;
+      let score = 0;
+
+      for (const index of indices) {
+        const weight = index.weight ?? 1;
+        if (weight <= 0) continue;
+
+        if (index.name === "date") {
+          score += getDateRelatedScore(post, current) * weight;
+          continue;
+        }
+
+        if (index.type === "fragments" || index.name === "fragmentrefs") continue;
+
+        const currentValues = new Set(getRelatedValues(current, index.name, toLower));
+        if (!currentValues.size) continue;
+
+        const matches = getRelatedValues(post, index.name, toLower).filter((value) => currentValues.has(value));
+        score += matches.length * weight;
+      }
 
       return { post, score };
     })
-    .filter((item) => item.score > 0)
+    .filter((item) => item.score > threshold)
     .sort((a, b) => b.score - a.score || b.post.data.date.getTime() - a.post.data.date.getTime())
     .slice(0, limit)
     .map((item) => item.post);

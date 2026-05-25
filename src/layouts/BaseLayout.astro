@@ -35,6 +35,7 @@ const autoSwitchAppearance = siteConfig.theme?.autoSwitchAppearance !== false;
 const headerLayout = siteConfig.theme?.header?.layout ?? "fixed";
 const searchEnabled = siteConfig.features?.search !== false;
 const imageZoomEnabled = siteConfig.features?.imageZoom !== false;
+const verification = siteConfig.verification ?? {};
 ---
 
 <!doctype html>
@@ -59,6 +60,11 @@ const imageZoomEnabled = siteConfig.features?.imageZoom !== false;
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImage} />
     <meta name="twitter:card" content="summary_large_image" />
+    {verification.google && <meta name="google-site-verification" content={verification.google} />}
+    {verification.bing && <meta name="msvalidate.01" content={verification.bing} />}
+    {verification.pinterest && <meta name="p:domain_verify" content={verification.pinterest} />}
+    {verification.yandex && <meta name="yandex-verification" content={verification.yandex} />}
+    {verification.fediverse && <meta name="fediverse:creator" content={verification.fediverse} />}
     <meta name="theme-color" content="#f8f3e7" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#171b18" media="(prefers-color-scheme: dark)" />
     <ClientRouter fallback="animate" />
