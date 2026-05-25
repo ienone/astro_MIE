@@ -133,6 +133,73 @@
   vertical-align: middle;
 }
 
+.article-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.article-view-toggle {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  gap: 8px;
+  border: 1px solid var(--outline);
+  border-radius: 999px;
+  background: var(--surface-container-high);
+  color: var(--on-surface);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 800;
+  padding: 7px 12px;
+  transition:
+    background var(--motion-hover),
+    border-color var(--motion-hover),
+    color var(--motion-hover),
+    transform var(--motion-hover);
+}
+
+.article-view-toggle:hover,
+.article-view-toggle:focus-visible {
+  border-color: color-mix(
+    in srgb,
+    var(--post-theme, var(--primary)) 58%,
+    var(--outline)
+  );
+  background: color-mix(
+    in srgb,
+    var(--post-theme, var(--primary)) 16%,
+    var(--surface-container-high)
+  );
+  color: color-mix(
+    in srgb,
+    var(--post-theme, var(--primary)) 82%,
+    var(--on-surface)
+  );
+  transform: translateY(-1px);
+}
+
+.article-view-toggle[aria-pressed="true"] {
+  border-color: color-mix(
+    in srgb,
+    var(--post-theme, var(--primary)) 48%,
+    var(--outline)
+  );
+  background: color-mix(
+    in srgb,
+    var(--post-theme, var(--primary)) 20%,
+    var(--surface-container-high)
+  );
+  color: color-mix(
+    in srgb,
+    var(--post-theme, var(--primary)) 86%,
+    var(--on-surface)
+  );
+}
+
 .article-cover {
   align-self: end;
   width: 100%;
@@ -152,6 +219,30 @@
   grid-template-columns: 230px minmax(0, var(--article-width)) 1fr;
   gap: 34px;
   margin-top: 44px;
+  transition:
+    gap var(--motion-emphasized),
+    grid-template-columns var(--motion-emphasized);
+}
+
+.article-layout[data-toc-enabled="false"],
+.article-layout[data-toc-state="hidden"] {
+  grid-template-columns: minmax(0, var(--article-width));
+  justify-content: center;
+}
+
+.article-layout[data-toc-state="hidden"] {
+  gap: 0;
+}
+
+.article-layout[data-toc-enabled="false"] .article-main,
+.article-layout[data-toc-state="hidden"] .article-main {
+  grid-column: 1;
+  width: min(100%, var(--article-width));
+  justify-self: center;
+}
+
+.article-layout[data-toc-state="hidden"] .toc {
+  display: none;
 }
 
 .article-main {
@@ -261,6 +352,10 @@
 }
 
 .toc details[open] .toc-children {
+  grid-template-rows: 1fr;
+}
+
+.toc-children.is-expanded {
   grid-template-rows: 1fr;
 }
 

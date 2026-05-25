@@ -13,9 +13,12 @@ interface TocGroup {
 }
 
 interface Props {
+  id?: string;
   headings: Heading[];
+  hideUnfocusedChildren?: boolean;
 }
 
+const { id = "article-toc", hideUnfocusedChildren = true } = Astro.props;
 const source = Astro.props.headings.filter((heading) => heading.depth > 1 && heading.depth < 4);
 const groups: TocGroup[] = [];
 
@@ -31,11 +34,11 @@ for (const heading of source) {
 
 {
   groups.length > 1 && (
-    <aside class="toc" aria-label="Table of contents" data-pagefind-ignore>
+    <aside id={id} class="toc" aria-label="Table of contents" data-pagefind-ignore>
       <p><Icon name="list-tree" />Contents</p>
       <nav>
         {groups.map((group) =>
-          group.children.length ? (
+          group.children.length && hideUnfocusedChildren ? (
             <details class="toc-group">
               <summary>
                 <a href={`#${group.heading.slug}`} data-toc-link>{group.heading.text}</a>
@@ -51,6 +54,19 @@ for (const heading of source) {
                 </div>
               </div>
             </details>
+          ) : group.children.length ? (
+            <div class="toc-expanded-group">
+              <a class="toc-top-link" href={`#${group.heading.slug}`} data-toc-link>{group.heading.text}</a>
+              <div class="toc-children is-expanded">
+                <div>
+                  {group.children.map((heading) => (
+                    <a class={`toc-depth-${heading.depth}`} href={`#${heading.slug}`} data-toc-link>
+                      {heading.text}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </div>
           ) : (
             <a class="toc-top-link" href={`#${group.heading.slug}`} data-toc-link>{group.heading.text}</a>
           )

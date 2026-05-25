@@ -4,12 +4,16 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import OptimizedImage from "../../components/OptimizedImage.astro";
 import PostCard from "../../components/PostCard.astro";
 import Toc from "../../components/Toc.astro";
+import Icon from "../../components/Icon.astro";
 import {
   formatDate,
   getAllPosts,
+  getPostBackgroundImage,
   getPostImage,
   getPostImagePosition,
   getPostSlug,
+  getPostThemeColor,
+  getPostTransitionSetName,
   getPostTransitionName,
   getPostUrl,
   getRelatedPosts,
@@ -17,6 +21,7 @@ import {
   termToSlug,
   wordCount
 } from "../../lib/posts";
+import { siteConfig } from "../../lib/site";
 
 export async function getStaticPaths() {
   const posts = await getAllPosts();
@@ -34,8 +39,20 @@ const newer = index > 0 ? posts[index - 1] : undefined;
 const older = index >= 0 ? posts[index + 1] : undefined;
 const related = getRelatedPosts(posts, post);
 const image = getPostImage(post);
-const articleStyle = { "--post-theme": post.data.themeColor };
+const backgroundImage = getPostBackgroundImage(post);
+const articleStyle = { "--post-theme": getPostThemeColor(post) };
 const imagePosition = getPostImagePosition(post);
+const backgroundImageWidth = siteConfig.assets.backgroundImageWidth ?? 1920;
+const backgroundImageWidths = [960, 1440, backgroundImageWidth].filter((width, index, widths) => width > 0 && widths.indexOf(width) === index);
+const showToc = siteConfig.features?.smartToc !== false;
+const hideUnfocusedTocChildren = siteConfig.features?.smartTocHideUnfocusedChildren !== false;
+const tocSource = headings.filter((heading) => heading.depth > 1 && heading.depth < 4);
+let tocGroupCount = 0;
+for (const heading of tocSource) {
+  if (heading.depth === 2 || tocGroupCount === 0) tocGroupCount += 1;
+}
+const hasToc = showToc && tocGroupCount > 1;
+const transitionSetName = getPostTransitionSetName(post);
 const coverTransitionName = getPostTransitionName(post, "cover");
 const titleTransitionName = getPostTransitionName(post, "title");
 const seriesName = post.data.series[0];
@@ -55,11 +72,33 @@ const seriesPosts = seriesName
 >
   <article class="article-shell" style={articleStyle} data-article-shell data-pagefind-body>
     <div class="reading-progress" data-reading-progress aria-hidden="true"></div>
-    <header class="article-hero">
-      {post.data.media?.background && <OptimizedImage class="article-background" src={post.data.media.background} alt="" loading="lazy" decoding="async" fetchpriority="low" widths={[960, 1440, 1920]} sizes="100vw" fit="cover" />}
+    <header
+      class="article-hero"
+      data-route-shared-set={transitionSetName}
+      data-route-shared-context="article"
+      data-route-shared-target-context="card"
+      data-route-shared-default-source="true"
+      data-route-shared-default-back="true"
+    >
+      {backgroundImage && <OptimizedImage class="article-background" src={backgroundImage} alt="" loading="lazy" decoding="async" fetchpriority="low" widths={backgroundImageWidths} sizes="100vw" fit="cover" />}
       <div class="article-hero-content">
         <a class="breadcrumb" href="/posts/">Posts</a>
-        <h1 class="post-title-transition" data-post-transition-title={titleTransitionName} data-pagefind-meta="title" transition:name={titleTransitionName}>{post.data.title}</h1>
+        <h1
+          class="post-title-transition"
+          data-post-transition-title={titleTransitionName}
+          data-route-shared
+          data-route-shared-set={transitionSetName}
+          data-route-shared-name={titleTransitionName}
+          data-route-shared-group="post-title"
+          data-route-shared-context="article"
+          data-route-shared-target-context="card"
+          data-route-shared-exit="fade"
+          data-route-shared-suppress-visual="true"
+          data-pagefind-meta="title"
+          transition:name={titleTransitionName}
+        >
+          {post.data.title}
+        </h1>
         {post.data.description && <p class="article-description" data-pagefind-meta="description">{post.data.description}</p>}
         <div class="article-meta">
           <span>{formatDate(post.data.date)}</span>
@@ -71,10 +110,30 @@ const seriesPosts = seriesName
           {post.data.categories.map((category) => <a href={`/categories/${termToSlug(category)}/`}>{category}</a>)}
           {post.data.tags.map((tag) => <a href={`/tags/${termToSlug(tag)}/`}>{tag}</a>)}
         </div>
+        {hasToc && (
+          <div class="article-actions" data-pagefind-ignore>
+            <button class="article-view-toggle" type="button" data-toc-toggle aria-controls="article-toc" aria-pressed="false" aria-label="隐藏目录">
+              <Icon name="list-tree" />
+              <span data-toc-toggle-label>沉浸阅读</span>
+            </button>
+          </div>
+        )}
       </div>
       {image && (
         <figure class="article-cover">
-          <div class="post-cover-transition" data-post-transition-cover={coverTransitionName} transition:name={coverTransitionName}>
+          <div
+            class="post-cover-transition"
+            data-post-transition-cover={coverTransitionName}
+            data-route-shared
+            data-route-shared-set={transitionSetName}
+            data-route-shared-name={coverTransitionName}
+            data-route-shared-group="post-cover"
+            data-route-shared-context="article"
+            data-route-shared-target-context="card"
+            data-route-shared-exit="fade"
+            data-route-shared-suppress-visual="true"
+            transition:name={coverTransitionName}
+          >
             <OptimizedImage
               src={image}
               alt={post.data.media?.alt || post.data.title}
@@ -92,8 +151,8 @@ const seriesPosts = seriesName
       )}
     </header>
 
-    <div class="article-layout">
-      <Toc headings={headings} />
+    <div class="article-layout" data-article-layout data-toc-enabled={String(hasToc)} data-toc-state={hasToc ? "visible" : "disabled"}>
+      {hasToc && <Toc id="article-toc" headings={headings} hideUnfocusedChildren={hideUnfocusedTocChildren} />}
       <div class="article-main">
         {seriesPosts.length > 1 && (
           <aside class="series-callout" data-pagefind-ignore>
@@ -113,8 +172,8 @@ const seriesPosts = seriesName
         </div>
 
         <nav class="post-pagination" aria-label="Previous and next posts" data-pagefind-ignore>
-          {newer && <a href={getPostUrl(newer)} style={{ "--post-theme": newer.data.themeColor }}><span>Newer post</span>{newer.data.title}</a>}
-          {older && <a href={getPostUrl(older)} style={{ "--post-theme": older.data.themeColor }}><span>Older post</span>{older.data.title}</a>}
+          {newer && <a href={getPostUrl(newer)} style={{ "--post-theme": getPostThemeColor(newer) }}><span>Newer post</span>{newer.data.title}</a>}
+          {older && <a href={getPostUrl(older)} style={{ "--post-theme": getPostThemeColor(older) }}><span>Older post</span>{older.data.title}</a>}
         </nav>
 
         {related.length > 0 && (
