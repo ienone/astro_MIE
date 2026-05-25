@@ -1,0 +1,133 @@
+---
+title: "内容写作与 MDX 组件指南"
+description: "如何在 Astro MIE 中编写 Markdown/MDX 文章、使用内容块并保持内容可迁移。"
+date: 2026-01-26
+updatedDate: 2026-05-25
+draft: false
+slug: "content-authoring-guide"
+section: "notes/frontend"
+tags: ["content", "mdx", "features"]
+categories: ["Notes"]
+series: ["Deployment docs"]
+seriesOrder: 7
+themeColor: "#2f6096"
+media:
+  featured: "/img/featured.svg"
+  background: "/img/background.svg"
+  alt: "Content authoring guide preview"
+seo:
+  title: "内容写作与 MDX 组件指南"
+  description: "Astro MIE 的 Markdown/MDX 写作约定、front matter、内容块和迁移原则。"
+  ogImage: "/img/featured.svg"
+---
+
+import Figure from "../../../../../components/blocks/Figure.astro";
+import Gallery from "../../../../../components/blocks/Gallery.astro";
+import ActionLinks from "../../../../../components/blocks/ActionLinks.astro";
+
+Astro MIE 的内容应尽量保持可迁移：正文使用 Markdown/MDX，媒体使用公开路径，结构化内容使用少量稳定组件。
+
+## 文件位置
+
+文章放在 `src/content/posts/` 下。
+推荐使用 page bundle 风格目录：
+
+```text
+src/content/posts/articles/example-post/index.md
+src/content/posts/notes/frontend/example-note/index.mdx
+```
+
+这样未来如果需要为单篇文章增加图片、附件或草稿素材，可以放在同一目录中管理。
+
+## 什么时候使用 Markdown
+
+普通长文优先使用 `.md`。
+适合：
+
+- 观点文章；
+- 部署文档；
+- 配置说明；
+- changelog；
+- 简单教程。
+
+Markdown 更容易迁移，也更适合未来后台编辑器直接处理。
+
+## 什么时候使用 MDX
+
+当文章需要组件时使用 `.mdx`。
+适合：
+
+- 多图图集；
+- 结构化 review；
+- 行动按钮；
+- 复杂说明块；
+- 可复用的文档模块。
+
+MDX 可以导入 Astro 组件，但不要把主题布局细节写进内容。
+内容块应该表达内容结构，而不是承担页面装饰。
+
+## 推荐 front matter
+
+每篇文章至少提供：
+
+- `title`
+- `description`
+- `date`
+- `draft`
+- `section`
+- `tags`
+- `categories`
+- `media.alt`
+
+如果属于系列，再提供 `series` 和 `seriesOrder`。
+如果需要自定义公开地址，提供 `slug`。
+
+## 图片和图集
+
+单图可使用 `Figure`：
+
+<Figure
+  src="/img/featured.svg"
+  alt="Featured image example"
+  caption="Figure 组件适合带说明文字的单张图片。"
+/>
+
+多图可使用 `Gallery`：
+
+<Gallery
+  images={[
+    { src: "/img/featured.svg", alt: "Featured placeholder", caption: "封面占位图。" },
+    { src: "/img/background.svg", alt: "Background placeholder", caption: "背景占位图。" }
+  ]}
+/>
+
+图片必须包含有意义的 `alt`。
+如果图片只是装饰，可以在组件或布局层传空 alt，但正文图片不建议省略。
+
+## 链接和导航
+
+跨文章推荐可以使用普通 Markdown 链接，也可以使用 `ActionLinks`：
+
+<ActionLinks
+  links={[
+    { href: "/posts/deployment-guide/", label: "部署指南" },
+    { href: "/posts/configuration-reference/", label: "配置参考" }
+  ]}
+/>
+
+站内链接推荐使用绝对路径，例如 `/posts/deployment-guide/`。
+这样即使文章目录移动，公开 URL 仍然稳定。
+
+## 写作检查
+
+发布前检查：
+
+- 标题是否明确；
+- description 是否能作为搜索结果摘要；
+- tags 是否过多或过散；
+- 图片 alt 是否填写；
+- 代码块是否带语言；
+- 是否误把草稿设置为 `draft: false`；
+- 文章日期是否是未来日期。
+
+这份检查以后可以迁移到 blog admin 的内容审核面板。
