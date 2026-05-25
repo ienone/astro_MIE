@@ -9,6 +9,7 @@ import {
   getPostTransitionSetName,
   getPostTransitionName,
   getPostUrl,
+  getPostSummary,
   readingTime,
   wordCount,
   getSectionLabel
@@ -24,6 +25,7 @@ interface Props {
 const { post, compact = false, showSummary = true, showMeta = true } = Astro.props;
 const image = getPostImage(post);
 const url = getPostUrl(post);
+const summary = getPostSummary(post);
 const stats = `${wordCount(post.body).toLocaleString("en-US")} words · ${readingTime(post.body)}`;
 const style = { "--post-theme": getPostThemeColor(post) };
 const imagePosition = getPostImagePosition(post);
@@ -87,7 +89,7 @@ const titleTransitionName = getPostTransitionName(post, "title");
       >
         {post.data.title}
       </h2>
-      {showSummary && post.data.description && <p>{post.data.description}</p>}
+      {showSummary && summary && <p>{summary}</p>}
       {showMeta && (
         <div class="meta-row">
           <span>{stats}</span>

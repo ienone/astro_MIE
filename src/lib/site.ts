@@ -79,6 +79,18 @@ export interface FeatureConfig {
   [key: string]: unknown;
 }
 
+export interface SourceConfig {
+  type?: string;
+  defaultContentLanguage?: string;
+  hasCJKLanguage?: boolean;
+  enableRobotsTXT?: boolean;
+  summaryLength?: number;
+  buildDrafts?: boolean;
+  buildFuture?: boolean;
+  enableEmoji?: boolean;
+  [key: string]: unknown;
+}
+
 export interface ArticleConfig {
   showDate?: boolean;
   showViews?: boolean;
@@ -185,13 +197,48 @@ export interface VerificationConfig {
   [key: string]: unknown;
 }
 
+export interface AnalyticsConfig {
+  umami?: {
+    src?: string;
+    websiteId?: string;
+    hostUrl?: string;
+    domains?: string;
+    autoTrack?: boolean;
+    doNotTrack?: boolean;
+    [key: string]: unknown;
+  };
+  plausible?: {
+    domain?: string;
+    src?: string;
+    outboundLinks?: boolean;
+    fileDownloads?: boolean;
+    taggedEvents?: boolean;
+    [key: string]: unknown;
+  };
+  fathom?: {
+    siteId?: string;
+    src?: string;
+    [key: string]: unknown;
+  };
+  firebase?: Record<string, unknown>;
+  seline?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
+export interface RepositoryConfig {
+  url?: string;
+  branch?: string;
+  contentEditUrl?: string;
+  [key: string]: unknown;
+}
+
 export interface BlogConfig {
   name: string;
   title: string;
   description: string;
   url: string;
   language?: string;
-  source?: Record<string, unknown>;
+  source?: SourceConfig;
   branding: {
     logo: string;
     secondaryLogo?: string;
@@ -230,8 +277,9 @@ export interface BlogConfig {
   taxonomies?: Record<string, unknown>;
   sitemap?: SitemapConfig;
   related?: RelatedConfig;
-  analytics?: Record<string, unknown>;
+  analytics?: AnalyticsConfig;
   verification?: VerificationConfig;
+  repository?: RepositoryConfig;
   rssnext?: Record<string, unknown>;
   [key: string]: unknown;
 }

@@ -4,11 +4,15 @@ import { getSectionConfig, siteConfig } from "./site";
 export type PostEntry = CollectionEntry<"posts">;
 export type TaxonomyKind = "tags" | "categories" | "series";
 
-export async function getAllPosts(options: { includeDrafts?: boolean } = {}) {
+export async function getAllPosts(options: { includeDrafts?: boolean; includeFuture?: boolean } = {}) {
   const posts = await getCollection("posts");
+  const includeDrafts = options.includeDrafts ?? siteConfig.source?.buildDrafts === true;
+  const includeFuture = options.includeFuture ?? siteConfig.source?.buildFuture === true;
+  const now = new Date();
 
   return posts
-    .filter((post) => options.includeDrafts || !post.data.draft)
+    .filter((post) => includeDrafts || !post.data.draft)
+    .filter((post) => includeFuture || post.data.date <= now)
     .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 }
 
@@ -121,6 +125,48 @@ export function wordCount(body = "") {
 export function readingTime(body = "") {
   const minutes = Math.max(1, Math.ceil(wordCount(body) / 420));
   return `${minutes} min read`;
+}
+
+function stripMarkdown(value = "") {
+  return value
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/[>#*_~|\-[\]{}()]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export function getPostSummary(post: PostEntry) {
+  if (post.data.description) return post.data.description;
+
+  const summaryLength = siteConfig.source?.summaryLength ?? 0;
+  if (summaryLength <= 0) return "";
+
+  const summary = stripMarkdown(post.body);
+  if (summary.length <= summaryLength) return summary;
+
+  return `${summary.slice(0, summaryLength).trimEnd()}…`;
+}
+
+export function getPostSourcePath(post: PostEntry) {
+  const normalizedId = post.id.replace(/\\/g, "/");
+
+  return `src/content/posts/${normalizedId}`;
+}
+
+export function getPostEditUrl(post: PostEntry) {
+  const template = siteConfig.repository?.contentEditUrl;
+  if (!template) return "";
+
+  const sourcePath = getPostSourcePath(post);
+
+  return template
+    .replaceAll("{id}", post.id.replace(/\\/g, "/"))
+    .replaceAll("{path}", sourcePath)
+    .replaceAll("{slug}", getPostSlug(post));
 }
 
 export function termToSlug(term: string) {
