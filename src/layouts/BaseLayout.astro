@@ -30,10 +30,20 @@ const siteUrl = Astro.site ?? new URL(siteConfig.url);
 const canonical = new URL(Astro.url.pathname, siteUrl).toString();
 const imageSrc = typeof image === "string" ? image : image.src;
 const ogImage = imageSrc.startsWith("http") ? imageSrc : new URL(imageSrc, siteUrl).toString();
+const defaultAppearance = siteConfig.theme?.defaultAppearance ?? "light";
+const autoSwitchAppearance = siteConfig.theme?.autoSwitchAppearance !== false;
+const headerLayout = siteConfig.theme?.header?.layout ?? "fixed";
+const searchEnabled = siteConfig.features?.search !== false;
+const imageZoomEnabled = siteConfig.features?.imageZoom !== false;
 ---
 
 <!doctype html>
-<html lang={siteConfig.language || "en"}>
+<html
+  lang={siteConfig.language || "en"}
+  data-default-appearance={defaultAppearance}
+  data-auto-switch-appearance={String(autoSwitchAppearance)}
+  data-header-layout={headerLayout}
+>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -57,14 +67,22 @@ const ogImage = imageSrc.startsWith("http") ? imageSrc : new URL(imageSrc, siteU
     <script is:inline>
       function applyStoredTheme() {
         const storedTheme = localStorage.getItem("theme");
+        const defaultAppearance = document.documentElement.dataset.defaultAppearance || "light";
+        const autoSwitchAppearance = document.documentElement.dataset.autoSwitchAppearance !== "false";
         const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-        document.documentElement.dataset.theme = storedTheme || (prefersDark ? "dark" : "light");
+        const configuredTheme = defaultAppearance === "dark" ? "dark" : "light";
+        const systemTheme = prefersDark ? "dark" : "light";
+        const shouldUseSystem = autoSwitchAppearance || defaultAppearance === "system" || defaultAppearance === "auto";
+        document.documentElement.dataset.theme = storedTheme || (shouldUseSystem ? systemTheme : configuredTheme);
       }
 
       applyStoredTheme();
 
       if (!window.__astroMieThemeBound) {
         window.__astroMieThemeBound = true;
+        window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+          if (!localStorage.getItem("theme")) applyStoredTheme();
+        });
         document.addEventListener("astro:after-swap", applyStoredTheme);
         document.addEventListener("astro:page-load", applyStoredTheme);
       }
@@ -75,8 +93,8 @@ const ogImage = imageSrc.startsWith("http") ? imageSrc : new URL(imageSrc, siteU
       <slot />
     </main>
     <Footer />
-    <SearchOverlay />
-    <ImageLightbox />
+    {searchEnabled && <SearchOverlay />}
+    {imageZoomEnabled && <ImageLightbox />}
     <PageEffects />
   </body>
 </html>

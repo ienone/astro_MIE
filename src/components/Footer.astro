@@ -5,8 +5,14 @@ import { isExternalLink, siteConfig } from "../lib/site";
 const defaultFooterLinks = [
   { label: "RSS", href: "/rss.xml", icon: "rss" }
 ];
+const footerConfig = siteConfig.footer ?? {};
+const showMenu = footerConfig.showMenu !== false;
+const showCopyright = footerConfig.showCopyright !== false;
+const showThemeAttribution = footerConfig.showThemeAttribution !== false;
+const showAppearanceSwitcher = footerConfig.showAppearanceSwitcher !== false;
+const showScrollToTop = footerConfig.showScrollToTop !== false;
 const seenFooterHrefs = new Set<string>();
-const footerLinks = [...defaultFooterLinks, ...(siteConfig.footer?.links ?? [])].filter((link) => {
+const footerLinks = [...defaultFooterLinks, ...(footerConfig.links ?? [])].filter((link) => {
   if (seenFooterHrefs.has(link.href)) return false;
   seenFooterHrefs.add(link.href);
   return true;
@@ -27,7 +33,7 @@ function getSocialText(link: { label: string; displayLabel?: string }) {
       <p>{siteConfig.description}</p>
     </div>
     <div class="footer-links">
-      <div class="footer-actions" aria-label="Footer links">
+      {showMenu && <div class="footer-actions" aria-label="Footer links">
         {
           footerLinks.map((link) => (
             <a href={link.href} target={isExternalLink(link.href) ? "_blank" : undefined} rel={isExternalLink(link.href) ? "noopener noreferrer" : undefined}>
@@ -36,9 +42,9 @@ function getSocialText(link: { label: string; displayLabel?: string }) {
             </a>
           ))
         }
-      </div>
+      </div>}
       {
-        showFooterSocial && footerSocialLinks.length > 0 && (
+        showMenu && showFooterSocial && footerSocialLinks.length > 0 && (
           <div class="footer-social social-links" aria-label="社交平台">
             {footerSocialLinks.map((link) => (
               <a
@@ -56,6 +62,31 @@ function getSocialText(link: { label: string; displayLabel?: string }) {
           </div>
         )
       }
+      {(showAppearanceSwitcher || showScrollToTop) && (
+        <div class="footer-actions footer-controls" aria-label="Footer controls">
+          {showAppearanceSwitcher && <button type="button" data-theme-toggle><Icon name="sun-moon" /><span>Theme</span></button>}
+          {showScrollToTop && <button type="button" data-scroll-top><Icon name="chevron-down" /><span>Top</span></button>}
+        </div>
+      )}
+      {(showCopyright || showThemeAttribution) && (
+        <div class="footer-meta">
+          {showCopyright && <p>© {new Date().getFullYear()} {siteConfig.author.displayName || siteConfig.author.name}</p>}
+          {showThemeAttribution && <p>Powered by Astro MIE.</p>}
+        </div>
+      )}
     </div>
   </div>
 </footer>
+
+<script>
+  function setupFooterControls() {
+    document.querySelectorAll("[data-scroll-top]").forEach((button) => {
+      if (!(button instanceof HTMLButtonElement) || button.dataset.scrollTopReady === "true") return;
+      button.dataset.scrollTopReady = "true";
+      button.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+    });
+  }
+
+  document.addEventListener("astro:page-load", setupFooterControls);
+  setupFooterControls();
+</script>

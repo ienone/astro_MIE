@@ -1,6 +1,12 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
-import PageHeader from "../components/PageHeader.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageHeader from "../../components/PageHeader.astro";
+import { siteConfig } from "../../lib/site";
+
+export function getStaticPaths() {
+  if (siteConfig.features?.search === false) return [];
+  return [{ params: { path: undefined } }];
+}
 ---
 
 <BaseLayout title="搜索" description="使用 Pagefind 静态索引搜索文章。">

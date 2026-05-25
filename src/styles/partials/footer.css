@@ -37,13 +37,18 @@
   gap: 8px;
 }
 
-.footer-actions a {
+.footer-actions a,
+.footer-actions button {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   min-height: 38px;
+  border: 0;
   border-radius: 999px;
   background: var(--surface-container-high);
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
   line-height: 1;
   padding: 8px 12px;
   transition:
@@ -53,16 +58,30 @@
 }
 
 .footer-actions a:hover,
-.footer-actions a:focus-visible {
+.footer-actions a:focus-visible,
+.footer-actions button:hover,
+.footer-actions button:focus-visible {
   background: var(--primary-container);
   color: var(--primary);
   transform: translateY(-2px);
 }
 
 .footer-actions a .icon,
+.footer-actions button .icon,
 .footer-social .icon {
   width: 1.08em;
   height: 1.08em;
+}
+
+.footer-controls [data-scroll-top] .icon {
+  transform: rotate(180deg);
+}
+
+.footer-meta {
+  display: grid;
+  gap: 4px;
+  font-size: 0.86rem;
+  text-align: right;
 }
 
 .footer-social {

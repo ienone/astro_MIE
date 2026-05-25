@@ -1,6 +1,9 @@
 import { defineCollection } from "astro:content";
 import { glob } from "astro/loaders";
 import { z } from "astro/zod";
+import blogConfig from "../blog.config.mjs";
+
+const defaultThemeColor = blogConfig.assets?.defaultThemeColor ?? "#146b5b";
 
 const posts = defineCollection({
   loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/posts" }),
@@ -43,7 +46,7 @@ const posts = defineCollection({
       themeColor: z
         .string()
         .regex(/^#[0-9a-fA-F]{6}$/)
-        .default("#146b5b"),
+        .default(defaultThemeColor),
       media: mediaSchema,
       seo: seoSchema,
       extensionFields: z.record(z.string(), z.unknown()).default({}),

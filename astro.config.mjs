@@ -16,6 +16,9 @@ export default defineConfig({
       defaultProps: {
         wrap: true,
       },
+      frames: {
+        showCopyToClipboardButton: blogConfig.features?.codeCopy !== false,
+      },
     }),
     mdx(),
     sitemap(),

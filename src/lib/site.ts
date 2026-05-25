@@ -56,6 +56,29 @@ export interface FooterConfig {
   [key: string]: unknown;
 }
 
+export interface ThemeConfig {
+  colorScheme?: string;
+  defaultAppearance?: "light" | "dark" | "system" | "auto";
+  autoSwitchAppearance?: boolean;
+  header?: {
+    layout?: "fixed" | "sticky" | "static";
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
+export interface FeatureConfig {
+  search?: boolean;
+  codeCopy?: boolean;
+  replyByEmail?: boolean;
+  imageZoom?: boolean;
+  imageOptimization?: boolean;
+  highlightCurrentMenuArea?: boolean;
+  smartToc?: boolean;
+  smartTocHideUnfocusedChildren?: boolean;
+  [key: string]: unknown;
+}
+
 export interface BlogConfig {
   name: string;
   title: string;
@@ -77,8 +100,8 @@ export interface BlogConfig {
     defaultThemeColor: string;
     backgroundImageWidth?: number;
   };
-  theme?: Record<string, unknown>;
-  features?: Record<string, unknown>;
+  theme?: ThemeConfig;
+  features?: FeatureConfig;
   author: {
     name: string;
     displayName?: string;
@@ -122,4 +145,8 @@ export function getSectionConfig(section: string): SectionConfig {
 
 export function isExternalLink(href = "") {
   return /^https?:\/\//.test(href) || href.startsWith("mailto:");
+}
+
+export function isFeatureEnabled(name: keyof FeatureConfig, defaultValue = true) {
+  return siteConfig.features?.[name] ?? defaultValue;
 }

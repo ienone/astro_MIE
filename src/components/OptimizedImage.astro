@@ -1,6 +1,7 @@
 ---
 import { Image } from "astro:assets";
 import type { ImageMetadata } from "astro";
+import { isFeatureEnabled } from "../lib/site";
 
 interface Props {
   src?: string | ImageMetadata;
@@ -37,7 +38,7 @@ const {
 const isImageMetadata = Boolean(src && typeof src === "object" && "src" in src && "width" in src && "height" in src);
 const image = isImageMetadata ? (src as ImageMetadata) : undefined;
 const fallbackSrc = typeof src === "string" ? src : image?.src;
-const canOptimize = Boolean(image && image.format !== "svg" && image.format !== "gif");
+const canOptimize = Boolean(isFeatureEnabled("imageOptimization") && image && image.format !== "svg" && image.format !== "gif");
 const intrinsicWidth = width ?? image?.width;
 const intrinsicHeight = height ?? image?.height;
 ---

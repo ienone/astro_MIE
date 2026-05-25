@@ -12,18 +12,14 @@
 - `mainSections`、`sections`：分区列表、分区标签、兜底描述和导航高亮。
 - `nav`：桌面/移动端导航与下拉分组。
 - `footer.links`：页脚动作链接。
+- `assets.defaultBackground`、`assets.defaultThemeColor`、`assets.backgroundImageWidth`：文章背景兜底、默认主题色、背景图响应式宽度。
+- `theme.defaultAppearance`、`theme.autoSwitchAppearance`、`theme.header.layout`：初始主题策略、系统主题跟随、页头布局。
+- `features.search`、`features.codeCopy`、`features.imageZoom`、`features.imageOptimization`、`features.highlightCurrentMenuArea`、`features.smartToc`、`features.smartTocHideUnfocusedChildren`：搜索、代码复制、灯箱、图片优化、导航高亮和 TOC 行为开关。
+- `footer.showMenu`、`footer.showCopyright`、`footer.showThemeAttribution`、`footer.showAppearanceSwitcher`、`footer.showScrollToTop`：页脚菜单、版权、主题署名、主题切换和返回顶部开关。
 
 ## 部分实现，但配置开关尚未完全接管行为
 
-- `assets.defaultBackground`、`assets.defaultThemeColor`、`assets.backgroundImageWidth`：类型/配置中存在，但当前渲染主要直接使用 featured 兜底图。
-- `theme.defaultAppearance`、`theme.autoSwitchAppearance`、`theme.header.layout`：UI 里有主题切换与固定页头，但这些配置值还没有驱动初始模式或页头布局。
-- `features.search`：搜索功能已实现，但该布尔值还没有用来隐藏/显示搜索入口。
-- `features.codeCopy`：代码复制已交给 `astro-expressive-code`，但该开关还没有接入启停逻辑。
-- `features.imageZoom`：文章图片灯箱已通过 PhotoSwipe 实现，但该开关还没有接入禁用逻辑。
-- `features.imageOptimization`：本地内容图片现在可走 Astro image metadata + `OptimizedImage`；但 public 路径字符串会按设计原样输出，无法被 Astro 转换。
-- `features.highlightCurrentMenuArea`：`Header.astro` 有当前导航区域高亮逻辑，但配置开关未接管。
-- `features.smartToc`、`features.smartTocHideUnfocusedChildren`：TOC 渲染/高亮已存在，但这些开关未接管具体行为。
-- `footer.showMenu`、`footer.showCopyright`、`footer.showThemeAttribution`、`footer.showAppearanceSwitcher`、`footer.showScrollToTop`：页脚有基础渲染，但这些选项还没有条件化改变输出。
+当前无已知“部分实现但开关未接管”的字段。后续新增功能如果先放入配置但未完全接线，应先记录在本节。
 
 ## 未实现 / 路线图占位
 

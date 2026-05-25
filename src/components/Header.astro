@@ -2,6 +2,9 @@
 import Icon from "./Icon.astro";
 import { isExternalLink, siteConfig } from "../lib/site";
 
+const searchEnabled = siteConfig.features?.search !== false;
+const highlightCurrentMenuArea = siteConfig.features?.highlightCurrentMenuArea !== false;
+
 function linkAttrs(href = "", explicitExternal = false, rel?: string) {
   const external = explicitExternal || isExternalLink(href);
   return {
@@ -11,7 +14,7 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
 }
 ---
 
-<header class="site-header" data-site-header transition:persist="site-header">
+<header class="site-header" data-site-header data-highlight-current-menu-area={String(highlightCurrentMenuArea)} transition:persist="site-header">
   <nav class="nav-shell" aria-label="Main navigation">
     <a class="brand" href="/" aria-label={`${siteConfig.name} home`}>
       <img src={siteConfig.branding.logo} alt="" width="34" height="34" loading="eager" decoding="async" />
@@ -48,7 +51,7 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
     </div>
 
     <div class="nav-actions">
-      <button class="icon-button" type="button" data-search-open aria-label="Open search"><Icon name="search" /></button>
+      {searchEnabled && <button class="icon-button" type="button" data-search-open aria-label="Open search"><Icon name="search" /></button>}
       <button class="icon-button" type="button" data-theme-toggle aria-label="Toggle theme"><Icon name="sun-moon" /></button>
       <button class="menu-button" type="button" data-menu-toggle aria-label="Open menu" aria-expanded="false" aria-controls="mobile-nav">
         <Icon name="menu" />
@@ -146,6 +149,20 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
   }
 
   function updateActiveNav() {
+    const highlightEnabled = document.querySelector("[data-site-header]")?.getAttribute("data-highlight-current-menu-area") !== "false";
+    if (!highlightEnabled) {
+      document.querySelectorAll("[data-nav-href]").forEach((link) => {
+        if (!(link instanceof HTMLElement)) return;
+        link.removeAttribute("aria-current");
+      });
+      document.querySelectorAll("[data-nav-trigger]").forEach((trigger) => {
+        if (trigger instanceof HTMLElement) delete trigger.dataset.active;
+      });
+      const navLinks = document.querySelector("[data-nav-links]");
+      if (navLinks instanceof HTMLElement) navLinks.style.setProperty("--nav-indicator-opacity", "0");
+      return;
+    }
+
     const currentPath = getCurrentNavPath();
     const navHrefLinks = [...document.querySelectorAll("[data-nav-href]")];
     let activeTargetPath = "";
@@ -285,7 +302,7 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
 
   function setupHeader() {
     const header = document.querySelector("[data-site-header]");
-    const toggle = document.querySelector("[data-theme-toggle]");
+    const toggles = document.querySelectorAll("[data-theme-toggle]");
     const menuButton = document.querySelector("[data-menu-toggle]");
 
     if (header instanceof HTMLElement && header.dataset.headerReady !== "true") {
@@ -305,15 +322,19 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
         link.addEventListener("click", () => closeNavMenus());
       });
 
-      toggle?.addEventListener("click", () => {
-        if (toggle instanceof HTMLElement) toggleThemeFrom(toggle);
-      });
-
       menuButton?.addEventListener("click", () => {
         const isOpen = menuButton.getAttribute("aria-expanded") === "true";
         setMobileMenu(!isOpen);
       });
     }
+
+    toggles.forEach((toggle) => {
+      if (!(toggle instanceof HTMLElement) || toggle.dataset.themeToggleReady === "true") return;
+      toggle.dataset.themeToggleReady = "true";
+      toggle.addEventListener("click", () => {
+        if (toggle instanceof HTMLElement) toggleThemeFrom(toggle);
+      });
+    });
 
     updateHeaderScrollState();
     updateActiveNav();
