@@ -35,7 +35,6 @@
   filter: blur(44px) saturate(1.28) brightness(0.92);
   transform: scale(1.14);
   animation: hero-ambient-drift 18s ease-in-out infinite alternate;
-  will-change: transform;
 }
 
 .home-hero-scrim,

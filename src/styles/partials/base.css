@@ -9,6 +9,35 @@
   color: var(--on-surface);
 }
 
+body::before {
+  position: fixed;
+  inset-block-start: 0;
+  inset-inline: 0;
+  z-index: 120;
+  height: 3px;
+  transform: scaleX(0);
+  transform-origin: left center;
+  background: linear-gradient(90deg, var(--primary), var(--tertiary), var(--accent));
+  box-shadow: 0 0 18px color-mix(in srgb, var(--primary) 32%, transparent);
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+}
+
+:root[data-route-transition="loading"] body::before {
+  animation: route-progress 900ms var(--motion-route-ease) 120ms both;
+}
+
+:root[data-route-transition="ready"] body::before,
+:root[data-route-transition="swapping"] body::before,
+:root[data-route-transition="settling"] body::before {
+  opacity: 0;
+  transform: scaleX(1);
+  transition:
+    opacity 220ms var(--motion-route-fade),
+    transform 260ms var(--motion-route-ease);
+}
+
 :root[data-theme="dark"] body {
   background:
     linear-gradient(180deg, rgba(18, 63, 54, 0.42), transparent 360px),
@@ -45,4 +74,25 @@ input {
 
 .skip-link:focus {
   transform: translateY(0);
+}
+
+@keyframes route-progress {
+  0% {
+    opacity: 0;
+    transform: scaleX(0.04);
+  }
+
+  14% {
+    opacity: 1;
+  }
+
+  58% {
+    opacity: 1;
+    transform: scaleX(0.58);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scaleX(0.86);
+  }
 }

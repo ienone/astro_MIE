@@ -1,0 +1,114 @@
+---
+import "photoswipe/style.css";
+---
+
+<script>
+  import PhotoSwipeLightbox from "photoswipe/lightbox";
+
+  const lightboxWindow = window as Window &
+    typeof globalThis & {
+      __astroMiePhotoSwipe?: PhotoSwipeLightbox;
+    };
+
+  function getImageCaption(image: HTMLImageElement) {
+    const figure = image.closest("figure");
+    return figure?.querySelector("figcaption")?.textContent?.trim() || image.alt || "";
+  }
+
+  function getImageDimensions(image: HTMLImageElement) {
+    const width = Number(image.dataset.pswpWidth || image.getAttribute("width") || image.naturalWidth || 1600);
+    const height = Number(image.dataset.pswpHeight || image.getAttribute("height") || image.naturalHeight || 1000);
+    return { width, height };
+  }
+
+  function setupArticleLightbox() {
+    lightboxWindow.__astroMiePhotoSwipe?.destroy();
+
+    const gallery = document.querySelector(".article-main .prose");
+    if (!(gallery instanceof HTMLElement) || !gallery.querySelector("img")) return;
+
+    const lightbox = new PhotoSwipeLightbox({
+      gallery,
+      children: "img:not([data-lightbox-ignore])",
+      bgOpacity: 0.86,
+      wheelToZoom: true,
+      initialZoomLevel: "fit",
+      secondaryZoomLevel: 1,
+      maxZoomLevel: 4,
+      paddingFn: (viewportSize) => ({
+        top: viewportSize.x < 700 ? 48 : 72,
+        bottom: viewportSize.x < 700 ? 72 : 96,
+        left: viewportSize.x < 700 ? 12 : 48,
+        right: viewportSize.x < 700 ? 12 : 48
+      }),
+      pswpModule: () => import("photoswipe")
+    });
+
+    lightbox.addFilter("itemData", (itemData) => {
+      const image = itemData.element instanceof HTMLImageElement ? itemData.element : undefined;
+      if (!image) return itemData;
+
+      const { width, height } = getImageDimensions(image);
+      return {
+        ...itemData,
+        src: image.currentSrc || image.src,
+        msrc: image.currentSrc || image.src,
+        width,
+        height,
+        alt: image.alt,
+        caption: getImageCaption(image)
+      };
+    });
+
+    lightbox.on("uiRegister", () => {
+      lightbox.pswp?.ui?.registerElement({
+        name: "download-button",
+        order: 8,
+        isButton: true,
+        tagName: "a",
+        html: "下载",
+        onInit: (element, pswp) => {
+          const link = element as HTMLAnchorElement;
+          link.classList.add("pswp__button--download");
+          link.setAttribute("download", "");
+          link.setAttribute("aria-label", "下载图片");
+
+          const updateLink = () => {
+            const src = String(pswp.currSlide?.data?.src || "");
+            link.href = src;
+            link.download = decodeURIComponent(src.split("/").pop()?.split("?")[0] || "image");
+          };
+
+          pswp.on("change", updateLink);
+          updateLink();
+        }
+      });
+
+      lightbox.pswp?.ui?.registerElement({
+        name: "caption",
+        order: 9,
+        isButton: false,
+        appendTo: "root",
+        html: "",
+        onInit: (element, pswp) => {
+          element.classList.add("pswp__custom-caption");
+          const updateCaption = () => {
+            const caption = String(pswp.currSlide?.data?.caption || "");
+            element.textContent = caption;
+            element.toggleAttribute("hidden", !caption);
+          };
+
+          pswp.on("change", updateCaption);
+          updateCaption();
+        }
+      });
+    });
+
+    lightbox.init();
+    lightboxWindow.__astroMiePhotoSwipe = lightbox;
+  }
+
+  document.addEventListener("astro:page-load", setupArticleLightbox);
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", setupArticleLightbox, { once: true });
+  else setupArticleLightbox();
+</script>

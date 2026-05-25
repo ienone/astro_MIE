@@ -14,7 +14,7 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
 <header class="site-header" data-site-header transition:persist="site-header">
   <nav class="nav-shell" aria-label="Main navigation">
     <a class="brand" href="/" aria-label={`${siteConfig.name} home`}>
-      <img src={siteConfig.branding.logo} alt="" width="34" height="34" loading="eager" />
+      <img src={siteConfig.branding.logo} alt="" width="34" height="34" loading="eager" decoding="async" />
       <span>{siteConfig.name}</span>
     </a>
 
@@ -90,6 +90,7 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
     typeof globalThis & {
       __astroMieHeaderBound?: boolean;
       __astroMieHeaderRaf?: number;
+      __astroMieHeaderScrolled?: boolean;
     };
 
   function normalizePath(path: string) {
@@ -182,8 +183,11 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
   }
 
   function updateHeaderScrollState() {
-    document.documentElement.dataset.scrolled = String(window.scrollY > 28);
-    updateNavIndicator();
+    const scrolled = window.scrollY > 28;
+    if (headerWindow.__astroMieHeaderScrolled === scrolled) return;
+
+    headerWindow.__astroMieHeaderScrolled = scrolled;
+    document.documentElement.dataset.scrolled = String(scrolled);
   }
 
   function closeNavMenus(except?: Element) {

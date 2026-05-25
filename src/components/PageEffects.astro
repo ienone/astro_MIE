@@ -1,0 +1,299 @@
+<script is:inline>
+  function setupRouteTransitionState() {
+    let routeTransitionActive = false;
+    let clearTimer;
+    let routeCardTransition = "";
+    let routeCoverName = "";
+    let routeTitleName = "";
+    let pendingPreparationEvent;
+    const routeMarkedElements = new Set();
+
+    function setRouteState(state) {
+      window.clearTimeout(clearTimer);
+      document.documentElement.dataset.routeTransition = state;
+    }
+
+    function setRouteCardTransition(value) {
+      routeCardTransition = value;
+      if (value) {
+        document.documentElement.dataset.routeCardTransition = value;
+      } else {
+        delete document.documentElement.dataset.routeCardTransition;
+      }
+    }
+
+    function resetRouteCardTransition() {
+      routeMarkedElements.forEach((element) => {
+        if (element instanceof HTMLElement) delete element.dataset.routeSource;
+      });
+      routeMarkedElements.clear();
+      pendingPreparationEvent = undefined;
+      setRouteCardTransition("");
+      routeCoverName = "";
+      routeTitleName = "";
+    }
+
+    function clearRouteState() {
+      window.clearTimeout(clearTimer);
+      clearTimer = window.setTimeout(() => {
+        if (routeTransitionActive) return;
+        delete document.documentElement.dataset.routeTransition;
+        resetRouteCardTransition();
+      }, 720);
+    }
+
+    function markRouteElement(element) {
+      if (!(element instanceof HTMLElement)) return;
+      element.dataset.routeSource = "true";
+      routeMarkedElements.add(element);
+    }
+
+    function getCurrentArticleTransitionNames() {
+      const cover = document.querySelector(".article-cover [data-post-transition-cover]");
+      const title = document.querySelector(".article-hero [data-post-transition-title]");
+      return {
+        coverName: cover instanceof HTMLElement ? cover.dataset.postTransitionCover || "" : "",
+        titleName: title instanceof HTMLElement ? title.dataset.postTransitionTitle || "" : ""
+      };
+    }
+
+    function hasPostCover(root) {
+      return Boolean(root.querySelector(".post-cover-transition"));
+    }
+
+    function markRouteCard(card, coverName, titleName) {
+      if (!(card instanceof HTMLElement)) return;
+      markRouteElement(card);
+      if (coverName) markRouteElement(card.querySelector(`.post-cover-transition[data-post-transition-cover="${coverName}"]`));
+      if (titleName) markRouteElement(card.querySelector(`.post-title-transition[data-post-transition-title="${titleName}"]`));
+    }
+
+    function markRouteTarget(root, coverName, titleName) {
+      if (!coverName && !titleName) return;
+      const articleCover = coverName
+        ? root.querySelector(`.article-cover .post-cover-transition[data-post-transition-cover="${coverName}"]`)
+        : null;
+      const articleTitle = titleName
+        ? root.querySelector(`.article-hero .post-title-transition[data-post-transition-title="${titleName}"]`)
+        : null;
+
+      if (articleCover || articleTitle) {
+        markRouteElement(articleCover);
+        markRouteElement(articleTitle);
+        return;
+      }
+
+      const cardSelector = coverName
+        ? `[data-post-card][data-post-transition-cover="${coverName}"]`
+        : `[data-post-card][data-post-transition-title="${titleName}"]`;
+      markRouteCard(root.querySelector(cardSelector), coverName, titleName);
+    }
+
+    function hasRouteTarget(root, coverName, titleName) {
+      if (!coverName && !titleName) return false;
+      const articleCover = coverName
+        ? root.querySelector(`.article-cover .post-cover-transition[data-post-transition-cover="${coverName}"]`)
+        : null;
+      const articleTitle = titleName
+        ? root.querySelector(`.article-hero .post-title-transition[data-post-transition-title="${titleName}"]`)
+        : null;
+      if (articleCover || articleTitle) return true;
+
+      const cardSelector = coverName
+        ? `[data-post-card][data-post-transition-cover="${coverName}"]`
+        : `[data-post-card][data-post-transition-title="${titleName}"]`;
+      return Boolean(root.querySelector(cardSelector));
+    }
+
+    function unmarkRouteElements() {
+      routeMarkedElements.forEach((element) => {
+        if (element instanceof HTMLElement) delete element.dataset.routeSource;
+      });
+      routeMarkedElements.clear();
+    }
+
+    function resolveRoutePostTransition() {
+      const newDocument = pendingPreparationEvent?.newDocument;
+      if (!newDocument) return;
+
+      const wantsSharedTransition = routeCardTransition === "forward" || routeCardTransition === "back";
+      if (wantsSharedTransition && hasRouteTarget(newDocument, routeCoverName, routeTitleName)) return;
+
+      unmarkRouteElements();
+      routeCoverName = "";
+      routeTitleName = "";
+      setRouteCardTransition(hasPostCover(document) && !hasPostCover(newDocument) ? "exit" : "suppress");
+    }
+
+    document.addEventListener("astro:before-preparation", (event) => {
+      routeTransitionActive = true;
+      resetRouteCardTransition();
+      pendingPreparationEvent = event;
+      setRouteCardTransition("suppress");
+
+      const sourceElement = event.sourceElement instanceof Element ? event.sourceElement : null;
+      const sourceCard = sourceElement?.closest("[data-post-card]");
+      if (sourceCard instanceof HTMLElement && sourceCard.dataset.postTransitionCover) {
+        setRouteCardTransition("forward");
+        routeCoverName = sourceCard.dataset.postTransitionCover;
+        routeTitleName = sourceCard.dataset.postTransitionTitle || "";
+        markRouteCard(sourceCard, routeCoverName, routeTitleName);
+      } else {
+        const articleTransition = getCurrentArticleTransitionNames();
+        if (articleTransition.coverName && event.direction === "back") {
+          setRouteCardTransition("back");
+          routeCoverName = articleTransition.coverName;
+          routeTitleName = articleTransition.titleName;
+          markRouteTarget(document, routeCoverName, routeTitleName);
+        }
+      }
+
+      setRouteState("loading");
+      event.signal?.addEventListener(
+        "abort",
+        () => {
+          routeTransitionActive = false;
+          pendingPreparationEvent = undefined;
+          clearRouteState();
+        },
+        { once: true }
+      );
+    });
+
+    document.addEventListener("astro:after-preparation", () => {
+      resolveRoutePostTransition();
+      if (routeTransitionActive) setRouteState("ready");
+    });
+
+    document.addEventListener("astro:before-swap", (event) => {
+      if (routeTransitionActive) setRouteState("swapping");
+      if (routeCardTransition) event.newDocument.documentElement.dataset.routeCardTransition = routeCardTransition;
+      if (!routeCoverName || routeCardTransition === "suppress" || routeCardTransition === "exit") return;
+
+      markRouteTarget(event.newDocument, routeCoverName, routeTitleName);
+    });
+
+    document.addEventListener("astro:after-swap", () => {
+      if (!routeTransitionActive) return;
+      setRouteState("settling");
+    });
+
+    document.addEventListener("astro:page-load", () => {
+      if (!routeTransitionActive) return;
+      routeTransitionActive = false;
+      clearRouteState();
+    });
+  }
+
+  function setupRevealMotion() {
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const revealTargets = document.querySelectorAll(
+      ".home-hero, .article-hero, .page-header, .content-section, .post-card, .term-card, .archive-item"
+    );
+
+    const canObserve = !reduceMotion && "IntersectionObserver" in window;
+
+    if (canObserve) {
+      window.__astroMieRevealObserver ??= new IntersectionObserver(
+        (entries, observer) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting || !(entry.target instanceof HTMLElement)) return;
+            entry.target.classList.add("is-visible");
+            observer.unobserve(entry.target);
+          });
+        },
+        { rootMargin: "0px 0px -8%", threshold: 0.12 }
+      );
+    }
+
+    revealTargets.forEach((element, index) => {
+      if (!(element instanceof HTMLElement)) return;
+      if (element.dataset.reveal === "ready") return;
+
+      const rect = element.getBoundingClientRect();
+      const initiallyVisible = rect.top < window.innerHeight * 0.92 && rect.bottom > 0;
+      const revealImmediately = !canObserve || initiallyVisible;
+
+      if (revealImmediately) element.classList.add("is-visible");
+      element.style.setProperty("--reveal-index", String(index % 8));
+      element.dataset.reveal = "ready";
+
+      if (!revealImmediately) window.__astroMieRevealObserver?.observe(element);
+    });
+  }
+
+  function setupArticleReading() {
+    const article = document.querySelector("[data-article-shell]");
+    const progress = document.querySelector("[data-reading-progress]");
+    const headings = [...document.querySelectorAll(".article-main .prose h2[id], .article-main .prose h3[id]")];
+    const tocLinks = [...document.querySelectorAll("[data-toc-link]")];
+
+    function setActiveHeading(activeId) {
+      tocLinks.forEach((link) => {
+        if (!(link instanceof HTMLAnchorElement)) return;
+        const isActive = decodeURIComponent(link.hash.slice(1)) === activeId;
+        link.toggleAttribute("aria-current", isActive);
+        if (isActive) {
+          link.setAttribute("aria-current", "location");
+          const group = link.closest(".toc-group");
+          if (group instanceof HTMLDetailsElement) group.open = true;
+        }
+      });
+    }
+
+    window.__astroMieUpdateArticleState = () => {
+      if (!(article instanceof HTMLElement)) {
+        if (progress instanceof HTMLElement) progress.style.setProperty("--reading-progress", "0");
+        return;
+      }
+
+      if (progress instanceof HTMLElement) {
+        const top = article.getBoundingClientRect().top + window.scrollY;
+        const bottom = top + article.offsetHeight;
+        const distance = Math.max(1, bottom - top - window.innerHeight);
+        const ratio = Math.min(1, Math.max(0, (window.scrollY - top) / distance));
+        progress.style.setProperty("--reading-progress", String(ratio));
+      }
+
+      if (!headings.length || !tocLinks.length) return;
+
+      const threshold = window.scrollY + 160;
+      let active = headings[0];
+      for (const heading of headings) {
+        if (!(heading instanceof HTMLElement)) continue;
+        const offset = heading.getBoundingClientRect().top + window.scrollY;
+        if (offset <= threshold) active = heading;
+        else break;
+      }
+
+      if (active instanceof HTMLElement) setActiveHeading(active.id);
+    };
+
+    window.__astroMieUpdateArticleState();
+  }
+
+  function initPageEffects() {
+    setupRevealMotion();
+    setupArticleReading();
+  }
+
+  if (!window.__astroMieBaseBound) {
+    window.__astroMieBaseBound = true;
+    setupRouteTransitionState();
+
+    window.addEventListener(
+      "scroll",
+      () => {
+        if (window.__astroMieArticleRaf) window.cancelAnimationFrame(window.__astroMieArticleRaf);
+        window.__astroMieArticleRaf = window.requestAnimationFrame(() => window.__astroMieUpdateArticleState?.());
+      },
+      { passive: true }
+    );
+    window.addEventListener("resize", () => window.__astroMieUpdateArticleState?.());
+
+    document.addEventListener("astro:page-load", initPageEffects);
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initPageEffects, { once: true });
+  }
+
+  initPageEffects();
+</script>
