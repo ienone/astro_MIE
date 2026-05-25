@@ -24,18 +24,19 @@
 - `sitemap.changefreq`、`sitemap.priority`、`sitemap.excludedKinds`：sitemap 默认更新频率、优先级和 taxonomy/term 页面过滤。
 - `related.threshold`、`related.toLower`、`related.indices`：相关文章权重、阈值与大小写归一化。
 - `verification.google`、`verification.bing`、`verification.pinterest`、`verification.yandex`、`verification.fediverse`：搜索引擎/平台验证 meta 标签。
+- `source.buildDrafts`、`source.buildFuture`：草稿和未来日期文章是否参与构建。
+- `source.summaryLength`：文章缺少 `description` 时的列表/RSS/文章描述摘要兜底；`0` 表示不自动截取。
+- `source.enableRobotsTXT`：生成 `robots.txt`；关闭时输出全站禁止抓取规则。
+- `article.showAuthor`、`article.showDraftLabel`、`article.showEdit`、`article.sharingLinks`：文章作者信息、草稿标识、编辑入口和分享链接。`showEdit` 需要配置 `repository.contentEditUrl` 才会渲染。
+- `analytics.umami`、`analytics.plausible`、`analytics.fathom`：生产构建中按配置条件输出轻量统计脚本。
 
 ## 部分实现，但配置开关尚未完全接管行为
 
-- `article.showAuthor`、`article.showDraftLabel`、`article.showEdit`、`article.sharingLinks`：属于文章页已有信息架构的合理扩展，但当前尚未接入 UI。
-- `article.showViews`、`article.showLikes`、`article.showComments`、`list.showViews`、`list.showLikes`、`taxonomy.showViews`、`taxonomy.showLikes`、`term.showViews`、`term.showLikes`：需要 analytics、评论系统或后台数据源，不能只靠静态主题配置完成。
-- `analytics.*`：尚未选择并接入具体统计服务；应在确定 Umami/Plausible/Fathom 等服务后再实现。
+- `article.showViews`、`article.showLikes`、`list.showViews`、`list.showLikes`、`taxonomy.showViews`、`taxonomy.showLikes`、`term.showViews`、`term.showLikes`：需要 analytics API 或后台数据源，不能只靠静态主题配置完成。
+- `article.showComments`：评论功能暂不考虑实现。
 
 ## 未实现 / 路线图占位
 
-- `source.buildDrafts`、`source.buildFuture`：可接入内容过滤，控制草稿和未来日期文章是否参与构建。
-- `source.summaryLength`：可作为文章卡片摘要兜底生成策略。
-- `source.enableRobotsTXT`：可用于生成或关闭 `robots.txt`。
 - `rssnext.*`：尚未实现 RSSNext 集成；只有在确定目标服务和嵌入方式后再接入。
 
 ## 建议清理方向
