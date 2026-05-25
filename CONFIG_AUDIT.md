@@ -16,24 +16,28 @@
 - `theme.defaultAppearance`、`theme.autoSwitchAppearance`、`theme.header.layout`：初始主题策略、系统主题跟随、页头布局。
 - `features.search`、`features.codeCopy`、`features.imageZoom`、`features.imageOptimization`、`features.highlightCurrentMenuArea`、`features.smartToc`、`features.smartTocHideUnfocusedChildren`：搜索、代码复制、灯箱、图片优化、导航高亮和 TOC 行为开关。
 - `footer.showMenu`、`footer.showCopyright`、`footer.showThemeAttribution`、`footer.showAppearanceSwitcher`、`footer.showScrollToTop`：页脚菜单、版权、主题署名、主题切换和返回顶部开关。
+- `article.showDate`、`article.showDateUpdated`、`article.showHero`、`article.showBreadcrumbs`、`article.showPagination`、`article.invertPagination`、`article.showReadingTime`、`article.showTableOfContents`、`article.showTaxonomies`、`article.showWordCount`、`article.showZenMode`：文章页元信息、hero、面包屑、上下篇、TOC、分类标签与沉浸阅读按钮显示。
+- `list.showHero`、`list.showSummary`、`list.showCards`、`list.groupByYear`、`list.cardView`、`list.cardViewScreenWidth`：文章列表页标题区、摘要、卡片/归档列表、按年分组与卡片布局。
+- `taxonomy.showTermCount`、`taxonomy.showHero`、`taxonomy.cardView`：标签/分类/系列索引页标题区、术语数量和卡片布局。
+- `term.showHero`、`term.groupByYear`、`term.cardView`、`term.cardViewScreenWidth`：单个标签/分类/系列页标题区、按年分组和卡片布局。
+- `pagination.pagerSize`：文章列表、标签页、分类页和系列页分页。
+- `sitemap.changefreq`、`sitemap.priority`、`sitemap.excludedKinds`：sitemap 默认更新频率、优先级和 taxonomy/term 页面过滤。
+- `related.threshold`、`related.toLower`、`related.indices`：相关文章权重、阈值与大小写归一化。
+- `verification.google`、`verification.bing`、`verification.pinterest`、`verification.yandex`、`verification.fediverse`：搜索引擎/平台验证 meta 标签。
 
 ## 部分实现，但配置开关尚未完全接管行为
 
-当前无已知“部分实现但开关未接管”的字段。后续新增功能如果先放入配置但未完全接线，应先记录在本节。
+- `article.showAuthor`、`article.showDraftLabel`、`article.showEdit`、`article.sharingLinks`：属于文章页已有信息架构的合理扩展，但当前尚未接入 UI。
+- `article.showViews`、`article.showLikes`、`article.showComments`、`list.showViews`、`list.showLikes`、`taxonomy.showViews`、`taxonomy.showLikes`、`term.showViews`、`term.showLikes`：需要 analytics、评论系统或后台数据源，不能只靠静态主题配置完成。
+- `analytics.*`：尚未选择并接入具体统计服务；应在确定 Umami/Plausible/Fathom 等服务后再实现。
 
 ## 未实现 / 路线图占位
 
-- `source.*`：Hugo/Blowfish 风格兼容信息。Astro 内容加载实际由 `src/content.config.ts` 配置。
-- `article.*`：大多是 Blowfish 兼容项，覆盖文章日期、作者、hero、面包屑、分页、TOC、分享、评论、zen mode 等；当前文章布局基本是组件硬编码。
-- `list.*`、`taxonomy.*`、`term.*`：列表页/分类页/术语页展示开关；当前相关页面使用固定 Astro 组件。
-- `pagination.pagerSize`：当前尚未实现分页，列表页会一次性渲染全部文章/术语。
-- `taxonomies`：兼容命名映射；当前路由硬编码为 `tags`、`categories`、`series`。
-- `sitemap.*`：已启用 sitemap 集成，但这些字段尚未传递给 `@astrojs/sitemap`。
-- `related.*`：当前相关文章算法是 `src/lib/posts.ts` 中的小型本地实现，未消费这些权重配置。
-- `analytics.*`：没有渲染任何 analytics 脚本，也没有后台侧 analytics 接入。
-- `verification.*`：没有渲染搜索引擎/社交平台验证 meta 标签。
-- `rssnext.*`：尚未实现 RSSNext 集成。
+- `source.buildDrafts`、`source.buildFuture`：可接入内容过滤，控制草稿和未来日期文章是否参与构建。
+- `source.summaryLength`：可作为文章卡片摘要兜底生成策略。
+- `source.enableRobotsTXT`：可用于生成或关闭 `robots.txt`。
+- `rssnext.*`：尚未实现 RSSNext 集成；只有在确定目标服务和嵌入方式后再接入。
 
 ## 建议清理方向
 
-保留已实现字段作为当前主题公开 API；将兼容/路线图字段移入明确的 `planned` 分组或暂时移除，避免配置看起来可用、实际却不影响渲染。
+保留已实现字段作为当前主题公开 API。Hugo/Blowfish 兼容字段、动态 taxonomy 命名映射、sitemap 文件名覆盖、相关文章 fragment 引用等如果没有明确产品需求，不再作为“待实现项”追踪，避免为了接配置而接配置。
