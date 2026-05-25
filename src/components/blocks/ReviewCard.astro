@@ -1,9 +1,12 @@
 ---
+import type { ImageMetadata } from "astro";
+import OptimizedImage from "../OptimizedImage.astro";
+
 interface Props {
   title: string;
   href?: string;
   score?: string | number;
-  poster?: string;
+  poster?: string | ImageMetadata;
   posterAlt?: string;
   meta?: string;
   accent?: string;
@@ -17,7 +20,7 @@ const style = accent ? { "--review-accent": accent } : undefined;
   {
     poster && (
       <a class="review-card__poster" href={href} target={href?.startsWith("http") ? "_blank" : undefined} rel={href?.startsWith("http") ? "noopener noreferrer" : undefined}>
-        <img src={poster} alt={posterAlt} loading="lazy" />
+        <OptimizedImage src={poster} alt={posterAlt} loading="lazy" decoding="async" widths={[240, 360, 520]} sizes="(min-width: 680px) 180px, 100vw" />
       </a>
     )
   }

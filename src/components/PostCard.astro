@@ -1,5 +1,6 @@
 ---
 import type { PostEntry } from "../lib/posts";
+import OptimizedImage from "./OptimizedImage.astro";
 import {
   formatDate,
   getPostImage,
@@ -26,20 +27,32 @@ const coverTransitionName = getPostTransitionName(post, "cover");
 const titleTransitionName = getPostTransitionName(post, "title");
 ---
 
-<article class:list={["post-card", { compact }]} style={style}>
+<article
+  class:list={["post-card", { compact }]}
+  style={style}
+  data-post-card
+  data-post-transition-cover={coverTransitionName}
+  data-post-transition-title={titleTransitionName}
+>
   <a href={url} class="post-card-link" aria-label={`Read ${post.data.title}`}>
     <div class="post-card-media">
-      <img
-        src={image}
-        alt={post.data.media?.alt || post.data.title}
-        loading="lazy"
-        style={{ objectPosition: imagePosition }}
-        transition:name={coverTransitionName}
-      />
+      <div class="post-cover-transition" data-post-transition-cover={coverTransitionName} transition:name={coverTransitionName}>
+        <OptimizedImage
+          src={image}
+          alt={post.data.media?.alt || post.data.title}
+          loading="lazy"
+          decoding="async"
+          widths={[360, 540, 720, 960]}
+          sizes={compact ? "(min-width: 900px) 33vw, 50vw" : "(min-width: 900px) 360px, 100vw"}
+          fit="cover"
+          position={imagePosition}
+          style={{ objectPosition: imagePosition }}
+        />
+      </div>
     </div>
     <div class="post-card-body">
       <div class="eyebrow">{getSectionLabel(post.data.section)} · {formatDate(post.data.date)}</div>
-      <h2 transition:name={titleTransitionName}>{post.data.title}</h2>
+      <h2 class="post-title-transition" data-post-transition-title={titleTransitionName} transition:name={titleTransitionName}>{post.data.title}</h2>
       {post.data.description && <p>{post.data.description}</p>}
       <div class="meta-row">
         <span>{stats}</span>

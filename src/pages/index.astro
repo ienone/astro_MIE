@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Icon from "../components/Icon.astro";
+import OptimizedImage from "../components/OptimizedImage.astro";
 import PostList from "../components/PostList.astro";
 import { getAllPosts, getTerms } from "../lib/posts";
 import { isExternalLink, siteConfig } from "../lib/site";
@@ -17,10 +18,10 @@ function getSocialText(link: { label: string; displayLabel?: string }) {
 
 <BaseLayout>
   <section class="home-hero">
-    <img class="home-hero-bg" src={siteConfig.assets.homeBackground} alt="" loading="eager" />
+    <OptimizedImage class="home-hero-bg" src={siteConfig.assets.homeBackground} alt="" loading="eager" decoding="async" fetchpriority="high" widths={[960, 1440, 1920]} sizes="100vw" fit="cover" />
     <div class="home-hero-scrim"></div>
     <div class="home-hero-content">
-      {siteConfig.author.avatar && <img class="avatar" src={siteConfig.author.avatar} alt="" width="110" height="110" />}
+      {siteConfig.author.avatar && <OptimizedImage class="avatar" src={siteConfig.author.avatar} alt="" width={110} height={110} decoding="async" />}
       <p class="eyebrow">{homepage.eyebrow ?? "Personal static blog"}</p>
       <h1>{siteConfig.name}</h1>
       <p>{siteConfig.author.headline}</p>

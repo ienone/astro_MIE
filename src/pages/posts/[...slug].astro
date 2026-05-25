@@ -1,6 +1,7 @@
 ---
 import { render } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import OptimizedImage from "../../components/OptimizedImage.astro";
 import PostCard from "../../components/PostCard.astro";
 import Toc from "../../components/Toc.astro";
 import {
@@ -55,10 +56,10 @@ const seriesPosts = seriesName
   <article class="article-shell" style={articleStyle} data-article-shell data-pagefind-body>
     <div class="reading-progress" data-reading-progress aria-hidden="true"></div>
     <header class="article-hero">
-      {post.data.media?.background && <img class="article-background" src={post.data.media.background} alt="" />}
+      {post.data.media?.background && <OptimizedImage class="article-background" src={post.data.media.background} alt="" loading="lazy" decoding="async" fetchpriority="low" widths={[960, 1440, 1920]} sizes="100vw" fit="cover" />}
       <div class="article-hero-content">
         <a class="breadcrumb" href="/posts/">Posts</a>
-        <h1 data-pagefind-meta="title" transition:name={titleTransitionName}>{post.data.title}</h1>
+        <h1 class="post-title-transition" data-post-transition-title={titleTransitionName} data-pagefind-meta="title" transition:name={titleTransitionName}>{post.data.title}</h1>
         {post.data.description && <p class="article-description" data-pagefind-meta="description">{post.data.description}</p>}
         <div class="article-meta">
           <span>{formatDate(post.data.date)}</span>
@@ -73,13 +74,20 @@ const seriesPosts = seriesName
       </div>
       {image && (
         <figure class="article-cover">
-          <img
-            src={image}
-            alt={post.data.media?.alt || post.data.title}
-            loading="eager"
-            style={{ objectPosition: imagePosition }}
-            transition:name={coverTransitionName}
-          />
+          <div class="post-cover-transition" data-post-transition-cover={coverTransitionName} transition:name={coverTransitionName}>
+            <OptimizedImage
+              src={image}
+              alt={post.data.media?.alt || post.data.title}
+              loading="eager"
+              decoding="async"
+              fetchpriority="high"
+              widths={[640, 960, 1280, 1600]}
+              sizes="(min-width: 980px) 420px, 100vw"
+              fit="cover"
+              position={imagePosition}
+              style={{ objectPosition: imagePosition }}
+            />
+          </div>
         </figure>
       )}
     </header>
