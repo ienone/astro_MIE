@@ -34,7 +34,6 @@ export default defineConfig({
     mdx(),
     sitemap({
       changefreq: sitemapConfig.changefreq,
-      filename: sitemapConfig.filename,
       priority: sitemapConfig.priority,
       filter: (page) => !excludedSitemapKinds.has(getSitemapKind(page)),
       serialize: (item) => ({

@@ -1,24 +1,29 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PageHeader from "../../components/PageHeader.astro";
+import PaginationNav from "../../components/PaginationNav.astro";
 import PostList from "../../components/PostList.astro";
-import { getAllPosts } from "../../lib/posts";
-import { siteConfig } from "../../lib/site";
+import { getAllPosts, getPageItems, getTotalPages } from "../../lib/posts";
+import { getPagerSize, siteConfig } from "../../lib/site";
 
 const posts = await getAllPosts();
 const listConfig = siteConfig.list ?? {};
+const pageSize = getPagerSize();
+const pagePosts = getPageItems(posts, 1, pageSize);
+const totalPages = getTotalPages(posts, pageSize);
 ---
 
 <BaseLayout title="All posts" description="Browse all Markdown and MDX posts by publication date.">
   {listConfig.showHero !== false && <PageHeader eyebrow="Posts" title="All posts" description="Browse content in reverse chronological order." />}
   <section class="content-section">
     <PostList
-      posts={posts}
+      posts={pagePosts}
       compact={listConfig.cardView === false}
       showSummary={listConfig.showSummary !== false}
       showCards={listConfig.showCards !== false}
       groupByYear={listConfig.groupByYear === true}
       cardViewScreenWidth={listConfig.cardViewScreenWidth === true}
     />
+    <PaginationNav currentPage={1} totalPages={totalPages} basePath="/posts" />
   </section>
 </BaseLayout>

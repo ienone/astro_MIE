@@ -1,0 +1,39 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import PageHeader from "../../../components/PageHeader.astro";
+import PaginationNav from "../../../components/PaginationNav.astro";
+import PostList from "../../../components/PostList.astro";
+import { getAllPosts, getPageItems, getTotalPages } from "../../../lib/posts";
+import { getPagerSize, siteConfig } from "../../../lib/site";
+
+export async function getStaticPaths() {
+  const posts = await getAllPosts();
+  const pageSize = getPagerSize();
+  const totalPages = getTotalPages(posts, pageSize);
+
+  return Array.from({ length: Math.max(0, totalPages - 1) }, (_, index) => {
+    const page = index + 2;
+
+    return { params: { page: String(page) }, props: { page, posts, totalPages } };
+  });
+}
+
+const { page, posts, totalPages } = Astro.props;
+const listConfig = siteConfig.list ?? {};
+const pagePosts = getPageItems(posts, page, getPagerSize());
+---
+
+<BaseLayout title={`All posts · Page ${page}`} description="Browse all Markdown and MDX posts by publication date.">
+  {listConfig.showHero !== false && <PageHeader eyebrow="Posts" title="All posts" description={`Browse content in reverse chronological order. Page ${page}.`} />}
+  <section class="content-section">
+    <PostList
+      posts={pagePosts}
+      compact={listConfig.cardView === false}
+      showSummary={listConfig.showSummary !== false}
+      showCards={listConfig.showCards !== false}
+      groupByYear={listConfig.groupByYear === true}
+      cardViewScreenWidth={listConfig.cardViewScreenWidth === true}
+    />
+    <PaginationNav currentPage={page} totalPages={totalPages} basePath="/posts" />
+  </section>
+</BaseLayout>

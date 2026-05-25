@@ -1,0 +1,36 @@
+---
+import BaseLayout from "../../../../layouts/BaseLayout.astro";
+import PageHeader from "../../../../components/PageHeader.astro";
+import PaginationNav from "../../../../components/PaginationNav.astro";
+import PostList from "../../../../components/PostList.astro";
+import { getAllPosts, getPageItems, getPostsByTermSlug, getTerms, getTotalPages } from "../../../../lib/posts";
+import { getPagerSize, siteConfig } from "../../../../lib/site";
+
+export async function getStaticPaths() {
+  const posts = await getAllPosts();
+  const pageSize = getPagerSize();
+
+  return getTerms(posts, "categories").flatMap((item) => {
+    const termPosts = getPostsByTermSlug(posts, "categories", item.slug);
+    const totalPages = getTotalPages(termPosts, pageSize);
+
+    return Array.from({ length: Math.max(0, totalPages - 1) }, (_, index) => {
+      const page = index + 2;
+
+      return { params: { slug: item.slug, page: String(page) }, props: { term: item.term, posts: termPosts, page, totalPages, slug: item.slug } };
+    });
+  });
+}
+
+const { term, posts, page, totalPages, slug } = Astro.props;
+const termConfig = siteConfig.term ?? {};
+const pagePosts = getPageItems(posts, page, getPagerSize());
+---
+
+<BaseLayout title={`Category: ${term} · Page ${page}`} description={`Posts in the ${term} category.`}>
+  {termConfig.showHero !== false && <PageHeader eyebrow="Category" title={term} description={`${posts.length} posts. Page ${page}.`} />}
+  <section class="content-section">
+    <PostList posts={pagePosts} compact={termConfig.cardView !== true} groupByYear={termConfig.groupByYear === true} cardViewScreenWidth={termConfig.cardViewScreenWidth === true} />
+    <PaginationNav currentPage={page} totalPages={totalPages} basePath={`/categories/${slug}`} />
+  </section>
+</BaseLayout>

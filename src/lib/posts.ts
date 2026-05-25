@@ -171,6 +171,14 @@ export function getArchiveGroups(posts: PostEntry[]) {
   return [...groups.entries()].sort((a, b) => b[0] - a[0]);
 }
 
+export function getTotalPages(items: unknown[], pageSize: number) {
+  return Math.max(1, Math.ceil(items.length / pageSize));
+}
+
+export function getPageItems<T>(items: T[], currentPage: number, pageSize: number) {
+  return items.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+}
+
 function normalizeRelatedTerm(value: string, toLower: boolean) {
   const normalized = value.trim();
 

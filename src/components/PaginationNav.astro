@@ -1,0 +1,32 @@
+---
+interface Props {
+  currentPage: number;
+  totalPages: number;
+  basePath: string;
+}
+
+const { currentPage, totalPages, basePath } = Astro.props;
+const normalizedBasePath = `/${basePath.replace(/^\/+|\/+$/g, "")}`;
+const getPageHref = (page: number) => (page <= 1 ? `${normalizedBasePath}/` : `${normalizedBasePath}/page/${page}/`);
+const pages = Array.from({ length: totalPages }, (_, index) => index + 1);
+---
+
+{
+  totalPages > 1 && (
+    <nav class="pagination-nav" aria-label="Pagination">
+      <a class:list={["pagination-link", { disabled: currentPage <= 1 }]} href={getPageHref(currentPage - 1)} aria-disabled={currentPage <= 1}>
+        上一页
+      </a>
+      <div class="pagination-pages">
+        {pages.map((page) => (
+          <a class:list={["pagination-page", { current: page === currentPage }]} href={getPageHref(page)} aria-current={page === currentPage ? "page" : undefined}>
+            {page}
+          </a>
+        ))}
+      </div>
+      <a class:list={["pagination-link", { disabled: currentPage >= totalPages }]} href={getPageHref(currentPage + 1)} aria-disabled={currentPage >= totalPages}>
+        下一页
+      </a>
+    </nav>
+  )
+}
