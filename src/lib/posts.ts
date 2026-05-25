@@ -34,6 +34,14 @@ export function getPostImage(post: PostEntry) {
   );
 }
 
+export function getPostBackgroundImage(post: PostEntry) {
+  return post.data.media?.background || siteConfig.assets.defaultBackground || siteConfig.assets.defaultFeatured;
+}
+
+export function getPostThemeColor(post: PostEntry) {
+  return post.data.themeColor || siteConfig.assets.defaultThemeColor;
+}
+
 export function getPostImagePosition(post: PostEntry) {
   const focalPoint = post.data.media?.focalPoint;
   if (!focalPoint) return "center";
@@ -44,12 +52,20 @@ export function getPostImagePosition(post: PostEntry) {
   return `${x}% ${y}%`;
 }
 
-export function getPostTransitionName(post: PostEntry, part: "cover" | "title") {
-  const slug = getPostSlug(post)
+function getPostTransitionSlug(post: PostEntry) {
+  return getPostSlug(post)
     .normalize("NFKD")
     .replace(/[^a-zA-Z0-9_-]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .toLowerCase();
+}
+
+export function getPostTransitionSetName(post: PostEntry) {
+  return `post-${getPostTransitionSlug(post) || "entry"}`;
+}
+
+export function getPostTransitionName(post: PostEntry, part: "cover" | "title") {
+  const slug = getPostTransitionSlug(post);
 
   return `post-${part}-${slug || "entry"}`;
 }

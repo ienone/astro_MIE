@@ -5,6 +5,8 @@ import {
   formatDate,
   getPostImage,
   getPostImagePosition,
+  getPostThemeColor,
+  getPostTransitionSetName,
   getPostTransitionName,
   getPostUrl,
   readingTime,
@@ -21,8 +23,9 @@ const { post, compact = false } = Astro.props;
 const image = getPostImage(post);
 const url = getPostUrl(post);
 const stats = `${wordCount(post.body).toLocaleString("en-US")} words · ${readingTime(post.body)}`;
-const style = { "--post-theme": post.data.themeColor };
+const style = { "--post-theme": getPostThemeColor(post) };
 const imagePosition = getPostImagePosition(post);
+const transitionSetName = getPostTransitionSetName(post);
 const coverTransitionName = getPostTransitionName(post, "cover");
 const titleTransitionName = getPostTransitionName(post, "title");
 ---
@@ -33,10 +36,25 @@ const titleTransitionName = getPostTransitionName(post, "title");
   data-post-card
   data-post-transition-cover={coverTransitionName}
   data-post-transition-title={titleTransitionName}
+  data-route-shared-set={transitionSetName}
+  data-route-shared-context="card"
+  data-route-shared-target-context="article"
 >
   <a href={url} class="post-card-link" aria-label={`Read ${post.data.title}`}>
     <div class="post-card-media">
-      <div class="post-cover-transition" data-post-transition-cover={coverTransitionName} transition:name={coverTransitionName}>
+      <div
+        class="post-cover-transition"
+        data-post-transition-cover={coverTransitionName}
+        data-route-shared
+        data-route-shared-set={transitionSetName}
+        data-route-shared-name={coverTransitionName}
+        data-route-shared-group="post-cover"
+        data-route-shared-context="card"
+        data-route-shared-target-context="article"
+        data-route-shared-exit="fade"
+        data-route-shared-suppress-visual="true"
+        transition:name={coverTransitionName}
+      >
         <OptimizedImage
           src={image}
           alt={post.data.media?.alt || post.data.title}
@@ -52,7 +70,21 @@ const titleTransitionName = getPostTransitionName(post, "title");
     </div>
     <div class="post-card-body">
       <div class="eyebrow">{getSectionLabel(post.data.section)} · {formatDate(post.data.date)}</div>
-      <h2 class="post-title-transition" data-post-transition-title={titleTransitionName} transition:name={titleTransitionName}>{post.data.title}</h2>
+      <h2
+        class="post-title-transition"
+        data-post-transition-title={titleTransitionName}
+        data-route-shared
+        data-route-shared-set={transitionSetName}
+        data-route-shared-name={titleTransitionName}
+        data-route-shared-group="post-title"
+        data-route-shared-context="card"
+        data-route-shared-target-context="article"
+        data-route-shared-exit="fade"
+        data-route-shared-suppress-visual="true"
+        transition:name={titleTransitionName}
+      >
+        {post.data.title}
+      </h2>
       {post.data.description && <p>{post.data.description}</p>}
       <div class="meta-row">
         <span>{stats}</span>

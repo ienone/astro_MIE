@@ -19,40 +19,9 @@ import Icon from "./Icon.astro";
 <script>
   // @ts-nocheck
   const htmlEntities = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" };
-  const searchFieldTransitionName = "site-search-field";
   let previousFocus;
 
   const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) => htmlEntities[char] ?? char);
-
-  const prefersReducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  function resetSearchFieldTransitionName(input, pageInput) {
-    if (input instanceof HTMLInputElement) {
-      input.style.viewTransitionName = "";
-      input.style.contain = "";
-    }
-
-    if (pageInput instanceof HTMLInputElement) {
-      pageInput.style.viewTransitionName = "";
-    }
-  }
-
-  function armSearchPageTransition(event) {
-    const link = event.currentTarget;
-    const input = document.querySelector("[data-search-transition-source]");
-    const pageInput = document.querySelector("[data-search-page-input]");
-    if (!(link instanceof HTMLAnchorElement) || !(input instanceof HTMLInputElement) || prefersReducedMotion()) return;
-
-    input.style.viewTransitionName = searchFieldTransitionName;
-    input.style.contain = "layout paint style";
-
-    // If the overlay is opened on /search/, avoid two old-page elements sharing
-    // the same view-transition-name while keeping the destination page input as
-    // the morph target after Astro swaps the page.
-    if (pageInput instanceof HTMLInputElement) pageInput.style.viewTransitionName = "none";
-
-    window.setTimeout(() => resetSearchFieldTransitionName(input, pageInput), 1200);
-  }
 
   async function ensurePagefind() {
     if (!window.__astroMiePagefind) {
@@ -189,7 +158,6 @@ import Icon from "./Icon.astro";
 
     if (dialog instanceof HTMLDialogElement && dialog.dataset.searchDialogReady !== "true") {
       dialog.dataset.searchDialogReady = "true";
-      dialog.querySelector("[data-search-page-link]")?.addEventListener("click", armSearchPageTransition);
       dialog.addEventListener("click", (event) => {
         if (event.target === dialog) closeSearch();
       });

@@ -1,36 +1,53 @@
 <script is:inline>
+  // Shared transition protocol:
+  // set groups related parts, context/target-context define source and destination,
+  // name/group map to View Transition names/classes, runtime lets JS opt elements in.
   function setupRouteTransitionState() {
     let routeTransitionActive = false;
     let clearTimer;
-    let routeCardTransition = "";
-    let routeCoverName = "";
-    let routeTitleName = "";
+    let routeSharedTransition = "";
+    let activeSharedSet = "";
+    let activeSourceContext = "";
+    let activeTargetContext = "";
     let pendingPreparationEvent;
     const routeMarkedElements = new Set();
+    const routeSharedStyleProperties = new Set();
 
     function setRouteState(state) {
       window.clearTimeout(clearTimer);
       document.documentElement.dataset.routeTransition = state;
     }
 
-    function setRouteCardTransition(value) {
-      routeCardTransition = value;
+    function setRouteSharedTransition(value) {
+      routeSharedTransition = value;
       if (value) {
-        document.documentElement.dataset.routeCardTransition = value;
+        document.documentElement.dataset.routeSharedTransition = value;
       } else {
-        delete document.documentElement.dataset.routeCardTransition;
+        delete document.documentElement.dataset.routeSharedTransition;
       }
     }
 
-    function resetRouteCardTransition() {
+    function clearRouteSharedStyleProperties() {
+      routeSharedStyleProperties.forEach((property) => document.documentElement.style.removeProperty(property));
+      routeSharedStyleProperties.clear();
+    }
+
+    function resetRouteSharedTransition() {
       routeMarkedElements.forEach((element) => {
-        if (element instanceof HTMLElement) delete element.dataset.routeSource;
+        if (!(element instanceof HTMLElement)) return;
+        delete element.dataset.routeSharedActive;
+        if (element.dataset.routeSharedRuntime === "true") {
+          element.style.viewTransitionName = "";
+          if (element.dataset.routeSharedContain) element.style.contain = "";
+        }
       });
       routeMarkedElements.clear();
+      clearRouteSharedStyleProperties();
       pendingPreparationEvent = undefined;
-      setRouteCardTransition("");
-      routeCoverName = "";
-      routeTitleName = "";
+      setRouteSharedTransition("");
+      activeSharedSet = "";
+      activeSourceContext = "";
+      activeTargetContext = "";
     }
 
     function clearRouteState() {
@@ -38,115 +55,217 @@
       clearTimer = window.setTimeout(() => {
         if (routeTransitionActive) return;
         delete document.documentElement.dataset.routeTransition;
-        resetRouteCardTransition();
+        resetRouteSharedTransition();
       }, 720);
+    }
+
+    function escapeAttributeValue(value) {
+      return String(value).replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+    }
+
+    function normalizePropertyPart(value) {
+      return String(value).replace(/[^a-zA-Z0-9_-]/g, "-");
+    }
+
+    function setRouteSharedStyleProperty(property, value) {
+      if (!value) return;
+      document.documentElement.style.setProperty(property, value);
+      routeSharedStyleProperties.add(property);
+    }
+
+    function applySharedMotionOptions(element) {
+      const group = element.dataset.routeSharedGroup || element.dataset.routeSharedName;
+      if (!group) return;
+
+      const prefix = `--route-shared-${normalizePropertyPart(group)}`;
+      const options = {
+        duration: "duration",
+        backDuration: "back-duration",
+        ease: "ease",
+        backEase: "back-ease",
+        z: "z"
+      };
+
+      Object.entries(options).forEach(([datasetKey, cssKey]) => {
+        setRouteSharedStyleProperty(`${prefix}-${cssKey}`, element.dataset[`routeShared${datasetKey[0].toUpperCase()}${datasetKey.slice(1)}`]);
+      });
     }
 
     function markRouteElement(element) {
       if (!(element instanceof HTMLElement)) return;
-      element.dataset.routeSource = "true";
+      element.dataset.routeSharedActive = "true";
+      if (element.dataset.routeSharedRuntime === "true" && element.dataset.routeSharedName) {
+        element.style.viewTransitionName = element.dataset.routeSharedName;
+        if (element.dataset.routeSharedContain) element.style.contain = element.dataset.routeSharedContain;
+      }
+      applySharedMotionOptions(element);
       routeMarkedElements.add(element);
     }
 
-    function getCurrentArticleTransitionNames() {
-      const cover = document.querySelector(".article-cover [data-post-transition-cover]");
-      const title = document.querySelector(".article-hero [data-post-transition-title]");
-      return {
-        coverName: cover instanceof HTMLElement ? cover.dataset.postTransitionCover || "" : "",
-        titleName: title instanceof HTMLElement ? title.dataset.postTransitionTitle || "" : ""
-      };
+    function setDatasetIfMissing(element, key, value) {
+      if (!(element instanceof HTMLElement) || element.dataset[key]) return;
+      element.dataset[key] = value;
     }
 
-    function hasPostCover(root) {
-      return Boolean(root.querySelector(".post-cover-transition"));
-    }
-
-    function markRouteCard(card, coverName, titleName) {
-      if (!(card instanceof HTMLElement)) return;
-      markRouteElement(card);
-      if (coverName) markRouteElement(card.querySelector(`.post-cover-transition[data-post-transition-cover="${coverName}"]`));
-      if (titleName) markRouteElement(card.querySelector(`.post-title-transition[data-post-transition-title="${titleName}"]`));
-    }
-
-    function markRouteTarget(root, coverName, titleName) {
-      if (!coverName && !titleName) return;
-      const articleCover = coverName
-        ? root.querySelector(`.article-cover .post-cover-transition[data-post-transition-cover="${coverName}"]`)
-        : null;
-      const articleTitle = titleName
-        ? root.querySelector(`.article-hero .post-title-transition[data-post-transition-title="${titleName}"]`)
-        : null;
-
-      if (articleCover || articleTitle) {
-        markRouteElement(articleCover);
-        markRouteElement(articleTitle);
-        return;
+    function upgradeRouteSharedAliases(root) {
+      const searchLink = root.querySelector("[data-search-page-link]");
+      if (searchLink instanceof HTMLElement) {
+        setDatasetIfMissing(searchLink, "routeSharedTrigger", "search-field");
+        setDatasetIfMissing(searchLink, "routeSharedSourceContext", "search-overlay");
+        setDatasetIfMissing(searchLink, "routeSharedTargetContext", "search-page");
       }
 
-      const cardSelector = coverName
-        ? `[data-post-card][data-post-transition-cover="${coverName}"]`
-        : `[data-post-card][data-post-transition-title="${titleName}"]`;
-      markRouteCard(root.querySelector(cardSelector), coverName, titleName);
+      const overlayInput = root.querySelector("[data-search-transition-source]");
+      if (overlayInput instanceof HTMLElement) {
+        overlayInput.dataset.routeShared = "";
+        setDatasetIfMissing(overlayInput, "routeSharedSet", "search-field");
+        setDatasetIfMissing(overlayInput, "routeSharedName", "site-search-field");
+        setDatasetIfMissing(overlayInput, "routeSharedGroup", "site-search-field");
+        setDatasetIfMissing(overlayInput, "routeSharedContext", "search-overlay");
+        setDatasetIfMissing(overlayInput, "routeSharedTargetContext", "search-page");
+        setDatasetIfMissing(overlayInput, "routeSharedRuntime", "true");
+        setDatasetIfMissing(overlayInput, "routeSharedContain", "layout paint style");
+      }
+
+      const pageInput = root.querySelector("[data-search-page-input]");
+      if (pageInput instanceof HTMLElement) {
+        pageInput.dataset.routeShared = "";
+        setDatasetIfMissing(pageInput, "routeSharedSet", "search-field");
+        setDatasetIfMissing(pageInput, "routeSharedName", "site-search-field");
+        setDatasetIfMissing(pageInput, "routeSharedGroup", "site-search-field");
+        setDatasetIfMissing(pageInput, "routeSharedContext", "search-page");
+        setDatasetIfMissing(pageInput, "routeSharedTargetContext", "search-overlay");
+        setDatasetIfMissing(pageInput, "routeSharedRuntime", "true");
+        setDatasetIfMissing(pageInput, "routeSharedContain", "layout paint style");
+      }
     }
 
-    function hasRouteTarget(root, coverName, titleName) {
-      if (!coverName && !titleName) return false;
-      const articleCover = coverName
-        ? root.querySelector(`.article-cover .post-cover-transition[data-post-transition-cover="${coverName}"]`)
-        : null;
-      const articleTitle = titleName
-        ? root.querySelector(`.article-hero .post-title-transition[data-post-transition-title="${titleName}"]`)
-        : null;
-      if (articleCover || articleTitle) return true;
+    function getSharedItems(root, set, context) {
+      if (!set) return [];
+      let selector = `[data-route-shared][data-route-shared-set="${escapeAttributeValue(set)}"]`;
+      if (context) selector += `[data-route-shared-context="${escapeAttributeValue(context)}"]`;
+      return [...root.querySelectorAll(selector)].filter((element) => element instanceof HTMLElement);
+    }
 
-      const cardSelector = coverName
-        ? `[data-post-card][data-post-transition-cover="${coverName}"]`
-        : `[data-post-card][data-post-transition-title="${titleName}"]`;
-      return Boolean(root.querySelector(cardSelector));
+    function markSharedItems(root, set, context) {
+      const items = getSharedItems(root, set, context);
+      items.forEach(markRouteElement);
+      return items.length;
+    }
+
+    function hasExitShared(root) {
+      return Boolean(root.querySelector("[data-route-shared][data-route-shared-exit]"));
     }
 
     function unmarkRouteElements() {
       routeMarkedElements.forEach((element) => {
-        if (element instanceof HTMLElement) delete element.dataset.routeSource;
+        if (!(element instanceof HTMLElement)) return;
+        delete element.dataset.routeSharedActive;
+        if (element.dataset.routeSharedRuntime === "true") {
+          element.style.viewTransitionName = "";
+          if (element.dataset.routeSharedContain) element.style.contain = "";
+        }
       });
       routeMarkedElements.clear();
+      clearRouteSharedStyleProperties();
     }
 
-    function resolveRoutePostTransition() {
+    function getRouteSharedConfig(sourceElement, direction) {
+      const trigger = sourceElement instanceof Element ? sourceElement.closest("[data-route-shared-trigger]") : null;
+      if (trigger instanceof HTMLElement) {
+        const set = trigger.dataset.routeSharedTrigger || trigger.dataset.routeSharedSet || "";
+        return {
+          set,
+          sourceContext: trigger.dataset.routeSharedSourceContext || "",
+          targetContext: trigger.dataset.routeSharedTargetContext || "",
+          transition: trigger.dataset.routeSharedTransition || "forward"
+        };
+      }
+
+      const sourceScope = sourceElement instanceof Element ? sourceElement.closest("[data-route-shared-set][data-route-shared-context]") : null;
+      if (sourceScope instanceof HTMLElement) {
+        const sourceContext = sourceScope.dataset.routeSharedContext || "";
+        return {
+          set: sourceScope.dataset.routeSharedSet || "",
+          sourceContext,
+          targetContext: sourceScope.dataset.routeSharedTargetContext || "",
+          transition: sourceScope.dataset.routeSharedTransition || (sourceContext === "article" ? "back" : "forward")
+        };
+      }
+
+      if (direction === "back") {
+        const backScope = document.querySelector("[data-route-shared-default-back][data-route-shared-set][data-route-shared-context]");
+        if (backScope instanceof HTMLElement) {
+          const sourceContext = backScope.dataset.routeSharedContext || "";
+          return {
+            set: backScope.dataset.routeSharedSet || "",
+            sourceContext,
+            targetContext: backScope.dataset.routeSharedTargetContext || "",
+            transition: backScope.dataset.routeSharedTransition || "back"
+          };
+        }
+      }
+    }
+
+    function activateSharedRoute(config) {
+      if (!config?.set) return false;
+
+      activeSharedSet = config.set;
+      activeSourceContext = config.sourceContext;
+      activeTargetContext = config.targetContext;
+      setRouteSharedTransition(config.transition || "forward");
+      return markSharedItems(document, activeSharedSet, activeSourceContext) > 0;
+    }
+
+    function activateDefaultSharedRoute(newDocument) {
+      const scopes = [
+        ...document.querySelectorAll("[data-route-shared-default-source][data-route-shared-set][data-route-shared-context]"),
+        ...document.querySelectorAll("[data-route-shared-default-back][data-route-shared-set][data-route-shared-context]")
+      ];
+
+      for (const scope of scopes) {
+        if (!(scope instanceof HTMLElement)) continue;
+        const set = scope.dataset.routeSharedSet || "";
+        const sourceContext = scope.dataset.routeSharedContext || "";
+        const targetContext = scope.dataset.routeSharedTargetContext || "";
+        if (!set || !targetContext || !getSharedItems(newDocument, set, targetContext).length) continue;
+
+        return activateSharedRoute({
+          set,
+          sourceContext,
+          targetContext,
+          transition: scope.dataset.routeSharedTransition || (sourceContext === "article" ? "back" : "forward")
+        });
+      }
+
+      return false;
+    }
+
+    function resolveRouteSharedTransition() {
       const newDocument = pendingPreparationEvent?.newDocument;
       if (!newDocument) return;
+      upgradeRouteSharedAliases(newDocument);
 
-      const wantsSharedTransition = routeCardTransition === "forward" || routeCardTransition === "back";
-      if (wantsSharedTransition && hasRouteTarget(newDocument, routeCoverName, routeTitleName)) return;
+      if (!activeSharedSet) activateDefaultSharedRoute(newDocument);
+
+      if (activeSharedSet && markSharedItems(newDocument, activeSharedSet, activeTargetContext) > 0) return;
 
       unmarkRouteElements();
-      routeCoverName = "";
-      routeTitleName = "";
-      setRouteCardTransition(hasPostCover(document) && !hasPostCover(newDocument) ? "exit" : "suppress");
+      activeSharedSet = "";
+      activeSourceContext = "";
+      activeTargetContext = "";
+      setRouteSharedTransition(hasExitShared(document) && !hasExitShared(newDocument) ? "exit" : "suppress");
     }
 
     document.addEventListener("astro:before-preparation", (event) => {
       routeTransitionActive = true;
-      resetRouteCardTransition();
+      resetRouteSharedTransition();
+      upgradeRouteSharedAliases(document);
       pendingPreparationEvent = event;
-      setRouteCardTransition("suppress");
+      setRouteSharedTransition("suppress");
 
       const sourceElement = event.sourceElement instanceof Element ? event.sourceElement : null;
-      const sourceCard = sourceElement?.closest("[data-post-card]");
-      if (sourceCard instanceof HTMLElement && sourceCard.dataset.postTransitionCover) {
-        setRouteCardTransition("forward");
-        routeCoverName = sourceCard.dataset.postTransitionCover;
-        routeTitleName = sourceCard.dataset.postTransitionTitle || "";
-        markRouteCard(sourceCard, routeCoverName, routeTitleName);
-      } else {
-        const articleTransition = getCurrentArticleTransitionNames();
-        if (articleTransition.coverName && event.direction === "back") {
-          setRouteCardTransition("back");
-          routeCoverName = articleTransition.coverName;
-          routeTitleName = articleTransition.titleName;
-          markRouteTarget(document, routeCoverName, routeTitleName);
-        }
-      }
+      activateSharedRoute(getRouteSharedConfig(sourceElement, event.direction));
 
       setRouteState("loading");
       event.signal?.addEventListener(
@@ -161,16 +280,13 @@
     });
 
     document.addEventListener("astro:after-preparation", () => {
-      resolveRoutePostTransition();
+      resolveRouteSharedTransition();
       if (routeTransitionActive) setRouteState("ready");
     });
 
     document.addEventListener("astro:before-swap", (event) => {
       if (routeTransitionActive) setRouteState("swapping");
-      if (routeCardTransition) event.newDocument.documentElement.dataset.routeCardTransition = routeCardTransition;
-      if (!routeCoverName || routeCardTransition === "suppress" || routeCardTransition === "exit") return;
-
-      markRouteTarget(event.newDocument, routeCoverName, routeTitleName);
+      if (routeSharedTransition) event.newDocument.documentElement.dataset.routeSharedTransition = routeSharedTransition;
     });
 
     document.addEventListener("astro:after-swap", () => {
@@ -219,6 +335,56 @@
       element.dataset.reveal = "ready";
 
       if (!revealImmediately) window.__astroMieRevealObserver?.observe(element);
+    });
+  }
+
+  function setupArticleTocToggle() {
+    const layout = document.querySelector("[data-article-layout]");
+    const toggle = document.querySelector("[data-toc-toggle]");
+    const label = document.querySelector("[data-toc-toggle-label]");
+    const storageKey = "astro-mie-toc-hidden";
+
+    if (!(layout instanceof HTMLElement)) return;
+
+    if (layout.dataset.tocEnabled !== "true") {
+      layout.dataset.tocState = "disabled";
+      return;
+    }
+
+    function readStoredState() {
+      try {
+        return window.localStorage.getItem(storageKey) === "true";
+      } catch {
+        return false;
+      }
+    }
+
+    function writeStoredState(hidden) {
+      try {
+        window.localStorage.setItem(storageKey, hidden ? "true" : "false");
+      } catch {
+        // Ignore private-mode storage failures; the per-page toggle still works.
+      }
+    }
+
+    function applyTocState(hidden) {
+      layout.dataset.tocState = hidden ? "hidden" : "visible";
+      if (toggle instanceof HTMLButtonElement) {
+        toggle.setAttribute("aria-pressed", hidden ? "true" : "false");
+        toggle.setAttribute("aria-label", hidden ? "显示目录" : "隐藏目录");
+      }
+      if (label instanceof HTMLElement) label.textContent = hidden ? "显示目录" : "沉浸阅读";
+    }
+
+    applyTocState(readStoredState());
+
+    if (!(toggle instanceof HTMLButtonElement) || toggle.dataset.tocToggleReady === "true") return;
+    toggle.dataset.tocToggleReady = "true";
+    toggle.addEventListener("click", () => {
+      const hidden = layout.dataset.tocState !== "hidden";
+      applyTocState(hidden);
+      writeStoredState(hidden);
+      window.__astroMieUpdateArticleState?.();
     });
   }
 
@@ -274,6 +440,7 @@
 
   function initPageEffects() {
     setupRevealMotion();
+    setupArticleTocToggle();
     setupArticleReading();
   }
 

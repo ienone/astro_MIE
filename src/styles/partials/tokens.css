@@ -190,14 +190,14 @@ html {
 }
 
 ::view-transition-group(.post-cover) {
-  z-index: 20;
-  animation-duration: var(--motion-route-duration);
-  animation-timing-function: var(--motion-route-ease);
+  z-index: var(--route-shared-post-cover-z, 20);
+  animation-duration: var(--route-shared-post-cover-duration, var(--motion-route-duration));
+  animation-timing-function: var(--route-shared-post-cover-ease, var(--motion-route-ease));
 }
 
 :root[data-astro-transition="back"]::view-transition-group(.post-cover) {
-  animation-duration: var(--motion-route-back-duration);
-  animation-timing-function: var(--motion-route-back-ease);
+  animation-duration: var(--route-shared-post-cover-back-duration, var(--motion-route-back-duration));
+  animation-timing-function: var(--route-shared-post-cover-back-ease, var(--motion-route-back-ease));
 }
 
 ::view-transition-image-pair(.post-cover),
@@ -216,22 +216,27 @@ html {
 }
 
 ::view-transition-old(.post-cover) {
-  animation: post-cover-old-hold var(--motion-route-duration) linear both;
+  animation: post-cover-old-hold var(--route-shared-post-cover-duration, var(--motion-route-duration)) linear both;
 }
 
 ::view-transition-new(.post-cover) {
-  animation: post-cover-new-settle var(--motion-route-duration) linear both;
+  animation: post-cover-new-settle var(--route-shared-post-cover-duration, var(--motion-route-duration)) linear both;
 }
 
 :root[data-astro-transition="back"]::view-transition-old(.post-cover),
 :root[data-astro-transition="back"]::view-transition-new(.post-cover) {
-  animation-duration: var(--motion-route-back-duration);
+  animation-duration: var(--route-shared-post-cover-back-duration, var(--motion-route-back-duration));
 }
 
 ::view-transition-group(.post-title) {
-  z-index: 30;
-  animation-duration: 520ms;
-  animation-timing-function: var(--motion-route-ease);
+  z-index: var(--route-shared-post-title-z, 30);
+  animation-duration: var(--route-shared-post-title-duration, 520ms);
+  animation-timing-function: var(--route-shared-post-title-ease, var(--motion-route-ease));
+}
+
+:root[data-astro-transition="back"]::view-transition-group(.post-title) {
+  animation-duration: var(--route-shared-post-title-back-duration, var(--route-shared-post-title-duration, 520ms));
+  animation-timing-function: var(--route-shared-post-title-back-ease, var(--motion-route-back-ease));
 }
 
 ::view-transition-old(.post-title),

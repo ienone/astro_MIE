@@ -120,17 +120,15 @@
   view-transition-class: post-cover;
 }
 
-:root[data-route-card-transition] .post-cover-transition:not([data-route-source="true"]),
-:root[data-route-card-transition] .post-title-transition:not([data-route-source="true"]) {
+:root[data-route-shared-transition] [data-route-shared]:not([data-route-shared-active="true"]) {
   view-transition-name: none !important;
 }
 
-:root[data-route-transition="ready"][data-route-card-transition="forward"] .post-cover-transition:not([data-route-source="true"]),
-:root[data-route-transition="ready"][data-route-card-transition="forward"] .post-title-transition:not([data-route-source="true"]) {
+:root[data-route-transition="ready"][data-route-shared-transition="forward"] [data-route-shared][data-route-shared-suppress-visual="true"]:not([data-route-shared-active="true"]) {
   opacity: 0;
 }
 
-:root[data-route-transition="ready"][data-route-card-transition="exit"] .post-cover-transition {
+:root[data-route-transition="ready"][data-route-shared-transition="exit"] [data-route-shared][data-route-shared-exit] {
   opacity: 0;
   transform: scale(0.992);
   transition:
