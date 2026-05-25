@@ -3,13 +3,22 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import PageHeader from "../../components/PageHeader.astro";
 import PostList from "../../components/PostList.astro";
 import { getAllPosts } from "../../lib/posts";
+import { siteConfig } from "../../lib/site";
 
 const posts = await getAllPosts();
+const listConfig = siteConfig.list ?? {};
 ---
 
 <BaseLayout title="All posts" description="Browse all Markdown and MDX posts by publication date.">
-  <PageHeader eyebrow="Posts" title="All posts" description="Browse content in reverse chronological order." />
+  {listConfig.showHero !== false && <PageHeader eyebrow="Posts" title="All posts" description="Browse content in reverse chronological order." />}
   <section class="content-section">
-    <PostList posts={posts} />
+    <PostList
+      posts={posts}
+      compact={listConfig.cardView === false}
+      showSummary={listConfig.showSummary !== false}
+      showCards={listConfig.showCards !== false}
+      groupByYear={listConfig.groupByYear === true}
+      cardViewScreenWidth={listConfig.cardViewScreenWidth === true}
+    />
   </section>
 </BaseLayout>

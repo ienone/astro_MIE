@@ -2,19 +2,21 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PageHeader from "../../components/PageHeader.astro";
 import { getAllPosts, getConfiguredSectionKeys, getSectionLabel, postMatchesSection } from "../../lib/posts";
+import { siteConfig } from "../../lib/site";
 
 const posts = await getAllPosts();
 const sections = getConfiguredSectionKeys(posts).map((section) => [
   section,
   posts.filter((post) => postMatchesSection(post, section)).length
 ] as const);
+const taxonomyConfig = siteConfig.taxonomy ?? {};
 ---
 
 <BaseLayout title="Sections" description="Browse posts by configured content section.">
-  <PageHeader eyebrow="Sections" title="Sections" description="Sections come from site configuration and can appear in top-level or dropdown navigation." />
+  {taxonomyConfig.showHero !== false && <PageHeader eyebrow="Sections" title="Sections" description="Sections come from site configuration and can appear in top-level or dropdown navigation." />}
   <section class="content-section">
     <div class="term-grid">
-      {sections.map(([section, count]) => <a class="term-card" href={`/sections/${section}/`}><span>{getSectionLabel(section)}</span><strong>{count}</strong></a>)}
+      {sections.map(([section, count]) => <a class="term-card" href={`/sections/${section}/`}><span>{getSectionLabel(section)}</span>{taxonomyConfig.showTermCount !== false && <strong>{count}</strong>}</a>)}
     </div>
   </section>
 </BaseLayout>

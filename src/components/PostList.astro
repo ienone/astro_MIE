@@ -1,19 +1,58 @@
 ---
 import PostCard from "./PostCard.astro";
-import type { PostEntry } from "../lib/posts";
+import { formatDate, getArchiveGroups, getPostUrl, type PostEntry } from "../lib/posts";
 
 interface Props {
   posts: PostEntry[];
   compact?: boolean;
+  showSummary?: boolean;
+  showCards?: boolean;
+  groupByYear?: boolean;
+  cardViewScreenWidth?: boolean;
 }
 
-const { posts, compact = false } = Astro.props;
+const {
+  posts,
+  compact = false,
+  showSummary = true,
+  showCards = true,
+  groupByYear = false,
+  cardViewScreenWidth = false
+} = Astro.props;
+const archiveGroups = groupByYear ? getArchiveGroups(posts) : [];
 ---
 
 {
-  posts.length ? (
-    <div class:list={["post-grid", { compact }]}>
-      {posts.map((post) => <PostCard post={post} compact={compact} />)}
+  posts.length ? showCards ? (
+    <div class:list={["post-grid", { compact, "screen-width": cardViewScreenWidth }]}>
+      {posts.map((post) => <PostCard post={post} compact={compact} showSummary={showSummary} />)}
+    </div>
+  ) : groupByYear ? (
+    <div class="archive-list compact">
+      {
+        archiveGroups.map(([year, yearPosts]) => (
+          <section class="archive-year">
+            <h2>{year}</h2>
+            <div>
+              {yearPosts.map((post) => (
+                <a class="archive-item" href={getPostUrl(post)}>
+                  <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
+                  <span>{post.data.title}</span>
+                </a>
+              ))}
+            </div>
+          </section>
+        ))
+      }
+    </div>
+  ) : (
+    <div class="archive-list compact">
+      {posts.map((post) => (
+        <a class="archive-item" href={getPostUrl(post)}>
+          <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
+          <span>{post.data.title}</span>
+        </a>
+      ))}
     </div>
   ) : (
     <p class="empty-state">No posts yet.</p>

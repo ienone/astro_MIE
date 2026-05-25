@@ -8,17 +8,19 @@ interface Term {
 interface Props {
   terms: Term[];
   basePath: string;
+  showCount?: boolean;
+  cardView?: boolean;
 }
 
-const { terms, basePath } = Astro.props;
+const { terms, basePath, showCount = true, cardView = false } = Astro.props;
 ---
 
-<div class="term-grid">
+<div class:list={["term-grid", { compact: !cardView }]}>
   {
     terms.map((item) => (
       <a class="term-card" href={`${basePath}/${item.slug}/`}>
         <span>{item.term}</span>
-        <strong>{item.count}</strong>
+        {showCount && <strong>{item.count}</strong>}
       </a>
     ))
   }

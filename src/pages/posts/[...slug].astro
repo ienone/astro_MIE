@@ -44,7 +44,18 @@ const articleStyle = { "--post-theme": getPostThemeColor(post) };
 const imagePosition = getPostImagePosition(post);
 const backgroundImageWidth = siteConfig.assets.backgroundImageWidth ?? 1920;
 const backgroundImageWidths = [960, 1440, backgroundImageWidth].filter((width, index, widths) => width > 0 && widths.indexOf(width) === index);
-const showToc = siteConfig.features?.smartToc !== false;
+const articleConfig = siteConfig.article ?? {};
+const showHero = articleConfig.showHero !== false;
+const showBreadcrumbs = articleConfig.showBreadcrumbs !== false;
+const showDate = articleConfig.showDate !== false;
+const showDateUpdated = articleConfig.showDateUpdated !== false;
+const showWordCount = articleConfig.showWordCount !== false;
+const showReadingTime = articleConfig.showReadingTime !== false;
+const showTaxonomies = articleConfig.showTaxonomies === true;
+const showPostPagination = articleConfig.showPagination !== false;
+const invertPagination = articleConfig.invertPagination === true;
+const showToc = siteConfig.features?.smartToc !== false && articleConfig.showTableOfContents !== false;
+const showZenMode = articleConfig.showZenMode !== false;
 const hideUnfocusedTocChildren = siteConfig.features?.smartTocHideUnfocusedChildren !== false;
 const tocSource = headings.filter((heading) => heading.depth > 1 && heading.depth < 4);
 let tocGroupCount = 0;
@@ -61,6 +72,8 @@ const seriesPosts = seriesName
       .filter((item) => item.data.series.includes(seriesName))
       .sort((a, b) => (a.data.seriesOrder ?? 999) - (b.data.seriesOrder ?? 999) || a.data.date.getTime() - b.data.date.getTime())
   : [];
+const previousPost = invertPagination ? newer : older;
+const nextPost = invertPagination ? older : newer;
 ---
 
 <BaseLayout
@@ -80,9 +93,9 @@ const seriesPosts = seriesName
       data-route-shared-default-source="true"
       data-route-shared-default-back="true"
     >
-      {backgroundImage && <OptimizedImage class="article-background" src={backgroundImage} alt="" loading="lazy" decoding="async" fetchpriority="low" widths={backgroundImageWidths} sizes="100vw" fit="cover" />}
+      {showHero && backgroundImage && <OptimizedImage class="article-background" src={backgroundImage} alt="" loading="lazy" decoding="async" fetchpriority="low" widths={backgroundImageWidths} sizes="100vw" fit="cover" />}
       <div class="article-hero-content">
-        <a class="breadcrumb" href="/posts/">Posts</a>
+        {showBreadcrumbs && <a class="breadcrumb" href="/posts/">Posts</a>}
         <h1
           class="post-title-transition"
           data-post-transition-title={titleTransitionName}
@@ -101,16 +114,18 @@ const seriesPosts = seriesName
         </h1>
         {post.data.description && <p class="article-description" data-pagefind-meta="description">{post.data.description}</p>}
         <div class="article-meta">
-          <span>{formatDate(post.data.date)}</span>
-          {post.data.updatedDate && <span>Updated {formatDate(post.data.updatedDate)}</span>}
-          <span>{wordCount(post.body).toLocaleString("en-US")} words</span>
-          <span>{readingTime(post.body)}</span>
+          {showDate && <span>{formatDate(post.data.date)}</span>}
+          {showDateUpdated && post.data.updatedDate && <span>Updated {formatDate(post.data.updatedDate)}</span>}
+          {showWordCount && <span>{wordCount(post.body).toLocaleString("en-US")} words</span>}
+          {showReadingTime && <span>{readingTime(post.body)}</span>}
         </div>
-        <div class="taxonomy-row">
-          {post.data.categories.map((category) => <a href={`/categories/${termToSlug(category)}/`}>{category}</a>)}
-          {post.data.tags.map((tag) => <a href={`/tags/${termToSlug(tag)}/`}>{tag}</a>)}
-        </div>
-        {hasToc && (
+        {showTaxonomies && (
+          <div class="taxonomy-row">
+            {post.data.categories.map((category) => <a href={`/categories/${termToSlug(category)}/`}>{category}</a>)}
+            {post.data.tags.map((tag) => <a href={`/tags/${termToSlug(tag)}/`}>{tag}</a>)}
+          </div>
+        )}
+        {hasToc && showZenMode && (
           <div class="article-actions" data-pagefind-ignore>
             <button class="article-view-toggle" type="button" data-toc-toggle aria-controls="article-toc" aria-pressed="false" aria-label="隐藏目录">
               <Icon name="list-tree" />
@@ -119,7 +134,7 @@ const seriesPosts = seriesName
           </div>
         )}
       </div>
-      {image && (
+      {showHero && image && (
         <figure class="article-cover">
           <div
             class="post-cover-transition"
@@ -171,10 +186,12 @@ const seriesPosts = seriesName
           <Content />
         </div>
 
-        <nav class="post-pagination" aria-label="Previous and next posts" data-pagefind-ignore>
-          {newer && <a href={getPostUrl(newer)} style={{ "--post-theme": getPostThemeColor(newer) }}><span>Newer post</span>{newer.data.title}</a>}
-          {older && <a href={getPostUrl(older)} style={{ "--post-theme": getPostThemeColor(older) }}><span>Older post</span>{older.data.title}</a>}
-        </nav>
+        {showPostPagination && (
+          <nav class="post-pagination" aria-label="Previous and next posts" data-pagefind-ignore>
+            {previousPost && <a href={getPostUrl(previousPost)} style={{ "--post-theme": getPostThemeColor(previousPost) }}><span>{invertPagination ? "Newer post" : "Older post"}</span>{previousPost.data.title}</a>}
+            {nextPost && <a href={getPostUrl(nextPost)} style={{ "--post-theme": getPostThemeColor(nextPost) }}><span>{invertPagination ? "Older post" : "Newer post"}</span>{nextPost.data.title}</a>}
+          </nav>
+        )}
 
         {related.length > 0 && (
           <section class="related-section" data-pagefind-ignore>
