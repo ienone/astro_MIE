@@ -1,53 +1,124 @@
 ---
-title: "Example structured review"
-description: "A de-identified review post showing how reusable article blocks can model repeated content."
+title: "部署验收与功能检查清单"
+description: "用于发布前后核对 Astro MIE 构建产物、页面功能、SEO、搜索和交互状态的检查清单。"
 date: 2026-01-18
+updatedDate: 2026-05-25
 draft: false
-slug: "example-review"
+slug: "deployment-checklist"
 section: "reviews"
-tags: ["review", "blocks", "example"]
-categories: ["Reviews"]
-series: []
+tags: ["deployment", "checklist", "features"]
+categories: ["Guide"]
+series: ["Deployment docs"]
+seriesOrder: 3
 themeColor: "#934966"
 media:
   featured: "/img/featured.svg"
   background: "/img/background.svg"
-  alt: "Abstract review preview"
+  alt: "Deployment checklist preview"
 seo:
-  title: "Example structured review"
-  description: "A generic review post for the Astro MIE theme."
+  title: "部署验收与功能检查清单"
+  description: "Astro MIE 发布前后的构建、SEO、RSS、搜索、媒体和文章功能验收清单。"
   ogImage: "/img/featured.svg"
 ---
 
 import ReviewCard from "../../../../components/blocks/ReviewCard.astro";
 import Gallery from "../../../../components/blocks/Gallery.astro";
 
-This post demonstrates content-level blocks.
-The example is intentionally generic so a theme repository can stay free of personal reviews or private media.
+这篇文档把原来的测试 review 改写为部署验收清单。
+它仍然使用结构化 MDX 组件，用来确认 ReviewCard、Gallery 和文章块样式在正式内容中可以正常工作。
 
-## Review cards
+## 发布前检查
 
 <ReviewCard
-  title="Example item"
-  score="8.4"
-  meta="Reusable block"
+  title="本地构建"
+  score="必须通过"
+  meta="npm run build"
   poster="/img/featured.svg"
   accent="#934966"
 >
-  A review card is useful when a post repeats the same structured shape many times.
-  Keep the block content-level: titles, scores, links, media, and short prose should survive a future theme change.
+  发布前必须运行 `npm run build`。该命令会先执行 `astro check`，再生成静态页面，最后运行 Pagefind 建立搜索索引。
 </ReviewCard>
 
-## Galleries
+<ReviewCard
+  title="内容可见性"
+  score="必须确认"
+  meta="draft / future"
+  poster="/img/featured.svg"
+  accent="#2f6096"
+>
+  检查草稿和未来日期文章是否符合预期。默认情况下，`draft: true` 和未来日期文章不会进入正式构建。
+</ReviewCard>
+
+<ReviewCard
+  title="站点配置"
+  score="必须确认"
+  meta="blog.config.mjs"
+  poster="/img/featured.svg"
+  accent="#146b5b"
+>
+  确认 `url`、导航、作者、默认图片、sitemap、verification 和 analytics 配置与正式站点一致。
+</ReviewCard>
+
+## 发布后检查
+
+部署完成后按顺序访问：
+
+1. `/`：首页是否显示背景、作者和最近文章。
+2. `/posts/`：文章列表是否分页、排序和展示摘要。
+3. `/tags/`、`/categories/`、`/series/`：术语索引是否正常生成。
+4. `/rss.xml`：RSS 是否包含已发布文章。
+5. `/robots.txt`：是否包含正确 sitemap 地址。
+6. `/sitemap-index.xml`：搜索引擎 sitemap 是否存在。
+7. 文章详情页：hero、TOC、分享、作者、相关文章和上下篇导航是否正常。
+
+## SEO 检查
+
+每次正式发布后建议抽查任意一篇文章的 HTML head：
+
+- `<title>` 是否包含文章标题和站点名；
+- description 是否来自 `seo.description`、`description` 或摘要兜底；
+- canonical 是否指向正式域名；
+- OG 图片是否可访问；
+- verification meta 是否按配置输出；
+- analytics 脚本是否只在生产构建中出现。
+
+## 媒体检查
 
 <Gallery
   images={[
-    { src: "/img/featured.svg", alt: "Example image one", caption: "Featured image placeholder." },
-    { src: "/img/background.svg", alt: "Example image two", caption: "Background image placeholder." }
+    { src: "/img/featured.svg", alt: "Default featured image", caption: "默认 featured 图片。" },
+    { src: "/img/background.svg", alt: "Default background image", caption: "默认 background 图片。" }
   ]}
 />
 
-## Summary
+媒体检查重点：
 
-Use reusable blocks for repeated article structures.
-Use Markdown syntax enhancements, such as spoilers, for inline writing behavior.
+- featured 图片在文章卡片和文章页封面中正常显示；
+- background 图片在 hero 背景中正常显示；
+- `media.alt` 不为空；
+- 图片路径使用站点可公开访问的路径；
+- 默认图片可作为缺图兜底。
+
+## 功能验收矩阵
+
+| 功能 | 入口 | 验收标准 |
+| --- | --- | --- |
+| 搜索 | 顶部搜索按钮 | 能搜索到已发布文章标题和正文 |
+| 代码复制 | 代码块 | 按钮可见且不会破坏代码布局 |
+| 图片灯箱 | 文章图片 | 点击图片可打开预览 |
+| TOC | 文章页 | 多个二级标题时显示目录 |
+| 分享链接 | 文章页 | Email、Telegram、Twitter、Reddit 等链接可打开 |
+| RSS | `/rss.xml` | 包含正确标题、摘要、日期和链接 |
+| Sitemap | `/sitemap-index.xml` | 构建后存在且地址可访问 |
+| Robots | `/robots.txt` | 包含 Allow/Disallow 和 sitemap 信息 |
+
+## 回滚建议
+
+如果发布后出现问题，优先执行以下步骤：
+
+1. 回到上一条已知可用 commit；
+2. 本地运行 `npm run build` 确认问题是否可复现；
+3. 检查最近变更是否涉及 `blog.config.mjs`、内容 front matter 或 Astro 路由；
+4. 修复后重新提交并等待 CI 部署。
+
+这份清单应随主题能力一起维护，确保它始终覆盖真实部署流程，而不是只作为示例文章存在。

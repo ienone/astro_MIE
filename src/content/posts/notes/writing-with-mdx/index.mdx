@@ -1,72 +1,154 @@
 ---
-title: "Writing with MDX, math, and spoilers"
-description: "A technical note demonstrating code fences, KaTeX, spoiler syntax, and reusable article blocks."
+title: "Astro MIE 功能说明"
+description: "面向使用者和维护者的主题功能说明，覆盖配置、内容、搜索、媒体、SEO 与交互能力。"
 date: 2026-01-14
+updatedDate: 2026-05-25
 draft: false
-slug: "writing-with-mdx"
+slug: "feature-guide"
 section: "notes/frontend"
-tags: ["mdx", "katex", "code"]
+tags: ["features", "mdx", "search", "seo"]
 categories: ["Notes"]
-series: ["Theme basics"]
+series: ["Deployment docs"]
 seriesOrder: 2
 themeColor: "#2f6096"
 media:
   featured: "/img/featured.svg"
   background: "/img/background.svg"
-  alt: "Abstract MDX note preview"
+  alt: "Astro MIE feature guide preview"
 seo:
-  title: "Writing with MDX, math, and spoilers"
-  description: "A generic MDX example for the Astro MIE theme."
+  title: "Astro MIE 功能说明"
+  description: "Astro MIE 的配置驱动主题、内容集合、MDX 组件、搜索、SEO、图片和文章交互功能说明。"
   ogImage: "/img/featured.svg"
 ---
 
 import Figure from "../../../../components/blocks/Figure.astro";
 import ActionLinks from "../../../../components/blocks/ActionLinks.astro";
 
-This note exercises the content renderer that a real blog post would use.
-It includes headings for the collapsible table of contents, math, code, and a masked spoiler.
+这篇文档用于说明当前 Astro MIE 主题已经提供的功能。
+它同时保留 MDX、代码块、数学公式、自定义块和 spoiler 语法的覆盖样例，方便在部署后检查渲染能力是否正常。
 
-## Math rendering
+## 配置驱动主题
+
+站点的大部分公共信息都来自 `blog.config.mjs`：
+
+- 站点名称、描述、语言和公开 URL；
+- logo、favicon、默认 featured/background 图片；
+- 作者头像、简介和社交链接；
+- 首页最近文章数量和更多链接；
+- 导航栏、页脚和分区描述；
+- 文章页、列表页、taxonomy 页和分页行为；
+- sitemap、verification、analytics 和 robots.txt。
+
+配置项不是为了兼容旧主题而机械接线，而是优先服务真实发布和维护流程。
+
+## 内容集合
+
+文章位于 `src/content/posts/`，由 Astro Content Collections 加载。
+推荐使用以下 front matter：
+
+```yaml
+title: "文章标题"
+description: "文章摘要"
+date: 2026-05-25
+updatedDate: 2026-05-25
+draft: false
+slug: "custom-slug"
+section: "articles"
+tags: ["astro", "deployment"]
+categories: ["Guide"]
+series: ["Deployment docs"]
+seriesOrder: 1
+themeColor: "#146b5b"
+media:
+  featured: "/img/featured.svg"
+  background: "/img/background.svg"
+  alt: "Preview image"
+seo:
+  title: "SEO title"
+  description: "SEO description"
+  ogImage: "/img/featured.svg"
+```
+
+如果没有填写 `description`，可以通过 `source.summaryLength` 从正文生成兜底摘要。
+
+## 文章页功能
+
+文章页支持：
+
+- hero 背景图和封面图；
+- 文章级主题色；
+- 日期、更新时间、字数和阅读时间；
+- 作者信息、草稿标识和编辑入口；
+- 自动目录、沉浸阅读按钮和阅读进度；
+- 分类标签、系列文章列表、上下篇导航；
+- 相关文章推荐；
+- 分享链接。
+
+其中编辑入口需要额外配置 `repository.contentEditUrl`，例如：
+
+```js
+repository: {
+  url: "https://github.com/ienone/astro_mie",
+  contentEditUrl: "https://github.com/ienone/astro_mie/edit/main/{path}"
+}
+```
+
+## MDX 与扩展语法
+
+MDX 文章可以导入组件，适合部署说明、功能说明、工具清单和结构化内容。
 
 Inline math such as $E = mc^2$ should render through KaTeX.
 
-Block math works as well:
+Block math:
 
 $$
 \int_0^1 x^2\,dx = \frac{1}{3}
 $$
 
-## Code fences
-
-The renderer adds a language badge and a copy button to fenced code blocks.
+代码块会显示语言样式，并在配置允许时显示复制按钮：
 
 ```ts
-type PostTheme = {
-  title: string;
-  themeColor: `#${string}`;
+type FeatureFlag = {
+  search: boolean;
+  imageZoom: boolean;
+  codeCopy: boolean;
 };
 
-export function accentStyle(post: PostTheme) {
-  return { "--post-theme": post.themeColor };
+export function isEnabled(value: boolean | undefined, fallback = true) {
+  return value ?? fallback;
 }
 ```
 
-## Spoiler syntax
+spoiler 语法可用于隐藏补充说明：:spoiler[这段文字默认被遮罩，悬停或聚焦后可读。]
 
-Use `:spoiler[hidden text]` when content should be blurred until hover or keyboard focus.
-For example, :spoiler[this sentence starts hidden and becomes readable on interaction].
+## 媒体与图片
 
-## Portable blocks
+主题提供 `OptimizedImage` 组件用于站点图片输出。
+文章 front matter 中的 `media.featured`、`media.background`、`media.alt` 和 `media.focalPoint` 会影响卡片、hero、OG 图和图片焦点。
 
 <Figure
   src="/img/featured.svg"
-  alt="Example featured artwork"
-  caption="A generic example figure rendered through an Astro block."
+  alt="Default featured image"
+  caption="默认 featured 图片，用于没有自定义封面的文档。"
 />
+
+## 搜索、RSS 与 sitemap
+
+构建流程会生成：
+
+- `/rss.xml`：RSS 订阅源；
+- `/robots.txt`：爬虫规则和 sitemap 地址；
+- `/sitemap-index.xml`：sitemap 索引；
+- `/pagefind/`：Pagefind 搜索索引。
+
+Pagefind 只索引带有 `data-pagefind-body` 的文章正文，导航、相关文章、分享链接等辅助 UI 会被排除。
+
+## 推荐入口
 
 <ActionLinks
   links={[
-    { href: "/posts/getting-started/", label: "Read the guide" },
-    { href: "/tags/mdx/", label: "Browse MDX posts" }
+    { href: "/posts/deployment-guide/", label: "查看部署指南" },
+    { href: "/posts/deployment-checklist/", label: "查看验收清单" },
+    { href: "/tags/features/", label: "浏览功能相关内容" }
   ]}
 />
