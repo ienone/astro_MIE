@@ -1,5 +1,6 @@
 ---
 import { ClientRouter } from "astro:transitions";
+import Analytics from "../components/Analytics.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import ImageLightbox from "../components/ImageLightbox.astro";
@@ -67,6 +68,7 @@ const verification = siteConfig.verification ?? {};
     {verification.fediverse && <meta name="fediverse:creator" content={verification.fediverse} />}
     <meta name="theme-color" content="#f8f3e7" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#171b18" media="(prefers-color-scheme: dark)" />
+    <Analytics />
     <ClientRouter fallback="animate" />
   </head>
   <body>

@@ -1,0 +1,43 @@
+---
+import { siteConfig } from "../lib/site";
+
+const analytics = siteConfig.analytics ?? {};
+const umami = analytics.umami ?? {};
+const plausible = analytics.plausible ?? {};
+const fathom = analytics.fathom ?? {};
+const plausibleExtensions = [
+  plausible.outboundLinks ? "outbound-links" : "",
+  plausible.fileDownloads ? "file-downloads" : "",
+  plausible.taggedEvents ? "tagged-events" : ""
+].filter(Boolean);
+const plausibleScriptName = plausibleExtensions.length ? `script.${plausibleExtensions.join(".")}.js` : "script.js";
+const shouldRenderUmami = import.meta.env.PROD && Boolean(umami.src && umami.websiteId);
+const shouldRenderPlausible = import.meta.env.PROD && Boolean(plausible.domain);
+const shouldRenderFathom = import.meta.env.PROD && Boolean(fathom.siteId);
+---
+
+{shouldRenderUmami && (
+  <script
+    is:inline
+    defer
+    src={umami.src}
+    data-website-id={umami.websiteId}
+    data-host-url={umami.hostUrl || undefined}
+    data-domains={umami.domains || undefined}
+    data-auto-track={umami.autoTrack === false ? "false" : undefined}
+    data-do-not-track={umami.doNotTrack === true ? "true" : undefined}
+  />
+)}
+
+{shouldRenderPlausible && (
+  <script
+    is:inline
+    defer
+    data-domain={plausible.domain}
+    src={plausible.src || `https://plausible.io/js/${plausibleScriptName}`}
+  />
+)}
+
+{shouldRenderFathom && (
+  <script is:inline defer src={fathom.src || "https://cdn.usefathom.com/script.js"} data-site={fathom.siteId} />
+)}
