@@ -1,5 +1,7 @@
 ---
 import Icon from "./Icon.astro";
+import MaterialIconButton from "./material/IconButton.astro";
+import Ripple from "./material/Ripple.astro";
 import { isExternalLink, siteConfig } from "../lib/site";
 
 const searchEnabled = siteConfig.features?.search !== false;
@@ -27,6 +29,7 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
           Array.isArray(item.children) ? (
             <div class="nav-menu" data-nav-group>
               <button class="nav-trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls={`nav-dropdown-${index}`} data-nav-trigger>
+                <Ripple />
                 <Icon name={item.icon} />
                 <span>{item.label}</span>
                 <Icon name="chevron-down" />
@@ -34,6 +37,7 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
               <div class="nav-dropdown" id={`nav-dropdown-${index}`} data-nav-dropdown>
                 {item.children.map((child) => (
                   <a class="nav-dropdown-link" href={child.href} data-nav-href={child.href} {...linkAttrs(child.href, child.external, child.rel)}>
+                    <Ripple />
                     <Icon name={child.icon} />
                     <span>{child.label}</span>
                   </a>
@@ -42,6 +46,7 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
             </div>
           ) : (
             <a class="nav-link" href={item.href ?? "#"} data-nav-href={item.href} {...linkAttrs(item.href, item.external, item.rel)}>
+              <Ripple />
               <Icon name={item.icon} />
               <span>{item.label}</span>
             </a>
@@ -51,11 +56,9 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
     </div>
 
     <div class="nav-actions">
-      {searchEnabled && <button class="icon-button" type="button" data-search-open aria-label="Open search"><Icon name="search" /></button>}
-      <button class="icon-button" type="button" data-theme-toggle aria-label="Toggle theme"><Icon name="sun-moon" /></button>
-      <button class="menu-button" type="button" data-menu-toggle aria-label="Open menu" aria-expanded="false" aria-controls="mobile-nav">
-        <Icon name="menu" />
-      </button>
+      {searchEnabled && <MaterialIconButton class="icon-button" icon="search" data-search-open aria-label="Open search" />}
+      <MaterialIconButton class="icon-button" icon="sun-moon" data-theme-toggle aria-label="Toggle theme" />
+      <MaterialIconButton class="menu-button" icon="menu" data-menu-toggle aria-label="Open menu" aria-expanded="false" aria-controls="mobile-nav" />
     </div>
   </nav>
 
@@ -65,12 +68,14 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
         Array.isArray(item.children) ? (
           <details class="mobile-nav-group">
             <summary>
+              <Ripple />
               <Icon name={item.icon} />
               <span>{item.label}</span>
             </summary>
             <div>
               {item.children.map((child) => (
                 <a href={child.href} data-nav-href={child.href} {...linkAttrs(child.href, child.external, child.rel)}>
+                  <Ripple />
                   <Icon name={child.icon} />
                   <span>{child.label}</span>
                 </a>
@@ -79,6 +84,7 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
           </details>
         ) : (
           <a href={item.href ?? "#"} data-nav-href={item.href} {...linkAttrs(item.href, item.external, item.rel)}>
+            <Ripple />
             <Icon name={item.icon} />
             <span>{item.label}</span>
           </a>
@@ -283,7 +289,7 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
   function setMobileMenu(open: boolean) {
     const menuButton = document.querySelector("[data-menu-toggle]");
     const mobileNav = document.querySelector("[data-mobile-nav]");
-    if (!(menuButton instanceof HTMLButtonElement) || !(mobileNav instanceof HTMLElement)) return;
+    if (!(menuButton instanceof HTMLElement) || !(mobileNav instanceof HTMLElement)) return;
 
     menuButton.setAttribute("aria-expanded", String(open));
     if (open) {

@@ -1,6 +1,7 @@
 ---
 import PostCard from "./PostCard.astro";
-import { formatDate, getArchiveGroups, getPostUrl, type PostEntry } from "../lib/posts";
+import Ripple from "./material/Ripple.astro";
+import { formatDate, getArchiveGroups, getPostMaterialColorStyle, getPostUrl, type PostEntry } from "../lib/posts";
 
 interface Props {
   posts: PostEntry[];
@@ -35,7 +36,8 @@ const archiveGroups = groupByYear ? getArchiveGroups(posts) : [];
             <h2>{year}</h2>
             <div>
               {yearPosts.map((post) => (
-                <a class="archive-item" href={getPostUrl(post)}>
+                <a class="archive-item mie-dynamic-color" href={getPostUrl(post)} style={getPostMaterialColorStyle(post)}>
+                  <Ripple />
                   <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
                   <span>{post.data.title}</span>
                 </a>
@@ -48,7 +50,8 @@ const archiveGroups = groupByYear ? getArchiveGroups(posts) : [];
   ) : (
     <div class="archive-list compact">
       {posts.map((post) => (
-        <a class="archive-item" href={getPostUrl(post)}>
+        <a class="archive-item mie-dynamic-color" href={getPostUrl(post)} style={getPostMaterialColorStyle(post)}>
+          <Ripple />
           <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
           <span>{post.data.title}</span>
         </a>

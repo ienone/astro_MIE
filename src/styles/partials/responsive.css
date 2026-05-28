@@ -23,6 +23,11 @@
     grid-template-columns: 1fr;
   }
 
+  .article-cover {
+    justify-self: stretch;
+    max-width: none;
+  }
+
   .article-main {
     grid-column: auto;
   }
@@ -36,7 +41,7 @@
   .site-header,
   main,
   .site-footer {
-    width: min(100% - 20px, var(--content-width));
+    width: min(calc(100% - 20px), var(--content-width));
   }
 
   .site-header {
@@ -44,19 +49,46 @@
   }
 
   .nav-shell {
+    grid-template-columns: minmax(0, 1fr) auto;
+    min-height: 56px;
+    gap: 6px;
     border-radius: var(--radius-lg);
+    padding: 7px 7px 7px 10px;
+  }
+
+  .brand {
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .brand img {
+    width: 30px;
+    height: 30px;
   }
 
   .brand span {
-    max-width: 42vw;
+    max-width: min(24vw, 6.5ch);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
+  .nav-actions {
+    flex: 0 0 auto;
+    min-width: max-content;
+    gap: 4px;
+  }
+
   .icon-button,
   .menu-button {
-    padding: 0 10px;
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
+    min-height: 36px;
+    padding: 0;
+    --md-filled-tonal-icon-button-container-height: 36px;
+    --md-filled-tonal-icon-button-container-width: 36px;
+    --md-filled-tonal-icon-button-icon-size: 19px;
   }
 
   .home-hero {
@@ -67,7 +99,26 @@
   .home-hero h1,
   .article-hero h1,
   .page-header h1 {
-    font-size: 2.2rem;
+    overflow-wrap: anywhere;
+    font-size: 2.05rem;
+  }
+
+  .page-header {
+    border-radius: var(--radius-lg);
+    padding: 20px 20px 20px 22px;
+  }
+
+  .home-hero-content {
+    padding: 32px 18px;
+  }
+
+  .section-heading {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .section-heading .text-link {
+    margin-left: 0;
   }
 
   .post-grid,

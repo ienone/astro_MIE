@@ -1,4 +1,5 @@
 import { getCollection, type CollectionEntry } from "astro:content";
+import { createMaterialColorStyle, createMaterialColorStyleFromString } from "./material-colors";
 import { getSectionConfig, siteConfig } from "./site";
 
 export type PostEntry = CollectionEntry<"posts">;
@@ -44,6 +45,24 @@ export function getPostBackgroundImage(post: PostEntry) {
 
 export function getPostThemeColor(post: PostEntry) {
   return post.data.themeColor || siteConfig.assets.defaultThemeColor;
+}
+
+export function getPostMaterialColorStyle(post: PostEntry) {
+  return createMaterialColorStyle(getPostThemeColor(post));
+}
+
+export function getTermMaterialColorStyle(kind: TaxonomyKind, term: string) {
+  return createMaterialColorStyleFromString(`${kind}:${term}`, siteConfig.assets.defaultThemeColor);
+}
+
+export function getSectionMaterialColorStyle(section: string) {
+  const sectionConfig = getSectionConfig(section);
+
+  return createMaterialColorStyleFromString(`section:${normalizeSectionPath(section)}:${sectionConfig.label}`, siteConfig.assets.defaultThemeColor);
+}
+
+export function getCollectionMaterialColorStyle(collection: string) {
+  return createMaterialColorStyleFromString(`collection:${collection}`, siteConfig.assets.defaultThemeColor);
 }
 
 export function getPostImagePosition(post: PostEntry) {

@@ -1,4 +1,8 @@
 ---
+import Ripple from "./material/Ripple.astro";
+import MaterialChip from "./material/Chip.astro";
+import { getTermMaterialColorStyle, type TaxonomyKind } from "../lib/posts";
+
 interface Term {
   term: string;
   slug: string;
@@ -8,20 +12,35 @@ interface Term {
 interface Props {
   terms: Term[];
   basePath: string;
+  kind?: TaxonomyKind;
   showCount?: boolean;
   cardView?: boolean;
 }
 
-const { terms, basePath, showCount = true, cardView = false } = Astro.props;
+function getKindFromBasePath(path: string): TaxonomyKind {
+  if (path.includes("categories")) return "categories";
+  if (path.includes("series")) return "series";
+  return "tags";
+}
+
+const { terms, basePath, kind = getKindFromBasePath(basePath), showCount = true, cardView = false } = Astro.props;
 ---
 
 <div class:list={["term-grid", { compact: !cardView }]}>
   {
-    terms.map((item) => (
-      <a class="term-card" href={`${basePath}/${item.slug}/`}>
-        <span>{item.term}</span>
-        {showCount && <strong>{item.count}</strong>}
-      </a>
-    ))
+    terms.map((item) =>
+      cardView ? (
+        <a class="term-card mie-dynamic-color" href={`${basePath}/${item.slug}/`} style={getTermMaterialColorStyle(kind, item.term)}>
+          <Ripple />
+          <span>{item.term}</span>
+          {showCount && <strong>{item.count}</strong>}
+        </a>
+      ) : (
+        <MaterialChip class="term-chip mie-dynamic-color" href={`${basePath}/${item.slug}/`} style={getTermMaterialColorStyle(kind, item.term)} elevated>
+          <span>{item.term}</span>
+          {showCount && <span class="tag-count">{item.count}</span>}
+        </MaterialChip>
+      )
+    )
   }
 </div>

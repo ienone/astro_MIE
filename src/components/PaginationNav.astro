@@ -1,4 +1,6 @@
 ---
+import MaterialButton from "./material/Button.astro";
+
 interface Props {
   currentPage: number;
   totalPages: number;
@@ -9,24 +11,38 @@ const { currentPage, totalPages, basePath } = Astro.props;
 const normalizedBasePath = `/${basePath.replace(/^\/+|\/+$/g, "")}`;
 const getPageHref = (page: number) => (page <= 1 ? `${normalizedBasePath}/` : `${normalizedBasePath}/page/${page}/`);
 const pages = Array.from({ length: totalPages }, (_, index) => index + 1);
+const getClassName = (baseClass: string, enabledClass?: string) => [baseClass, enabledClass].filter(Boolean).join(" ");
 ---
 
 {
   totalPages > 1 && (
     <nav class="pagination-nav" aria-label="Pagination">
-      <a class:list={["pagination-link", { disabled: currentPage <= 1 }]} href={getPageHref(currentPage - 1)} aria-disabled={currentPage <= 1}>
-        上一页
-      </a>
+      <MaterialButton
+        class={getClassName("pagination-link", currentPage <= 1 ? "disabled" : undefined)}
+        href={getPageHref(currentPage - 1)}
+        icon="chevron-left"
+        disabled={currentPage <= 1 ? true : undefined}
+        aria-disabled={currentPage <= 1 ? "true" : undefined}
+      >
+        Previous
+      </MaterialButton>
       <div class="pagination-pages">
         {pages.map((page) => (
-          <a class:list={["pagination-page", { current: page === currentPage }]} href={getPageHref(page)} aria-current={page === currentPage ? "page" : undefined}>
+          <MaterialButton class={getClassName("pagination-page", page === currentPage ? "current" : undefined)} href={getPageHref(page)} aria-current={page === currentPage ? "page" : undefined}>
             {page}
-          </a>
+          </MaterialButton>
         ))}
       </div>
-      <a class:list={["pagination-link", { disabled: currentPage >= totalPages }]} href={getPageHref(currentPage + 1)} aria-disabled={currentPage >= totalPages}>
-        下一页
-      </a>
+      <MaterialButton
+        class={getClassName("pagination-link", currentPage >= totalPages ? "disabled" : undefined)}
+        href={getPageHref(currentPage + 1)}
+        icon="chevron-right"
+        trailingIcon
+        disabled={currentPage >= totalPages ? true : undefined}
+        aria-disabled={currentPage >= totalPages ? "true" : undefined}
+      >
+        Next
+      </MaterialButton>
     </nav>
   )
 }

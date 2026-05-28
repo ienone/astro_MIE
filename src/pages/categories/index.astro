@@ -2,7 +2,7 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PageHeader from "../../components/PageHeader.astro";
 import TermCloud from "../../components/TermCloud.astro";
-import { getAllPosts, getTerms } from "../../lib/posts";
+import { getAllPosts, getCollectionMaterialColorStyle, getTerms } from "../../lib/posts";
 import { siteConfig } from "../../lib/site";
 
 const terms = getTerms(await getAllPosts(), "categories");
@@ -10,8 +10,8 @@ const taxonomyConfig = siteConfig.taxonomy ?? {};
 ---
 
 <BaseLayout title="Categories" description="All configured post categories.">
-  {taxonomyConfig.showHero !== false && <PageHeader eyebrow="Categories" title="Categories" description="Categories are generated from explicit front matter fields." />}
+  {taxonomyConfig.showHero !== false && <PageHeader eyebrow="Categories" title="Categories" description="Categories are generated from explicit front matter fields." style={getCollectionMaterialColorStyle("categories")} />}
   <section class="content-section">
-    <TermCloud terms={terms} basePath="/categories" showCount={taxonomyConfig.showTermCount !== false} cardView={taxonomyConfig.cardView === true} />
+    <TermCloud terms={terms} basePath="/categories" kind="categories" showCount={taxonomyConfig.showTermCount !== false} cardView={taxonomyConfig.cardView === true} />
   </section>
 </BaseLayout>

@@ -1,11 +1,12 @@
 ---
 import type { PostEntry } from "../lib/posts";
 import OptimizedImage from "./OptimizedImage.astro";
+import Ripple from "./material/Ripple.astro";
 import {
   formatDate,
   getPostImage,
   getPostImagePosition,
-  getPostThemeColor,
+  getPostMaterialColorStyle,
   getPostTransitionSetName,
   getPostTransitionName,
   getPostUrl,
@@ -27,7 +28,7 @@ const image = getPostImage(post);
 const url = getPostUrl(post);
 const summary = getPostSummary(post);
 const stats = `${wordCount(post.body).toLocaleString("en-US")} words · ${readingTime(post.body)}`;
-const style = { "--post-theme": getPostThemeColor(post) };
+const style = getPostMaterialColorStyle(post);
 const imagePosition = getPostImagePosition(post);
 const transitionSetName = getPostTransitionSetName(post);
 const coverTransitionName = getPostTransitionName(post, "cover");
@@ -35,7 +36,7 @@ const titleTransitionName = getPostTransitionName(post, "title");
 ---
 
 <article
-  class:list={["post-card", { compact }]}
+  class:list={["post-card", "mie-dynamic-color", { compact }]}
   style={style}
   data-post-card
   data-post-transition-cover={coverTransitionName}
@@ -45,6 +46,7 @@ const titleTransitionName = getPostTransitionName(post, "title");
   data-route-shared-target-context="article"
 >
   <a href={url} class="post-card-link" aria-label={`Read ${post.data.title}`}>
+    <Ripple />
     <div class="post-card-media">
       <div
         class="post-cover-transition"

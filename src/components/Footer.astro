@@ -1,5 +1,7 @@
 ---
 import Icon from "./Icon.astro";
+import MaterialButton from "./material/Button.astro";
+import Ripple from "./material/Ripple.astro";
 import { isExternalLink, siteConfig } from "../lib/site";
 
 const defaultFooterLinks = [
@@ -36,10 +38,9 @@ function getSocialText(link: { label: string; displayLabel?: string }) {
       {showMenu && <div class="footer-actions" aria-label="Footer links">
         {
           footerLinks.map((link) => (
-            <a href={link.href} target={isExternalLink(link.href) ? "_blank" : undefined} rel={isExternalLink(link.href) ? "noopener noreferrer" : undefined}>
-              <Icon name={link.icon} />
-              <span>{link.label}</span>
-            </a>
+            <MaterialButton variant="text" href={link.href} icon={link.icon} target={isExternalLink(link.href) ? "_blank" : undefined} rel={isExternalLink(link.href) ? "noopener noreferrer" : undefined}>
+              {link.label}
+            </MaterialButton>
           ))
         }
       </div>}
@@ -55,6 +56,7 @@ function getSocialText(link: { label: string; displayLabel?: string }) {
                 aria-label={link.displayLabel ? `${link.label}: ${link.displayLabel}` : link.label}
                 title={getSocialText(link)}
               >
+                <Ripple />
                 <Icon name={link.icon} />
                 <span class="social-link__label">{getSocialText(link)}</span>
               </a>
@@ -64,8 +66,8 @@ function getSocialText(link: { label: string; displayLabel?: string }) {
       }
       {(showAppearanceSwitcher || showScrollToTop) && (
         <div class="footer-actions footer-controls" aria-label="Footer controls">
-          {showAppearanceSwitcher && <button type="button" data-theme-toggle><Icon name="sun-moon" /><span>Theme</span></button>}
-          {showScrollToTop && <button type="button" data-scroll-top><Icon name="chevron-down" /><span>Top</span></button>}
+          {showAppearanceSwitcher && <MaterialButton variant="text" icon="sun-moon" data-theme-toggle>Theme</MaterialButton>}
+          {showScrollToTop && <MaterialButton variant="text" icon="chevron-down" data-scroll-top>Top</MaterialButton>}
         </div>
       )}
       {(showCopyright || showThemeAttribution) && (
@@ -81,7 +83,7 @@ function getSocialText(link: { label: string; displayLabel?: string }) {
 <script>
   function setupFooterControls() {
     document.querySelectorAll("[data-scroll-top]").forEach((button) => {
-      if (!(button instanceof HTMLButtonElement) || button.dataset.scrollTopReady === "true") return;
+      if (!(button instanceof HTMLElement) || button.dataset.scrollTopReady === "true") return;
       button.dataset.scrollTopReady = "true";
       button.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
     });

@@ -3,7 +3,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import PageHeader from "../../components/PageHeader.astro";
 import PaginationNav from "../../components/PaginationNav.astro";
 import PostList from "../../components/PostList.astro";
-import { getAllPosts, getPageItems, getPostsByTermSlug, getTerms, getTotalPages } from "../../lib/posts";
+import { getAllPosts, getPageItems, getPostsByTermSlug, getTermMaterialColorStyle, getTerms, getTotalPages } from "../../lib/posts";
 import { getPagerSize, siteConfig } from "../../lib/site";
 
 export async function getStaticPaths() {
@@ -22,7 +22,7 @@ const totalPages = getTotalPages(posts, pageSize);
 ---
 
 <BaseLayout title={`Tag: ${term}`} description={`Posts tagged ${term}.`}>
-  {termConfig.showHero !== false && <PageHeader eyebrow="Tag" title={term} description={`${posts.length} posts.`} />}
+  {termConfig.showHero !== false && <PageHeader eyebrow="Tag" title={term} description={`${posts.length} posts.`} style={getTermMaterialColorStyle("tags", term)} />}
   <section class="content-section">
     <PostList posts={pagePosts} compact={termConfig.cardView !== true} groupByYear={termConfig.groupByYear === true} cardViewScreenWidth={termConfig.cardViewScreenWidth === true} />
     <PaginationNav currentPage={1} totalPages={totalPages} basePath={`/tags/${Astro.params.slug}`} />

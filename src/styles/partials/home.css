@@ -3,10 +3,10 @@
   display: grid;
   min-height: 520px;
   overflow: hidden;
-  border: 1px solid var(--outline);
-  border-radius: var(--radius-xl);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-extra-large);
   isolation: isolate;
-  box-shadow: var(--shadow-2);
+  box-shadow: var(--md-sys-elevation-level3);
   place-items: center;
 }
 
@@ -16,8 +16,8 @@
   z-index: 0;
   content: "";
   background:
-    radial-gradient(circle at 28% 24%, rgba(255, 255, 255, 0.26), transparent 22%),
-    radial-gradient(circle at 76% 68%, rgba(255, 228, 184, 0.18), transparent 30%);
+    radial-gradient(circle at 28% 24%, color-mix(in srgb, var(--md-sys-color-primary-container) 36%, transparent), transparent 22%),
+    radial-gradient(circle at 76% 68%, color-mix(in srgb, var(--md-sys-color-tertiary-container) 34%, transparent), transparent 30%);
   mix-blend-mode: soft-light;
   pointer-events: none;
 }
@@ -42,7 +42,23 @@
   position: absolute;
   inset: 0;
   content: "";
-  background: linear-gradient(180deg, rgba(10, 14, 12, 0.18), rgba(10, 14, 12, 0.62));
+}
+
+.home-hero-scrim {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--md-sys-color-surface) 28%, transparent), color-mix(in srgb, var(--md-sys-color-surface) 72%, transparent)),
+    linear-gradient(135deg, color-mix(in srgb, var(--md-sys-color-primary) 20%, transparent), color-mix(in srgb, var(--md-sys-color-tertiary) 18%, transparent));
+}
+
+.article-hero::before {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--md-sys-color-scrim) 16%, transparent), color-mix(in srgb, var(--md-sys-color-scrim) 62%, transparent)),
+    linear-gradient(135deg, color-mix(in srgb, var(--md-sys-color-primary) 22%, transparent), color-mix(in srgb, var(--md-sys-color-tertiary) 18%, transparent));
+}
+
+.home-hero {
+  --hero-foreground: var(--md-sys-color-on-surface);
+  --hero-muted: color-mix(in srgb, var(--md-sys-color-on-surface) 78%, transparent);
 }
 
 .home-hero-content {
@@ -52,8 +68,9 @@
   justify-items: center;
   max-width: 720px;
   padding: 40px 24px;
-  color: #fffdf7;
+  color: var(--hero-foreground);
   text-align: center;
+  text-shadow: 0 2px 18px color-mix(in srgb, var(--md-sys-color-scrim) 44%, transparent);
 }
 
 .home-hero-content > * {
@@ -79,9 +96,9 @@
 .avatar {
   width: 110px;
   height: 110px;
-  border: 2px solid rgba(255, 255, 255, 0.54);
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.18);
+  border: 2px solid color-mix(in srgb, var(--hero-foreground) 56%, transparent);
+  border-radius: var(--md-sys-shape-corner-full);
+  background: color-mix(in srgb, var(--md-sys-color-surface-container-high) 54%, transparent);
   object-fit: cover;
 }
 
@@ -102,22 +119,24 @@
 
 .home-hero p {
   margin: 14px 0 0;
+  color: var(--hero-muted);
   font-size: 1.08rem;
 }
 
 .hero-links {
   justify-content: center;
   margin-top: 28px;
-  --social-bg: rgba(255, 253, 247, 0.18);
-  --social-bg-hover: rgba(255, 253, 247, 0.28);
-  --social-border: rgba(255, 253, 247, 0.28);
-  --social-color: #fffdf7;
+  --social-bg: color-mix(in srgb, var(--md-sys-color-surface-container-high) 46%, transparent);
+  --social-bg-hover: color-mix(in srgb, var(--md-sys-color-primary-container) 68%, transparent);
+  --social-border: color-mix(in srgb, var(--md-sys-color-outline) 56%, transparent);
+  --social-border-hover: color-mix(in srgb, var(--md-sys-color-primary) 52%, transparent);
+  --social-color: var(--hero-foreground);
 }
 
 .portable-button {
-  background: rgba(255, 253, 247, 0.18);
-  border: 1px solid rgba(255, 253, 247, 0.28);
-  color: #fffdf7;
+  border: 1px solid color-mix(in srgb, var(--md-sys-color-outline) 56%, transparent);
+  background: color-mix(in srgb, var(--md-sys-color-surface-container-high) 46%, transparent);
+  color: var(--hero-foreground);
   padding: 10px 16px;
 }
 
@@ -139,10 +158,10 @@
   min-width: var(--social-size);
   min-height: var(--social-size);
   overflow: hidden;
-  border: 1px solid var(--social-border, var(--outline));
-  border-radius: 999px;
-  background: var(--social-bg, var(--surface-container-high));
-  color: var(--social-color, var(--on-surface));
+  border: 1px solid var(--social-border, var(--md-sys-color-outline-variant));
+  border-radius: var(--md-sys-shape-corner-full);
+  background: var(--social-bg, var(--md-sys-color-surface-container-high));
+  color: var(--social-color, var(--md-sys-color-on-surface));
   gap: 0;
   line-height: 1;
   padding: 0 12px;
@@ -153,6 +172,13 @@
     color var(--motion-hover),
     gap var(--social-motion-collapse),
     min-width var(--social-motion-collapse);
+  --md-ripple-hover-color: currentColor;
+  --md-ripple-pressed-color: currentColor;
+}
+
+.social-link > :not(md-ripple) {
+  position: relative;
+  z-index: 1;
 }
 
 .social-link .icon {
@@ -177,8 +203,8 @@
 .social-link:focus-visible {
   gap: 8px;
   min-width: calc(var(--social-size) + 4ch);
-  background: var(--social-bg-hover, var(--primary-container));
-  border-color: var(--social-border-hover, var(--primary));
+  background: var(--social-bg-hover, var(--md-sys-color-primary-container));
+  border-color: var(--social-border-hover, var(--md-sys-color-primary));
   transition:
     background var(--motion-hover),
     border-color var(--motion-hover),

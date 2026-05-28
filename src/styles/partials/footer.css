@@ -7,13 +7,13 @@
   display: flex;
   justify-content: space-between;
   gap: 28px;
-  border-top: 1px solid var(--outline);
+  border-top: 1px solid var(--md-sys-color-outline-variant);
   padding: 28px 0;
-  color: var(--on-surface-muted);
+  color: var(--md-sys-color-on-surface-variant);
 }
 
 .footer-title {
-  color: var(--on-surface);
+  color: var(--md-sys-color-on-surface);
   font-weight: 800;
   margin: 0 0 8px;
 }
@@ -37,37 +37,52 @@
   gap: 8px;
 }
 
-.footer-actions a,
-.footer-actions button {
+.footer-actions .mie-material-button {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 8px;
   min-height: 38px;
   border: 0;
-  border-radius: 999px;
-  background: var(--surface-container-high);
+  border-radius: var(--md-sys-shape-corner-full);
+  background: var(--md-sys-color-surface-container-high);
   color: inherit;
   cursor: pointer;
   font: inherit;
   line-height: 1;
   padding: 8px 12px;
+  overflow: hidden;
+  --md-ripple-hover-color: var(--md-sys-color-primary);
+  --md-ripple-pressed-color: var(--md-sys-color-primary);
+  --md-text-button-container-shape: var(--md-sys-shape-corner-full);
+  --md-text-button-hover-state-layer-color: var(--md-sys-color-primary);
+  --md-text-button-hover-state-layer-opacity: var(--md-sys-state-hover-opacity);
+  --md-text-button-icon-color: currentColor;
+  --md-text-button-label-text-color: currentColor;
+  --md-text-button-label-text-weight: 700;
+  --md-text-button-pressed-state-layer-color: var(--md-sys-color-primary);
+  --md-text-button-pressed-state-layer-opacity: var(--md-sys-state-pressed-opacity);
   transition:
     background var(--motion-hover),
     color var(--motion-hover),
     transform var(--motion-hover);
 }
 
-.footer-actions a:hover,
-.footer-actions a:focus-visible,
-.footer-actions button:hover,
-.footer-actions button:focus-visible {
-  background: var(--primary-container);
-  color: var(--primary);
-  transform: translateY(-2px);
+.footer-actions .mie-material-button > * {
+  position: relative;
+  z-index: 1;
 }
 
-.footer-actions a .icon,
-.footer-actions button .icon,
+.footer-actions .mie-material-button:hover,
+.footer-actions .mie-material-button:focus-visible {
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+  transform: translateY(-2px);
+  --md-text-button-hover-icon-color: var(--md-sys-color-on-primary-container);
+  --md-text-button-hover-label-text-color: var(--md-sys-color-on-primary-container);
+}
+
+.footer-actions .mie-material-button .icon,
 .footer-social .icon {
   width: 1.08em;
   height: 1.08em;
@@ -86,9 +101,9 @@
 
 .footer-social {
   --social-size: 38px;
-  --social-bg: var(--surface-container-high);
-  --social-bg-hover: var(--primary-container);
-  --social-border: var(--outline);
-  --social-border-hover: color-mix(in srgb, var(--primary) 42%, var(--outline));
-  --social-color: var(--on-surface-muted);
+  --social-bg: var(--md-sys-color-surface-container-high);
+  --social-bg-hover: var(--md-sys-color-primary-container);
+  --social-border: var(--md-sys-color-outline-variant);
+  --social-border-hover: color-mix(in srgb, var(--md-sys-color-primary) 42%, var(--md-sys-color-outline));
+  --social-color: var(--md-sys-color-on-surface-variant);
 }

@@ -3,12 +3,15 @@ interface Props {
   eyebrow?: string;
   title: string;
   description?: string;
+  class?: string;
+  style?: Record<string, string> | string;
 }
 
-const { eyebrow, title, description } = Astro.props;
+const { eyebrow, title, description, class: className, style } = Astro.props;
+const headerClass = ["page-header", "mie-dynamic-color", className].filter(Boolean).join(" ");
 ---
 
-<header class="page-header">
+<header class={headerClass} style={style}>
   {eyebrow && <p class="eyebrow">{eyebrow}</p>}
   <h1>{title}</h1>
   {description && <p>{description}</p>}

@@ -12,7 +12,7 @@
 
 .eyebrow {
   margin: 0 0 8px;
-  color: var(--primary);
+  color: var(--md-sys-color-primary);
   font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0;
@@ -27,16 +27,56 @@
 }
 
 .text-link {
-  background: var(--primary-container);
-  color: var(--primary);
+  position: relative;
+  display: inline-grid;
+  overflow: visible;
+  background: transparent;
+  color: var(--md-sys-color-on-primary-container);
   font-weight: 700;
-  padding: 10px 16px;
+  padding: 0;
+  --md-filled-tonal-button-container-color: var(--md-sys-color-primary-container);
+  --md-filled-tonal-button-container-height: 40px;
+  --md-filled-tonal-button-container-shape: var(--md-sys-shape-corner-full);
+  --md-filled-tonal-button-hover-state-layer-color: var(--md-sys-color-primary);
+  --md-filled-tonal-button-hover-state-layer-opacity: var(--md-sys-state-hover-opacity);
+  --md-filled-tonal-button-label-text-color: var(--md-sys-color-on-primary-container);
+  --md-filled-tonal-button-label-text-weight: 700;
+  --md-filled-tonal-button-pressed-state-layer-color: var(--md-sys-color-primary);
+  --md-filled-tonal-button-pressed-state-layer-opacity: var(--md-sys-state-pressed-opacity);
 }
 
 .text-link:hover,
 .text-link:focus-visible {
-  background: color-mix(in srgb, var(--primary) 18%, var(--primary-container));
   transform: translateY(-2px);
+  --md-filled-tonal-button-container-color: color-mix(in srgb, var(--md-sys-color-primary) 18%, var(--md-sys-color-primary-container));
+}
+
+.section-icon-link {
+  display: inline-grid;
+  place-items: center;
+  --md-filled-tonal-icon-button-container-color: var(--md-sys-color-primary-container);
+  --md-filled-tonal-icon-button-container-height: 42px;
+  --md-filled-tonal-icon-button-container-width: 42px;
+  --md-filled-tonal-icon-button-container-shape: var(--md-sys-shape-corner-full);
+  --md-filled-tonal-icon-button-hover-state-layer-color: var(--md-sys-color-primary);
+  --md-filled-tonal-icon-button-hover-state-layer-opacity: var(--md-sys-state-hover-opacity);
+  --md-filled-tonal-icon-button-icon-color: var(--md-sys-color-on-primary-container);
+  --md-filled-tonal-icon-button-icon-size: 20px;
+  --md-filled-tonal-icon-button-pressed-state-layer-color: var(--md-sys-color-primary);
+  --md-filled-tonal-icon-button-pressed-state-layer-opacity: var(--md-sys-state-pressed-opacity);
+  transition: transform var(--motion-hover);
+}
+
+.section-icon-link:hover,
+.section-icon-link:focus-visible {
+  transform: translateY(-2px);
+  --md-filled-tonal-icon-button-container-color: color-mix(in srgb, var(--md-sys-color-primary) 18%, var(--md-sys-color-primary-container));
+}
+
+.text-link > :not(md-ripple),
+.tag-strip a > :not(md-ripple) {
+  position: relative;
+  z-index: 1;
 }
 
 .post-grid {
@@ -59,11 +99,13 @@
   display: grid;
   height: 100%;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--post-theme, var(--primary)) 18%, var(--outline));
-  border-radius: var(--radius-lg);
-  background: var(--surface-container);
-  box-shadow: var(--shadow-1);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-extra-large);
+  background: var(--md-sys-color-surface-container);
+  box-shadow: var(--md-sys-elevation-level1);
   isolation: isolate;
+  --md-ripple-hover-color: var(--md-sys-color-primary);
+  --md-ripple-pressed-color: var(--md-sys-color-primary);
   transition:
     transform var(--motion-emphasized),
     box-shadow var(--motion-emphasized),
@@ -77,8 +119,8 @@
   z-index: 1;
   content: "";
   background:
-    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--post-theme, var(--primary)) 24%, transparent), transparent 42%),
-    linear-gradient(180deg, transparent 34%, color-mix(in srgb, var(--post-theme, var(--primary)) 8%, transparent));
+    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--md-sys-color-primary-container) 82%, transparent), transparent 42%),
+    linear-gradient(180deg, transparent 34%, color-mix(in srgb, var(--md-sys-color-tertiary-container) 32%, transparent));
   opacity: 0;
   pointer-events: none;
   transition: opacity var(--motion-emphasized);
@@ -86,8 +128,8 @@
 
 .post-card-link:hover {
   transform: translateY(-6px) rotateX(1.2deg);
-  box-shadow: var(--shadow-2);
-  border-color: color-mix(in srgb, var(--post-theme, var(--primary)) 72%, var(--outline));
+  box-shadow: var(--md-sys-elevation-level3);
+  border-color: color-mix(in srgb, var(--md-sys-color-primary) 60%, var(--md-sys-color-outline-variant));
 }
 
 .post-card-link:hover::before {
@@ -96,16 +138,20 @@
 
 .post-card-link:active {
   transform: translateY(-1px) scale(0.996);
-  border-color: var(--post-theme, var(--primary));
+  border-color: var(--md-sys-color-primary);
+}
+
+.post-card-link > :not(md-ripple) {
+  position: relative;
+  z-index: 2;
 }
 
 .post-card-media {
   position: relative;
-  z-index: 2;
   aspect-ratio: 16 / 9;
   overflow: hidden;
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  background: var(--surface-container-high);
+  background: var(--md-sys-color-surface-container-high);
   contain: paint;
 }
 
@@ -115,7 +161,7 @@
   height: 100%;
   overflow: clip;
   border-radius: inherit;
-  background: var(--surface-container-high);
+  background: var(--md-sys-color-surface-container-high);
   contain: paint;
   view-transition-class: post-cover;
 }
@@ -153,7 +199,6 @@
 
 .post-card-body {
   position: relative;
-  z-index: 2;
   display: grid;
   gap: 10px;
   padding: 18px;
@@ -172,7 +217,7 @@
 
 .post-card-link:hover h2,
 .post-card-link:focus-visible h2 {
-  color: color-mix(in srgb, var(--post-theme, var(--primary)) 78%, var(--on-surface));
+  color: color-mix(in srgb, var(--md-sys-color-primary) 78%, var(--md-sys-color-on-surface));
 }
 
 .post-card p {
@@ -180,7 +225,7 @@
   min-height: 3.2em;
   margin: 0;
   overflow: hidden;
-  color: var(--on-surface-muted);
+  color: var(--md-sys-color-on-surface-variant);
   line-height: 1.6;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -196,10 +241,14 @@
 .meta-row span,
 .taxonomy-row a,
 .tag-strip a {
-  border: 1px solid var(--outline);
-  border-radius: 999px;
-  background: var(--surface-container-high);
-  color: var(--on-surface-muted);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-full);
+  background: color-mix(
+    in srgb,
+    var(--md-sys-color-surface-container-high) 76%,
+    var(--md-sys-color-primary-container)
+  );
+  color: var(--md-sys-color-on-surface-variant);
   font-size: 0.82rem;
   padding: 6px 10px;
   transition:
@@ -209,32 +258,153 @@
     transform var(--motion-hover);
 }
 
+.taxonomy-row a,
+.tag-strip a {
+  position: relative;
+  overflow: hidden;
+  --md-ripple-hover-color: var(--md-sys-color-primary);
+  --md-ripple-pressed-color: var(--md-sys-color-primary);
+}
+
+.taxonomy-row a > :not(md-ripple) {
+  position: relative;
+  z-index: 1;
+}
+
+.taxonomy-row .mie-material-chip,
+.tag-strip .mie-material-chip,
+.term-grid.compact .mie-material-chip {
+  --md-assist-chip-container-height: 34px;
+  --md-assist-chip-container-shape: var(--md-sys-shape-corner-full);
+  --md-assist-chip-elevated-container-color: color-mix(
+    in srgb,
+    var(--md-sys-color-surface-container-high) 76%,
+    var(--md-sys-color-primary-container)
+  );
+  --md-assist-chip-elevated-container-elevation: var(--md-sys-elevation-level0);
+  --md-assist-chip-elevated-container-shadow-color: var(--md-sys-color-shadow);
+  --md-assist-chip-elevated-focus-container-elevation: var(--md-sys-elevation-level0);
+  --md-assist-chip-elevated-hover-container-elevation: var(--md-sys-elevation-level1);
+  --md-assist-chip-elevated-pressed-container-elevation: var(--md-sys-elevation-level0);
+  --md-assist-chip-hover-label-text-color: var(--md-sys-color-on-primary-container);
+  --md-assist-chip-hover-leading-icon-color: var(--md-sys-color-on-primary-container);
+  --md-assist-chip-hover-state-layer-color: var(--md-sys-color-primary);
+  --md-assist-chip-hover-state-layer-opacity: var(--md-sys-state-hover-opacity);
+  --md-assist-chip-label-text-color: var(--md-sys-color-on-surface);
+  --md-assist-chip-label-text-weight: 700;
+  --md-assist-chip-outline-color: var(--md-sys-color-outline-variant);
+  --md-assist-chip-outline-width: 1px;
+  --md-assist-chip-pressed-label-text-color: var(--md-sys-color-on-primary-container);
+  --md-assist-chip-pressed-leading-icon-color: var(--md-sys-color-on-primary-container);
+  --md-assist-chip-pressed-state-layer-color: var(--md-sys-color-primary);
+  --md-assist-chip-pressed-state-layer-opacity: var(--md-sys-state-pressed-opacity);
+}
+
 .post-card-link:hover .meta-row span {
-  border-color: color-mix(in srgb, var(--post-theme, var(--primary)) 38%, var(--outline));
-  background: color-mix(in srgb, var(--post-theme, var(--primary)) 12%, var(--surface-container-high));
+  border-color: color-mix(in srgb, var(--md-sys-color-primary) 38%, var(--md-sys-color-outline-variant));
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
 }
 
 .tag-strip a {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: var(--on-surface);
+  color: var(--md-sys-color-on-surface);
   font-weight: 700;
 }
 
+.taxonomy-row a:hover,
+.taxonomy-row a:focus-visible,
 .tag-strip a:hover,
 .tag-strip a:focus-visible {
-  background: var(--primary-container);
-  color: var(--primary);
+  border-color: color-mix(in srgb, var(--md-sys-color-primary) 48%, var(--md-sys-color-outline));
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
   transform: translateY(-2px);
 }
 
-.tag-strip span {
-  color: var(--primary);
+.taxonomy-row .mie-material-chip:hover,
+.taxonomy-row .mie-material-chip:focus-visible,
+.tag-strip .mie-material-chip:hover,
+.tag-strip .mie-material-chip:focus-visible,
+.term-grid.compact .mie-material-chip:hover,
+.term-grid.compact .mie-material-chip:focus-visible {
+  transform: translateY(-2px);
+  --md-assist-chip-outline-color: color-mix(in srgb, var(--md-sys-color-primary) 48%, var(--md-sys-color-outline));
+}
+
+.tag-strip a > span:first-of-type {
+  color: inherit;
+}
+
+.tag-strip a > span:last-child {
+  display: inline-grid;
+  min-width: 1.65em;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+  font-weight: 900;
+  place-items: center;
+}
+
+.tag-strip .tag-count,
+.term-grid .tag-count {
+  display: inline-grid;
+  min-width: 1.65em;
+  min-height: 1.65em;
+  margin-left: 8px;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+  font-weight: 900;
+  place-items: center;
 }
 
 .page-header {
-  max-width: 840px;
+  position: relative;
+  display: grid;
+  max-width: 940px;
+  overflow: hidden;
+  border-radius: var(--md-sys-shape-corner-extra-large);
+  isolation: isolate;
+  padding: 24px 28px;
+}
+
+.page-header::before {
+  position: absolute;
+  inset-block: 18px;
+  inset-inline-start: 0;
+  width: 7px;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: linear-gradient(
+    180deg,
+    var(--md-sys-color-primary),
+    var(--md-sys-color-tertiary)
+  );
+  content: "";
+}
+
+.page-header::after {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--md-sys-color-primary-container) 78%, transparent),
+      color-mix(in srgb, var(--md-sys-color-tertiary-container) 36%, transparent) 48%,
+      transparent 86%
+    ),
+    radial-gradient(
+      circle at 90% 12%,
+      color-mix(in srgb, var(--md-sys-color-secondary-container) 46%, transparent),
+      transparent 34%
+    );
+  content: "";
+  opacity: 0.86;
+  pointer-events: none;
 }
 
 .page-header h1 {
@@ -242,7 +412,7 @@
 }
 
 .page-header p:not(.eyebrow) {
-  color: var(--on-surface-muted);
+  color: var(--md-sys-color-on-surface-variant);
   font-size: 1.08rem;
   line-height: 1.8;
 }
@@ -253,36 +423,81 @@
   gap: 14px;
 }
 
+.term-grid.compact {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
 .term-card {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
   min-height: 86px;
-  border: 1px solid var(--outline);
-  border-radius: var(--radius-md);
-  background: var(--surface-container);
-  box-shadow: var(--shadow-1);
+  overflow: hidden;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-large);
+  background: color-mix(
+    in srgb,
+    var(--md-sys-color-surface-container) 72%,
+    var(--md-sys-color-primary-container)
+  );
+  box-shadow: var(--md-sys-elevation-level1);
   padding: 20px;
+  --md-ripple-hover-color: var(--md-sys-color-primary);
+  --md-ripple-pressed-color: var(--md-sys-color-primary);
   transition:
     border-color var(--motion-hover),
+    background var(--motion-hover),
     box-shadow var(--motion-emphasized),
     transform var(--motion-emphasized);
 }
 
+.term-card::before {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 7px;
+  background: var(--md-sys-color-primary);
+  content: "";
+  opacity: 0.72;
+  transition:
+    opacity var(--motion-hover),
+    width var(--motion-emphasized);
+}
+
+.term-card > :not(md-ripple) {
+  position: relative;
+  z-index: 1;
+}
+
 .term-card:hover,
 .term-card:focus-visible {
-  border-color: color-mix(in srgb, var(--accent) 48%, var(--outline));
-  box-shadow: var(--shadow-2);
+  border-color: color-mix(in srgb, var(--md-sys-color-primary) 48%, var(--md-sys-color-outline));
+  background: color-mix(
+    in srgb,
+    var(--md-sys-color-primary-container) 78%,
+    var(--md-sys-color-surface-container)
+  );
+  box-shadow: var(--md-sys-elevation-level3);
   transform: translateY(-4px);
+}
+
+.term-card:hover::before,
+.term-card:focus-visible::before {
+  width: 13px;
+  opacity: 1;
 }
 
 .term-card strong {
   display: grid;
   min-width: 38px;
   min-height: 38px;
-  border-radius: 999px;
-  background: var(--accent-container);
-  color: var(--accent);
+  border-radius: var(--md-sys-shape-corner-full);
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
   place-items: center;
   transition:
     background var(--motion-hover),
@@ -292,8 +507,8 @@
 
 .term-card:hover strong,
 .term-card:focus-visible strong {
-  background: var(--accent);
-  color: var(--surface);
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
   transform: scale(1.06);
 }
 
@@ -319,17 +534,18 @@
   justify-content: center;
   min-width: 42px;
   min-height: 42px;
-  border: 1px solid var(--outline);
-  border-radius: 999px;
-  background: var(--surface-container);
-  color: var(--on-surface);
   font-weight: 800;
-  padding: 0 14px;
-  transition:
-    background var(--motion-hover),
-    border-color var(--motion-hover),
-    color var(--motion-hover),
-    transform var(--motion-hover);
+  --md-filled-tonal-button-container-color: var(--md-sys-color-surface-container);
+  --md-filled-tonal-button-container-height: 42px;
+  --md-filled-tonal-button-container-shape: var(--md-sys-shape-corner-full);
+  --md-filled-tonal-button-hover-state-layer-color: var(--md-sys-color-primary);
+  --md-filled-tonal-button-hover-state-layer-opacity: var(--md-sys-state-hover-opacity);
+  --md-filled-tonal-button-icon-color: var(--md-sys-color-on-surface);
+  --md-filled-tonal-button-label-text-color: var(--md-sys-color-on-surface);
+  --md-filled-tonal-button-label-text-weight: 800;
+  --md-filled-tonal-button-pressed-state-layer-color: var(--md-sys-color-primary);
+  --md-filled-tonal-button-pressed-state-layer-opacity: var(--md-sys-state-pressed-opacity);
+  transition: transform var(--motion-hover);
 }
 
 .pagination-link:hover,
@@ -337,10 +553,10 @@
 .pagination-page:hover,
 .pagination-page:focus-visible,
 .pagination-page.current {
-  border-color: color-mix(in srgb, var(--primary) 62%, var(--outline));
-  background: var(--primary-container);
-  color: var(--primary);
   transform: translateY(-2px);
+  --md-filled-tonal-button-container-color: var(--md-sys-color-primary-container);
+  --md-filled-tonal-button-icon-color: var(--md-sys-color-on-primary-container);
+  --md-filled-tonal-button-label-text-color: var(--md-sys-color-on-primary-container);
 }
 
 .pagination-link.disabled {

@@ -71,7 +71,7 @@
 
 .search-overlay::backdrop {
   animation: search-backdrop-in var(--motion-hover) both;
-  background: rgba(12, 16, 14, 0.48);
+  background: color-mix(in srgb, var(--md-sys-color-scrim) 48%, transparent);
   backdrop-filter: blur(8px);
 }
 
@@ -88,7 +88,7 @@
   max-height: calc(100dvh - 56px);
   overflow: auto;
   animation: search-panel-in var(--motion-emphasized) both;
-  border-radius: var(--radius-lg);
+  border-radius: var(--md-sys-shape-corner-extra-large);
   padding: 18px;
   transform-origin: top center;
 }
@@ -115,12 +115,16 @@
 }
 
 .search-page-link {
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--primary) 12%, var(--surface-container-high));
-  color: var(--primary);
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
   font-size: 0.86rem;
   font-weight: 800;
   padding: 8px 12px;
+  --md-ripple-hover-color: var(--md-sys-color-primary);
+  --md-ripple-pressed-color: var(--md-sys-color-primary);
   transition:
     background var(--motion-hover),
     color var(--motion-hover),
@@ -129,30 +133,36 @@
 
 .search-page-link:hover,
 .search-page-link:focus-visible {
-  background: var(--primary-container);
+  background: color-mix(in srgb, var(--md-sys-color-primary) 18%, var(--md-sys-color-primary-container));
   transform: translateY(-1px);
+}
+
+.search-page-link > :not(md-ripple),
+.search-result > :not(md-ripple) {
+  position: relative;
+  z-index: 1;
 }
 
 .search-page-link[hidden] {
   display: none;
 }
 
-.search-panel input,
-.search-page input {
+.search-field {
   width: 100%;
-  border: 1px solid var(--outline);
-  border-radius: 999px;
-  background: var(--surface-container);
-  color: var(--on-surface);
-  outline: none;
-  padding: 14px 18px;
-  transition:
-    border-color var(--motion-hover),
-    box-shadow var(--motion-hover),
-    transform var(--motion-hover);
+  --md-outlined-text-field-container-shape: var(--md-sys-shape-corner-extra-large);
+  --md-outlined-text-field-container-color: var(--md-sys-color-surface-container);
+  --md-outlined-text-field-focus-outline-color: var(--md-sys-color-primary);
+  --md-outlined-text-field-focus-label-text-color: var(--md-sys-color-primary);
+  --md-outlined-text-field-hover-outline-color: color-mix(in srgb, var(--md-sys-color-primary) 52%, var(--md-sys-color-outline));
+  --md-outlined-text-field-input-text-color: var(--md-sys-color-on-surface);
+  --md-outlined-text-field-label-text-color: var(--md-sys-color-on-surface-variant);
+  --md-outlined-text-field-outline-color: var(--md-sys-color-outline-variant);
+  --md-outlined-text-field-supporting-text-color: var(--md-sys-color-on-surface-variant);
+  --md-outlined-text-field-caret-color: var(--md-sys-color-primary);
+  transition: transform var(--motion-hover);
 }
 
-.search-page input {
+.search-page .search-field {
   contain: layout paint style;
 }
 
@@ -174,10 +184,7 @@
   mix-blend-mode: normal;
 }
 
-.search-panel input:focus,
-.search-page input:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 16%, transparent);
+.search-field:focus-within {
   transform: translateY(-1px);
 }
 
@@ -188,14 +195,18 @@
 }
 
 .search-result {
+  position: relative;
   display: grid;
   gap: 5px;
   animation: search-result-in var(--motion-enter) both;
   animation-delay: calc(var(--result-index, 0) * 38ms);
-  border: 1px solid var(--outline);
-  border-radius: var(--radius-md);
-  background: var(--surface-container);
+  overflow: hidden;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-large);
+  background: var(--md-sys-color-surface-container);
   padding: 14px;
+  --md-ripple-hover-color: var(--md-sys-color-primary);
+  --md-ripple-pressed-color: var(--md-sys-color-primary);
   transition:
     border-color var(--motion-hover),
     box-shadow var(--motion-hover),
@@ -204,8 +215,8 @@
 
 .search-result:hover,
 .search-result:focus-visible {
-  border-color: color-mix(in srgb, var(--primary) 56%, var(--outline));
-  box-shadow: var(--shadow-1);
+  border-color: color-mix(in srgb, var(--md-sys-color-primary) 56%, var(--md-sys-color-outline));
+  box-shadow: var(--md-sys-elevation-level1);
   transform: translateY(-2px);
 }
 
@@ -216,12 +227,12 @@
 .search-result small,
 .search-empty,
 .empty-state {
-  color: var(--on-surface-muted);
+  color: var(--md-sys-color-on-surface-variant);
 }
 
 .search-result mark {
   border-radius: 0.35em;
-  background: color-mix(in oklab, var(--tertiary) 22%, transparent);
-  color: var(--on-surface);
+  background: color-mix(in oklab, var(--md-sys-color-tertiary-container) 78%, transparent);
+  color: var(--md-sys-color-on-tertiary-container);
   padding: 0 0.15em;
 }

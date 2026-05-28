@@ -1,4 +1,6 @@
 ---
+import MaterialButton from "../material/Button.astro";
+
 interface ActionLink {
   href: string;
   label: string;
@@ -21,9 +23,9 @@ const { links = [], label = "Related links" } = Astro.props;
       const rel = link.rel ?? (target === "_blank" ? "noopener noreferrer" : undefined);
 
       return (
-        <a class="action-links__item" href={link.href} target={target} rel={rel}>
+        <MaterialButton class="action-links__item" href={link.href} target={target} rel={rel}>
           {link.label}
-        </a>
+        </MaterialButton>
       );
     })
   }
@@ -38,25 +40,21 @@ const { links = [], label = "Related links" } = Astro.props;
   }
 
   .action-links__item {
-    border: 1px solid var(--primary);
-    border-radius: 999px;
-    background: var(--primary-container);
-    color: var(--primary);
-    font-family: var(--font-sans);
-    font-weight: 700;
-    line-height: 1.2;
-    padding: 0.7rem 1rem;
-    text-decoration: none;
-    transition:
-      background var(--motion-fast),
-      color var(--motion-fast),
-      transform var(--motion-fast);
+    --md-filled-tonal-button-container-color: var(--md-sys-color-primary-container);
+    --md-filled-tonal-button-container-height: 42px;
+    --md-filled-tonal-button-container-shape: var(--md-sys-shape-corner-full);
+    --md-filled-tonal-button-hover-state-layer-color: var(--md-sys-color-primary);
+    --md-filled-tonal-button-hover-state-layer-opacity: var(--md-sys-state-hover-opacity);
+    --md-filled-tonal-button-label-text-color: var(--md-sys-color-on-primary-container);
+    --md-filled-tonal-button-label-text-weight: 700;
+    --md-filled-tonal-button-pressed-state-layer-color: var(--md-sys-color-primary);
+    --md-filled-tonal-button-pressed-state-layer-opacity: var(--md-sys-state-pressed-opacity);
+    transition: transform var(--motion-fast);
   }
 
   .action-links__item:hover,
   .action-links__item:focus-visible {
-    background: var(--primary);
-    color: var(--on-primary);
     transform: translateY(-1px);
+    --md-filled-tonal-button-container-color: color-mix(in srgb, var(--md-sys-color-primary) 18%, var(--md-sys-color-primary-container));
   }
 </style>

@@ -3,10 +3,20 @@
   min-height: 100%;
   margin: 0;
   background:
-    linear-gradient(180deg, rgba(215, 240, 230, 0.42), transparent 360px),
-    linear-gradient(135deg, rgba(255, 228, 184, 0.22), rgba(216, 232, 255, 0.18) 58%, rgba(255, 217, 227, 0.16)),
-    var(--surface);
-  color: var(--on-surface);
+    linear-gradient(180deg, color-mix(in srgb, var(--md-sys-color-primary-container) 52%, transparent), transparent 360px),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--md-sys-color-secondary-container) 28%, transparent),
+      color-mix(in srgb, var(--md-sys-color-tertiary-container) 22%, transparent) 58%,
+      color-mix(in srgb, var(--md-sys-color-primary-container) 18%, transparent)
+    ),
+    var(--md-sys-color-background);
+  color: var(--md-sys-color-on-background);
+}
+
+html,
+body {
+  overflow-x: clip;
 }
 
 body::before {
@@ -17,8 +27,8 @@ body::before {
   height: 3px;
   transform: scaleX(0);
   transform-origin: left center;
-  background: linear-gradient(90deg, var(--primary), var(--tertiary), var(--accent));
-  box-shadow: 0 0 18px color-mix(in srgb, var(--primary) 32%, transparent);
+  background: linear-gradient(90deg, var(--md-sys-color-primary), var(--md-sys-color-tertiary), var(--md-sys-color-secondary));
+  box-shadow: 0 0 18px color-mix(in srgb, var(--md-sys-color-primary) 32%, transparent);
   content: "";
   opacity: 0;
   pointer-events: none;
@@ -40,9 +50,14 @@ body::before {
 
 :root[data-theme="dark"] body {
   background:
-    linear-gradient(180deg, rgba(18, 63, 54, 0.42), transparent 360px),
-    linear-gradient(135deg, rgba(70, 49, 15, 0.22), rgba(32, 58, 95, 0.18) 58%, rgba(81, 38, 57, 0.18)),
-    var(--surface);
+    linear-gradient(180deg, color-mix(in srgb, var(--md-sys-color-primary-container) 46%, transparent), transparent 360px),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--md-sys-color-secondary-container) 24%, transparent),
+      color-mix(in srgb, var(--md-sys-color-tertiary-container) 20%, transparent) 58%,
+      color-mix(in srgb, var(--md-sys-color-primary-container) 16%, transparent)
+    ),
+    var(--md-sys-color-background);
 }
 
 a {
@@ -53,6 +68,24 @@ a {
 img {
   display: block;
   max-width: 100%;
+}
+
+.mie-material-button__icon,
+.mie-material-chip__icon {
+  display: inline-grid;
+  color: inherit;
+  place-items: center;
+}
+
+.mie-material-button .icon,
+.mie-material-chip .icon,
+.mie-material-icon-button .icon {
+  width: 1.12em;
+  height: 1.12em;
+}
+
+.mie-material-text-field {
+  display: block;
 }
 
 button,
@@ -66,9 +99,9 @@ input {
   left: 12px;
   z-index: 1000;
   transform: translateY(-140%);
-  border-radius: var(--radius-sm);
-  background: var(--primary);
-  color: var(--surface);
+  border-radius: var(--md-sys-shape-corner-medium);
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
   padding: 10px 14px;
 }
 

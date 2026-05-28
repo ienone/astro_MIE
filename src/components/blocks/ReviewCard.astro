@@ -51,13 +51,13 @@ const style = accent ? { "--review-accent": accent } : undefined;
 
 <style>
   .review-card {
-    --review-accent: var(--primary);
+    --review-accent: var(--md-sys-color-primary);
     display: grid;
     grid-template-columns: minmax(120px, 180px) minmax(0, 1fr);
     gap: 18px;
-    border: 1px solid color-mix(in srgb, var(--review-accent) 36%, var(--outline));
-    border-radius: var(--radius-md);
-    background: color-mix(in srgb, var(--review-accent) 8%, var(--surface-container));
+    border: 1px solid color-mix(in srgb, var(--review-accent) 36%, var(--md-sys-color-outline-variant));
+    border-radius: var(--md-sys-shape-corner-large);
+    background: color-mix(in srgb, var(--review-accent) 8%, var(--md-sys-color-surface-container));
     margin: 1.5rem 0;
     padding: 16px;
   }
@@ -68,12 +68,12 @@ const style = accent ? { "--review-accent": accent } : undefined;
 
   .review-card__poster img {
     width: 100%;
-    border-radius: var(--radius-sm);
+    border-radius: var(--md-sys-shape-corner-medium);
     object-fit: cover;
   }
 
   .review-card__title {
-    color: var(--on-surface);
+    color: var(--md-sys-color-on-surface);
     font-family: var(--font-sans);
     font-size: 1.25rem;
     line-height: 1.25;
@@ -92,7 +92,7 @@ const style = accent ? { "--review-accent": accent } : undefined;
   }
 
   .review-card__meta {
-    color: var(--on-surface-muted);
+    color: var(--md-sys-color-on-surface-variant);
     font-family: var(--font-sans);
     margin: 0.35rem 0 0;
   }

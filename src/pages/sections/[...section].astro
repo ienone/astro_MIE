@@ -7,6 +7,7 @@ import {
   getConfiguredSectionKeys,
   getSectionDescription,
   getSectionLabel,
+  getSectionMaterialColorStyle,
   postMatchesSection
 } from "../../lib/posts";
 import { siteConfig } from "../../lib/site";
@@ -31,7 +32,7 @@ const termConfig = siteConfig.term ?? {};
 ---
 
 <BaseLayout title={title} description={description}>
-  {termConfig.showHero !== false && <PageHeader eyebrow="Section" title={title} description={`${description} ${posts.length} posts.`} />}
+  {termConfig.showHero !== false && <PageHeader eyebrow="Section" title={title} description={`${description} ${posts.length} posts.`} style={getSectionMaterialColorStyle(section)} />}
   <section class="content-section">
     <PostList posts={posts} compact={termConfig.cardView !== true} groupByYear={termConfig.groupByYear === true} cardViewScreenWidth={termConfig.cardViewScreenWidth === true} />
   </section>

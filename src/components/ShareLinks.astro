@@ -1,5 +1,5 @@
 ---
-import Icon from "./Icon.astro";
+import MaterialButton from "./material/Button.astro";
 import { siteConfig } from "../lib/site";
 
 interface Props {
@@ -49,10 +49,9 @@ const shareLinks = links
     <nav class="share-links" aria-label="分享文章" data-pagefind-ignore>
       <span>Share</span>
       {shareLinks.map((link) => (
-        <a href={link.href} target={link.href.startsWith("http") ? "_blank" : undefined} rel={link.href.startsWith("http") ? "noopener noreferrer" : undefined}>
-          <Icon name={link.icon} />
-          <span>{link.label}</span>
-        </a>
+        <MaterialButton class="share-link" href={link.href} icon={link.icon} target={link.href.startsWith("http") ? "_blank" : undefined} rel={link.href.startsWith("http") ? "noopener noreferrer" : undefined}>
+          {link.label}
+        </MaterialButton>
       ))}
     </nav>
   )

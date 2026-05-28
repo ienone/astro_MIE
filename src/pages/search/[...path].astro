@@ -1,6 +1,8 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PageHeader from "../../components/PageHeader.astro";
+import MaterialTextField from "../../components/material/TextField.astro";
+import { getCollectionMaterialColorStyle } from "../../lib/posts";
 import { siteConfig } from "../../lib/site";
 
 export function getStaticPaths() {
@@ -10,9 +12,9 @@ export function getStaticPaths() {
 ---
 
 <BaseLayout title="搜索" description="使用 Pagefind 静态索引搜索文章。">
-  <PageHeader eyebrow="Search" title="搜索" description="搜索由 Pagefind 生成的静态文章索引，支持标题、摘要和正文匹配。" />
+  <PageHeader eyebrow="Search" title="搜索" description="搜索由 Pagefind 生成的静态文章索引，支持标题、摘要和正文匹配。" style={getCollectionMaterialColorStyle("search")} />
   <section class="content-section search-page">
-    <input data-search-page-input type="search" placeholder="输入关键词" autocomplete="off" />
+    <MaterialTextField class="search-field" data-search-page-input type="search" label="输入关键词" placeholder="标题、摘要或正文" autocomplete="off" />
     <div class="search-results inline" data-search-page-results></div>
   </section>
 </BaseLayout>
