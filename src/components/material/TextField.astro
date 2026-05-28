@@ -1,0 +1,18 @@
+---
+interface Props {
+  class?: string;
+  id?: string;
+  label?: string;
+  placeholder?: string;
+  type?: string;
+  value?: string;
+  autocomplete?: string;
+  style?: Record<string, string> | string;
+  [key: string]: unknown;
+}
+
+const { class: className, type = "text", ...attrs } = Astro.props;
+const hostClass = ["mie-material-text-field", className].filter(Boolean).join(" ");
+---
+
+<md-outlined-text-field {...attrs} class={hostClass} type={type}></md-outlined-text-field>

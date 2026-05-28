@@ -1,0 +1,9 @@
+---
+interface Props {
+  disabled?: boolean;
+}
+
+const { disabled = false } = Astro.props;
+---
+
+{!disabled && <md-ripple></md-ripple>}

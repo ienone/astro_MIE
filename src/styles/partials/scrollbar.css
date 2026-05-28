@@ -1,0 +1,295 @@
+html {
+  scrollbar-gutter: stable both-edges;
+}
+
+html[data-mie-custom-scrollbar="ready"] {
+  scrollbar-width: none;
+}
+
+html[data-mie-custom-scrollbar="ready"]::-webkit-scrollbar,
+html[data-mie-custom-scrollbar="ready"] body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+html[data-mie-scrollbar-dragging="true"] {
+  cursor: grabbing;
+  scroll-behavior: auto !important;
+  user-select: none;
+}
+
+.mie-scrollbar {
+  --scrollbar-rail-axis: 20px;
+  --scrollbar-track-opacity: 0.5;
+  --scrollbar-progress-opacity: 0.7;
+  --scrollbar-thumb-opacity: 0.9;
+  --scrollbar-marker-opacity: 0.34;
+  --scrollbar-tooltip-y: 50%;
+  position: fixed;
+  inset-block: 22px;
+  inset-inline-end: max(6px, env(safe-area-inset-right));
+  z-index: 180;
+  width: 58px;
+  opacity: 0.9;
+  pointer-events: auto;
+  transition:
+    opacity 220ms var(--md-sys-motion-easing-emphasized),
+    width 220ms var(--md-sys-motion-easing-emphasized);
+}
+
+.mie-scrollbar[data-scrollbar-overflow="false"],
+.mie-scrollbar[data-scrollbar-motion="reduced"] {
+  display: none;
+}
+
+.mie-scrollbar[data-scrollbar-state="idle"] {
+  --scrollbar-track-opacity: 0;
+  --scrollbar-marker-opacity: 0.28;
+  opacity: 0.54;
+}
+
+.mie-scrollbar[data-scrollbar-state="scrolling"],
+.mie-scrollbar[data-scrollbar-state="hover"],
+.mie-scrollbar[data-scrollbar-state="dragging"] {
+  --scrollbar-track-opacity: 0.68;
+  --scrollbar-progress-opacity: 0.94;
+  --scrollbar-thumb-opacity: 1;
+  --scrollbar-marker-opacity: 0.58;
+  opacity: 1;
+}
+
+.mie-scrollbar[data-scrollbar-state="dragging"] {
+  width: 68px;
+}
+
+.mie-scrollbar-track {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  cursor: pointer;
+  justify-items: end;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.mie-scrollbar-total,
+.mie-scrollbar-progress,
+.mie-scrollbar-thumb {
+  position: absolute;
+  inset-block-start: 0;
+  border-radius: var(--md-sys-shape-corner-full);
+}
+
+.mie-scrollbar-total {
+  inset-inline-end: calc(var(--scrollbar-rail-axis) - 1px);
+  width: 2px;
+  height: 100%;
+  background: color-mix(in srgb, var(--md-sys-color-outline) 82%, transparent);
+  opacity: var(--scrollbar-track-opacity);
+  transition: opacity 220ms var(--md-sys-motion-easing-emphasized);
+}
+
+.mie-scrollbar-progress {
+  inset-inline-end: calc(var(--scrollbar-rail-axis) - 3px);
+  width: 6px;
+  height: calc(var(--scrollbar-progress) * 100%);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--md-sys-color-primary) 88%, var(--md-sys-color-surface)),
+      color-mix(in srgb, var(--md-sys-color-tertiary) 62%, var(--md-sys-color-primary))
+    );
+  box-shadow: 0 0 18px color-mix(in srgb, var(--md-sys-color-primary) 24%, transparent);
+  opacity: var(--scrollbar-progress-opacity);
+  pointer-events: none;
+  transition:
+    width 180ms var(--md-sys-motion-easing-emphasized),
+    opacity 180ms var(--md-sys-motion-easing-emphasized);
+}
+
+.mie-scrollbar-thumb {
+  inset-block-start: var(--scrollbar-thumb-offset);
+  inset-inline-end: calc(var(--scrollbar-rail-axis) - 19px);
+  width: 38px;
+  height: 5px;
+  background:
+    linear-gradient(
+      90deg,
+      var(--md-sys-color-primary),
+      color-mix(in srgb, var(--md-sys-color-tertiary) 56%, var(--md-sys-color-primary))
+    );
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--md-sys-color-surface) 78%, transparent),
+    0 10px 28px color-mix(in srgb, var(--md-sys-color-primary) 24%, transparent);
+  cursor: grab;
+  opacity: var(--scrollbar-thumb-opacity);
+  pointer-events: auto;
+  transform: translate3d(0, -50%, 0);
+  transition:
+    width 220ms var(--md-sys-motion-easing-emphasized-decelerate),
+    height 220ms var(--md-sys-motion-easing-emphasized-decelerate),
+    inset-inline-end 220ms var(--md-sys-motion-easing-emphasized-decelerate),
+    background 220ms var(--md-sys-motion-easing-emphasized),
+    box-shadow 220ms var(--md-sys-motion-easing-emphasized),
+    opacity 180ms var(--md-sys-motion-easing-emphasized);
+}
+
+.mie-scrollbar[data-scrollbar-state="idle"] .mie-scrollbar-thumb {
+  inset-inline-end: calc(var(--scrollbar-rail-axis) - 4.5px);
+  width: 9px;
+  height: 9px;
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--md-sys-color-surface) 82%, transparent),
+    0 8px 22px color-mix(in srgb, var(--md-sys-color-primary) 18%, transparent);
+}
+
+.mie-scrollbar[data-scrollbar-state="hover"] .mie-scrollbar-thumb,
+.mie-scrollbar[data-scrollbar-state="scrolling"] .mie-scrollbar-thumb {
+  inset-inline-end: calc(var(--scrollbar-rail-axis) - 19px);
+  width: 38px;
+  height: 5px;
+}
+
+.mie-scrollbar[data-scrollbar-state="dragging"] .mie-scrollbar-thumb {
+  inset-inline-end: calc(var(--scrollbar-rail-axis) - 24px);
+  width: 48px;
+  height: 8px;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--md-sys-color-surface) 84%, transparent),
+    0 18px 42px color-mix(in srgb, var(--md-sys-color-primary) 34%, transparent);
+  cursor: grabbing;
+}
+
+.mie-scrollbar-markers {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  width: 100%;
+  pointer-events: none;
+}
+
+.mie-scrollbar-marker {
+  --scrollbar-marker-radius: 3px;
+  --scrollbar-marker-size: 6px;
+  position: absolute;
+  inset-block-start: var(--scrollbar-marker-y, 0%);
+  inset-inline-end: calc(var(--scrollbar-rail-axis) - var(--scrollbar-marker-radius));
+  width: var(--scrollbar-marker-size);
+  height: var(--scrollbar-marker-size);
+  border: 0;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: color-mix(in srgb, var(--md-sys-color-outline) 62%, var(--md-sys-color-surface));
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--md-sys-color-surface) 92%, transparent),
+    0 4px 12px color-mix(in srgb, var(--md-sys-color-shadow) 6%, transparent);
+  cursor: pointer;
+  opacity: var(--scrollbar-marker-opacity);
+  padding: 0;
+  pointer-events: auto;
+  transform: translate3d(0, -50%, 0);
+  transition:
+    width 170ms var(--md-sys-motion-easing-emphasized),
+    height 170ms var(--md-sys-motion-easing-emphasized),
+    background 170ms var(--md-sys-motion-easing-emphasized),
+    opacity 170ms var(--md-sys-motion-easing-emphasized),
+    transform 170ms var(--md-sys-motion-easing-emphasized);
+}
+
+.mie-scrollbar-marker[data-level="2"] {
+  --scrollbar-marker-radius: 4px;
+  --scrollbar-marker-size: 8px;
+}
+
+.mie-scrollbar-marker[data-level="3"] {
+  --scrollbar-marker-radius: 2.5px;
+  --scrollbar-marker-size: 5px;
+}
+
+.mie-scrollbar-marker[data-read="true"] {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 22%, var(--md-sys-color-surface));
+  opacity: calc(var(--scrollbar-marker-opacity) + 0.04);
+}
+
+.mie-scrollbar-marker[data-at-progress="true"],
+.mie-scrollbar-marker:hover {
+  --scrollbar-marker-radius: 6px;
+  --scrollbar-marker-size: 12px;
+  background: var(--md-sys-color-primary);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--md-sys-color-surface) 86%, transparent),
+    0 10px 28px color-mix(in srgb, var(--md-sys-color-primary) 22%, transparent);
+  opacity: 1;
+  transform: translate3d(0, -50%, 0);
+}
+
+.mie-scrollbar-tooltip {
+  position: absolute;
+  inset-inline-end: calc(var(--scrollbar-rail-axis) + 12px);
+  top: var(--scrollbar-tooltip-y);
+  display: -webkit-box;
+  width: max-content;
+  max-width: min(300px, calc(100vw - 108px));
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--md-sys-color-primary) 18%, var(--md-sys-color-outline-variant));
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--md-sys-color-surface-container-high) 92%, transparent);
+  box-shadow:
+    0 12px 28px color-mix(in srgb, var(--md-sys-color-shadow) 10%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--md-sys-color-surface) 60%, transparent);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  backdrop-filter: blur(18px);
+  color: var(--md-sys-color-on-surface);
+  font-size: 0.82rem;
+  font-weight: 760;
+  line-height: 1.35;
+  opacity: 0;
+  padding: 8px 11px;
+  pointer-events: none;
+  text-wrap: balance;
+  transform: translate3d(6px, -50%, 0) scale(0.98);
+  transform-origin: right center;
+  transition:
+    opacity 170ms var(--md-sys-motion-easing-emphasized-decelerate),
+    transform 210ms var(--md-sys-motion-easing-emphasized-decelerate);
+}
+
+.mie-scrollbar-tooltip::before {
+  position: absolute;
+  inset-block: 9px;
+  inset-inline-start: 0;
+  width: 3px;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: var(--md-sys-color-primary);
+  content: "";
+}
+
+.mie-scrollbar-tooltip[data-visible="true"] {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate3d(0, -50%, 0) scale(1);
+}
+
+@media (max-width: 780px) {
+  .mie-scrollbar {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-mie-custom-scrollbar="ready"] {
+    scrollbar-width: auto;
+  }
+
+  html[data-mie-custom-scrollbar="ready"]::-webkit-scrollbar,
+  html[data-mie-custom-scrollbar="ready"] body::-webkit-scrollbar {
+    width: auto;
+    height: auto;
+    display: initial;
+  }
+
+  .mie-scrollbar {
+    display: none !important;
+  }
+}

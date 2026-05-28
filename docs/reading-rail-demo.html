@@ -1,0 +1,1061 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Material Reading Rail Demo</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --md-primary: #146b5b;
+        --md-on-primary: #ffffff;
+        --md-primary-container: #b9f0de;
+        --md-on-primary-container: #002019;
+        --md-secondary: #6d4e12;
+        --md-tertiary: #86536a;
+        --md-surface: #fffdf7;
+        --md-surface-container: #f4efe7;
+        --md-surface-container-high: #eee8df;
+        --md-on-surface: #1c1d19;
+        --md-on-surface-variant: #60655d;
+        --md-outline: rgba(67, 73, 66, 0.3);
+        --md-outline-variant: rgba(67, 73, 66, 0.16);
+        --md-shadow: rgba(36, 32, 24, 0.18);
+        --rail-progress: 0;
+        --rail-axis: 22px;
+        --rail-thumb-offset: 0px;
+        --rail-tooltip-y: 50%;
+        --rail-track-opacity: 0.48;
+        --rail-progress-opacity: 0.62;
+        --rail-thumb-opacity: 0.86;
+        --rail-marker-opacity: 0.34;
+        --ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+        --ease-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        min-height: 100%;
+        background: var(--md-surface);
+        color: var(--md-on-surface);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+        letter-spacing: 0;
+        scroll-behavior: smooth;
+        scrollbar-gutter: stable both-edges;
+        scrollbar-width: none;
+      }
+
+      html::-webkit-scrollbar,
+      body::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+        display: none;
+      }
+
+      html[data-rail-dragging="true"] {
+        cursor: grabbing;
+        scroll-behavior: auto !important;
+        user-select: none;
+      }
+
+      body {
+        min-height: 100%;
+        margin: 0;
+        background:
+          radial-gradient(circle at 8% 6%, rgba(185, 240, 222, 0.76), transparent 28rem),
+          radial-gradient(circle at 92% 16%, rgba(255, 216, 227, 0.68), transparent 24rem),
+          linear-gradient(180deg, #fffdf7 0%, #f7f1e9 42%, #fffdf7 100%);
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .page-shell {
+        width: min(1120px, calc(100% - 48px));
+        margin: 0 auto;
+        padding: 52px 0 120px;
+      }
+
+      .demo-hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
+        gap: 32px;
+        align-items: end;
+        min-height: 44vh;
+        border: 1px solid var(--md-outline-variant);
+        border-radius: 36px;
+        background:
+          linear-gradient(135deg, rgba(185, 240, 222, 0.78), transparent 54%),
+          radial-gradient(circle at 86% 18%, rgba(255, 216, 227, 0.82), transparent 38%),
+          rgba(255, 253, 247, 0.74);
+        box-shadow: 0 24px 72px var(--md-shadow);
+        padding: clamp(28px, 5vw, 56px);
+      }
+
+      .eyebrow {
+        width: max-content;
+        margin: 0 0 16px;
+        border-radius: 999px;
+        background: var(--md-primary-container);
+        color: var(--md-on-primary-container);
+        font-size: 0.78rem;
+        font-weight: 850;
+        padding: 8px 13px;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        max-width: 780px;
+        margin: 0;
+        font-size: clamp(2.6rem, 7vw, 6.8rem);
+        line-height: 0.94;
+        letter-spacing: 0;
+      }
+
+      .hero-copy {
+        max-width: 620px;
+        margin: 24px 0 0;
+        color: var(--md-on-surface-variant);
+        font-size: 1.08rem;
+        line-height: 1.75;
+      }
+
+      .hero-card {
+        align-self: stretch;
+        display: grid;
+        align-content: end;
+        min-height: 260px;
+        border-radius: 28px;
+        background:
+          linear-gradient(180deg, rgba(20, 107, 91, 0.16), rgba(134, 83, 106, 0.22)),
+          var(--md-surface-container);
+        color: var(--md-on-surface);
+        padding: 22px;
+      }
+
+      .hero-card strong {
+        display: block;
+        font-size: 2.8rem;
+        line-height: 1;
+      }
+
+      .hero-card span {
+        color: var(--md-on-surface-variant);
+        font-size: 0.92rem;
+        font-weight: 720;
+      }
+
+      .article-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 760px) minmax(200px, 1fr);
+        gap: 48px;
+        align-items: start;
+        margin-top: 56px;
+      }
+
+      article {
+        border-radius: 28px;
+        background: rgba(255, 253, 247, 0.74);
+        padding: clamp(26px, 5vw, 56px);
+      }
+
+      .sticky-note {
+        position: sticky;
+        top: 28px;
+        border: 1px solid var(--md-outline-variant);
+        border-radius: 24px;
+        background: rgba(244, 239, 231, 0.72);
+        box-shadow: 0 12px 44px rgba(36, 32, 24, 0.08);
+        color: var(--md-on-surface-variant);
+        line-height: 1.65;
+        padding: 22px;
+      }
+
+      .sticky-note strong {
+        display: block;
+        margin-bottom: 10px;
+        color: var(--md-on-surface);
+      }
+
+      h2,
+      h3 {
+        scroll-margin-top: 24px;
+      }
+
+      h2 {
+        margin: 3.1rem 0 1rem;
+        color: var(--md-on-surface);
+        font-size: clamp(1.8rem, 4vw, 3.2rem);
+        line-height: 1.08;
+      }
+
+      h3 {
+        margin: 2.4rem 0 0.8rem;
+        color: color-mix(in srgb, var(--md-primary) 78%, var(--md-on-surface));
+        font-size: 1.32rem;
+      }
+
+      p {
+        color: var(--md-on-surface-variant);
+        font-size: 1.02rem;
+        line-height: 1.85;
+      }
+
+      .callout {
+        margin: 2rem 0;
+        border: 1px solid color-mix(in srgb, var(--md-primary) 28%, transparent);
+        border-radius: 24px;
+        background: color-mix(in srgb, var(--md-primary-container) 48%, var(--md-surface));
+        color: var(--md-on-primary-container);
+        padding: 20px 22px;
+      }
+
+      .reading-rail {
+        position: fixed;
+        inset-block: 24px;
+        inset-inline-end: max(8px, env(safe-area-inset-right));
+        z-index: 40;
+        width: 64px;
+        opacity: 0.9;
+        pointer-events: auto;
+        transition:
+          opacity 220ms var(--ease-emphasized),
+          width 220ms var(--ease-emphasized);
+      }
+
+      .reading-rail[data-overflow="false"] {
+        display: none;
+      }
+
+      .reading-rail[data-state="idle"] {
+        --rail-track-opacity: 0;
+        --rail-marker-opacity: 0.28;
+        opacity: 0.54;
+      }
+
+      .reading-rail[data-state="scrolling"],
+      .reading-rail[data-state="hover"],
+      .reading-rail[data-state="dragging"] {
+        --rail-track-opacity: 0.68;
+        --rail-progress-opacity: 0.92;
+        --rail-thumb-opacity: 1;
+        --rail-marker-opacity: 0.58;
+        opacity: 1;
+      }
+
+      .reading-rail[data-state="dragging"] {
+        width: 72px;
+      }
+
+      .rail-track {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        justify-items: end;
+        cursor: pointer;
+        touch-action: none;
+      }
+
+      .rail-total,
+      .rail-read,
+      .rail-thumb {
+        position: absolute;
+        inset-block-start: 0;
+        border-radius: 999px;
+      }
+
+      .rail-total {
+        inset-inline-end: calc(var(--rail-axis) - 1px);
+        width: 2px;
+        height: 100%;
+        background: color-mix(in srgb, var(--md-outline) 82%, transparent);
+        opacity: var(--rail-track-opacity);
+        transition: opacity 220ms var(--ease-emphasized);
+      }
+
+      .rail-read {
+        inset-inline-end: calc(var(--rail-axis) - 3px);
+        width: 6px;
+        height: calc(var(--rail-progress) * 100%);
+        background:
+          linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--md-primary) 88%, var(--md-surface)),
+            color-mix(in srgb, var(--md-tertiary) 62%, var(--md-primary))
+          );
+        box-shadow: 0 0 18px color-mix(in srgb, var(--md-primary) 24%, transparent);
+        opacity: var(--rail-progress-opacity);
+        pointer-events: none;
+        transition:
+          width 180ms var(--ease-emphasized),
+          opacity 180ms var(--ease-emphasized);
+      }
+
+      .rail-thumb {
+        inset-block-start: var(--rail-thumb-offset);
+        inset-inline-end: calc(var(--rail-axis) - 19px);
+        width: 38px;
+        height: 5px;
+        border-radius: 999px;
+        background:
+          linear-gradient(90deg, var(--md-primary), color-mix(in srgb, var(--md-tertiary) 56%, var(--md-primary)));
+        box-shadow:
+          0 0 0 1px color-mix(in srgb, var(--md-surface) 78%, transparent),
+          0 10px 28px color-mix(in srgb, var(--md-primary) 24%, transparent);
+        cursor: grab;
+        opacity: var(--rail-thumb-opacity);
+        pointer-events: auto;
+        transform: translate3d(0, -50%, 0);
+        transition:
+          width 240ms var(--ease-decelerate),
+          height 240ms var(--ease-decelerate),
+          inset-inline-end 240ms var(--ease-decelerate),
+          background 240ms var(--ease-emphasized),
+          box-shadow 240ms var(--ease-emphasized),
+          opacity 180ms var(--ease-emphasized);
+      }
+
+      .reading-rail[data-state="idle"] .rail-thumb {
+        inset-inline-end: calc(var(--rail-axis) - 4.5px);
+        width: 9px;
+        height: 9px;
+        box-shadow:
+          0 0 0 2px color-mix(in srgb, var(--md-surface) 82%, transparent),
+          0 8px 22px color-mix(in srgb, var(--md-primary) 18%, transparent);
+      }
+
+      .reading-rail[data-state="hover"] .rail-thumb,
+      .reading-rail[data-state="scrolling"] .rail-thumb {
+        inset-inline-end: calc(var(--rail-axis) - 19px);
+        width: 38px;
+        height: 5px;
+      }
+
+      .reading-rail[data-state="dragging"] .rail-thumb {
+        inset-inline-end: calc(var(--rail-axis) - 24px);
+        width: 48px;
+        height: 8px;
+        box-shadow:
+          0 0 0 1px color-mix(in srgb, var(--md-surface) 84%, transparent),
+          0 18px 42px color-mix(in srgb, var(--md-primary) 34%, transparent);
+        cursor: grabbing;
+      }
+
+      .rail-markers {
+        position: absolute;
+        inset-block: 0;
+        inset-inline-end: 0;
+        width: 100%;
+        pointer-events: none;
+      }
+
+      .rail-marker {
+        --marker-radius: 3px;
+        --marker-size: 6px;
+        position: absolute;
+        inset-block-start: var(--marker-y, 0%);
+        inset-inline-end: calc(var(--rail-axis) - var(--marker-radius));
+        width: var(--marker-size);
+        height: var(--marker-size);
+        border: 0;
+        border-radius: 999px;
+        background: color-mix(in srgb, var(--md-outline) 62%, var(--md-surface));
+        box-shadow:
+          0 0 0 2px color-mix(in srgb, var(--md-surface) 92%, transparent),
+          0 4px 12px rgba(36, 32, 24, 0.06);
+        cursor: pointer;
+        opacity: var(--rail-marker-opacity);
+        padding: 0;
+        pointer-events: auto;
+        transform: translate3d(0, -50%, 0);
+        transition:
+          width 170ms var(--ease-emphasized),
+          height 170ms var(--ease-emphasized),
+          background 170ms var(--ease-emphasized),
+          opacity 170ms var(--ease-emphasized),
+          transform 170ms var(--ease-emphasized);
+      }
+
+      .rail-marker[data-level="2"] {
+        --marker-size: 8px;
+        --marker-radius: 4px;
+      }
+
+      .rail-marker[data-level="3"] {
+        --marker-size: 5px;
+        --marker-radius: 2.5px;
+      }
+
+      .rail-marker[data-read="true"] {
+        background: color-mix(in srgb, var(--md-primary) 22%, var(--md-surface));
+        opacity: calc(var(--rail-marker-opacity) + 0.04);
+      }
+
+      .rail-marker[data-at-progress="true"],
+      .rail-marker:hover {
+        --marker-size: 12px;
+        --marker-radius: 6px;
+        background: var(--md-primary);
+        box-shadow:
+          0 0 0 3px color-mix(in srgb, var(--md-surface) 86%, transparent),
+          0 10px 28px color-mix(in srgb, var(--md-primary) 22%, transparent);
+        opacity: 1;
+        transform: translate3d(0, -50%, 0);
+      }
+
+      .rail-tooltip {
+        position: absolute;
+        inset-inline-end: calc(var(--rail-axis) + 12px);
+        top: var(--rail-tooltip-y);
+        width: max-content;
+        max-width: min(300px, calc(100vw - 108px));
+        border: 1px solid color-mix(in srgb, var(--md-primary) 18%, var(--md-outline-variant));
+        border-radius: 14px;
+        background: color-mix(in srgb, var(--md-surface-container-high) 92%, transparent);
+        box-shadow:
+          0 12px 28px rgba(36, 32, 24, 0.1),
+          0 0 0 1px color-mix(in srgb, var(--md-surface) 60%, transparent);
+        backdrop-filter: blur(18px);
+        color: var(--md-on-surface);
+        font-size: 0.82rem;
+        font-weight: 760;
+        line-height: 1.35;
+        opacity: 0;
+        overflow: visible;
+        padding: 8px 11px;
+        pointer-events: none;
+        text-overflow: ellipsis;
+        transform: translate3d(6px, -50%, 0) scale(0.98);
+        transform-origin: right center;
+        transition:
+          opacity 170ms var(--ease-decelerate),
+          transform 210ms var(--ease-decelerate);
+        white-space: nowrap;
+      }
+
+      .rail-tooltip[data-visible="true"] {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translate3d(0, -50%, 0) scale(1);
+      }
+
+      .mobile-progress {
+        position: fixed;
+        inset-block-start: 0;
+        inset-inline: 0;
+        z-index: 50;
+        display: none;
+        height: 4px;
+        background: color-mix(in srgb, var(--md-outline) 28%, transparent);
+      }
+
+      .mobile-progress::before {
+        display: block;
+        width: calc(var(--rail-progress) * 100%);
+        height: 100%;
+        background: var(--md-primary);
+        content: "";
+      }
+
+      @media (max-width: 780px) {
+        .page-shell {
+          width: min(100% - 28px, 720px);
+          padding-top: 28px;
+        }
+
+        .demo-hero,
+        .article-layout {
+          grid-template-columns: 1fr;
+        }
+
+        .hero-card,
+        .sticky-note {
+          display: none;
+        }
+
+        .reading-rail {
+          display: none;
+        }
+
+        .mobile-progress {
+          display: block;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          transition-duration: 1ms !important;
+          animation-duration: 1ms !important;
+          animation-iteration-count: 1 !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="mobile-progress" aria-hidden="true"></div>
+
+    <aside class="reading-rail" data-reading-rail data-state="idle" data-overflow="false" aria-hidden="true">
+      <div class="rail-track" data-rail-track>
+        <div class="rail-total"></div>
+        <div class="rail-read" data-rail-read></div>
+        <div class="rail-thumb" data-rail-thumb></div>
+      </div>
+      <div class="rail-markers" data-rail-markers></div>
+      <div class="rail-tooltip" data-rail-tooltip></div>
+    </aside>
+
+    <main class="page-shell">
+      <section class="demo-hero">
+        <div>
+          <p class="eyebrow">Reading rail demo</p>
+          <h1>Fused progress and scrollbar</h1>
+          <p class="hero-copy">
+            A standalone prototype for the article page. The right rail combines total scroll range,
+            read progress, a current-position endpoint, section markers, and a contextual heading label.
+          </p>
+        </div>
+        <div class="hero-card">
+          <span>Desktop interaction</span>
+          <strong>Rail</strong>
+          <span>Hover, drag, and jump between sections.</span>
+        </div>
+      </section>
+
+      <div class="article-layout">
+        <article>
+          <p class="eyebrow">Article body</p>
+          <h2 id="overview">Overview</h2>
+          <p>
+            The rail treats the page as a vertical reading map. A quiet base line represents the total
+            article, a brighter line from the top represents progress, and the thicker pill represents
+            the current read position. The endpoint pill can be dragged without smooth-scroll delay.
+          </p>
+          <p>
+            The interaction is intentionally calm while reading. It becomes more expressive only when
+            the user scrolls, hovers near the rail, drags the endpoint, or points at a section marker.
+          </p>
+
+          <h3 id="state-model">State model</h3>
+          <p>
+            The visual states are idle, scrolling, hover, dragging, and settling. Idle stays visible but
+            low contrast. Hover raises contrast and makes the active label available. Dragging expands
+            the endpoint and pins the label to the current section.
+          </p>
+          <div class="callout">
+            The important distinction is geometric: every marker and the current progress endpoint sits
+            on the same rail axis. This keeps the control readable as a single fused component.
+          </div>
+
+          <h2 id="progress-layer">Progress layer</h2>
+          <p>
+            The read layer is drawn over the total rail from top to bottom. It is slightly thicker than
+            the base line, and the endpoint pill sits across its lower edge. This keeps progress readable without
+            overpowering the article.
+          </p>
+          <p>
+            The color uses the Material primary tone. On a real article page, this can inherit the
+            post's dynamic color seed, which would tie the rail to the cover image or section theme.
+          </p>
+
+          <h3 id="unread-layer">Unread layer</h3>
+          <p>
+            The unread part remains as a muted outline line. It does not need a separate strong color.
+            The contrast difference between the base line and the read layer is enough to show progress.
+          </p>
+
+          <h2 id="progress-endpoint">Progress endpoint</h2>
+          <p>
+            The horizontal pill marks the lower edge of the read range. It is centered on the same axis as
+            the rail and section dots, so the entire control reads as one continuous vertical instrument.
+          </p>
+          <p>
+            In dragging state, the endpoint expands into a larger Material pill with higher elevation. Its
+            movement is direct and synchronous. Only width, shadow, and color are animated.
+          </p>
+
+          <h3 id="dragging">Dragging behavior</h3>
+          <p>
+            During drag, global smooth scrolling is temporarily disabled. This prevents queued smooth
+            scroll updates from lagging behind the pointer. On release, smooth scrolling returns for
+            marker clicks and normal anchor navigation.
+          </p>
+
+          <h2 id="markers">Section markers</h2>
+          <p>
+            Headings become nodes on the rail. Larger dots indicate higher-level sections, and smaller
+            dots indicate nested sections. Read markers pick up the primary color; unread markers remain
+            quiet.
+          </p>
+          <p>
+            A single floating tooltip is used instead of placing one label inside every marker. The
+            single-label approach is easier to clamp near the viewport edges and avoids overlapping
+            labels in dense articles.
+          </p>
+
+          <h3 id="active-label">Active label</h3>
+          <p>
+            The label is intentionally transient. It stays open while hovering a section dot or the
+            label itself, and when the progress endpoint rests on a section dot. Passing a section while
+            scrolling only triggers a short, smooth reveal before it fades back out.
+          </p>
+
+          <h2 id="mobile">Mobile behavior</h2>
+          <p>
+            On narrow screens, the rail is hidden and the top progress strip returns. This is a practical
+            compromise: side labels have little room on mobile, and a fixed right-side control is easy to
+            hit accidentally during touch scrolling.
+          </p>
+          <p>
+            The same progress variable can drive both desktop rail and mobile top strip, so the
+            implementation does not need two separate progress systems.
+          </p>
+
+          <h2 id="reduced-motion">Reduced motion</h2>
+          <p>
+            When reduced motion is requested, the rail should still be fully functional. It should remove
+            scale and slide transitions while preserving opacity and direct drag behavior.
+          </p>
+          <p>
+            This keeps the component accessible without giving up the Material interaction model for
+            users who want motion.
+          </p>
+
+          <h2 id="implementation-notes">Implementation notes</h2>
+          <p>
+            The prototype is intentionally self-contained. The production version can reuse the same
+            metrics logic in the Astro scroll component and replace the existing top progress bar on
+            desktop article pages.
+          </p>
+          <p>
+            The next useful iteration would be testing it against real post titles, long Chinese
+            headings, and dense heading structures to tune tooltip width, marker density, and color
+            contrast.
+          </p>
+        </article>
+
+        <aside class="sticky-note">
+          <strong>What to inspect</strong>
+          Scroll the article, hover the rail, drag the pill, and hover section dots. The top progress bar
+          is intentionally only used below mobile width.
+        </aside>
+      </div>
+    </main>
+
+    <script>
+      const doc = document.documentElement;
+      const body = document.body;
+      const rail = document.querySelector("[data-reading-rail]");
+      const track = document.querySelector("[data-rail-track]");
+      const thumb = document.querySelector("[data-rail-thumb]");
+      const markers = document.querySelector("[data-rail-markers]");
+      const tooltip = document.querySelector("[data-rail-tooltip]");
+      const mobileProgress = document.querySelector(".mobile-progress");
+      const state = {
+        dragging: false,
+        dragStartY: 0,
+        dragStartScroll: 0,
+        metrics: null,
+        activeId: "",
+        hoverMarker: null,
+        tooltipHover: false,
+        progressMarkerId: "",
+        previousThumbOffset: null,
+        settleTimer: 0,
+        hideTimer: 0,
+        stateTimer: 0,
+        scrollBehavior: ""
+      };
+      const progressLockDistance = 9;
+      const progressEdgeRelease = 0.012;
+      const tooltipFlashMs = 860;
+
+      function clamp(value, min, max) {
+        return Math.min(max, Math.max(min, value));
+      }
+
+      function getMetrics() {
+        const scrollHeight = Math.max(doc.scrollHeight, body.scrollHeight);
+        const viewportHeight = window.innerHeight || doc.clientHeight;
+        const maxScroll = Math.max(0, scrollHeight - viewportHeight);
+        const rect = track.getBoundingClientRect();
+        const progress = maxScroll > 0 ? clamp(window.scrollY / maxScroll, 0, 1) : 0;
+        const thumbTravel = rect.height;
+        return {
+          maxScroll,
+          progress,
+          trackTop: rect.top,
+          trackHeight: rect.height,
+          thumbTravel,
+          thumbOffset: rect.height * progress
+        };
+      }
+
+      function setRailState(nextState) {
+        if (!rail || state.dragging) return;
+        rail.dataset.state = nextState;
+      }
+
+      function showTransientState() {
+        if (!rail || state.dragging || rail.matches(":hover")) return;
+        rail.dataset.state = "scrolling";
+        window.clearTimeout(state.stateTimer);
+        state.stateTimer = window.setTimeout(() => {
+          if (!state.dragging && !rail.matches(":hover")) rail.dataset.state = "idle";
+        }, 760);
+      }
+
+      function settleRailToIdle(delay = 520) {
+        window.clearTimeout(state.settleTimer);
+        rail.dataset.state = "scrolling";
+        state.settleTimer = window.setTimeout(() => {
+          if (!state.dragging) rail.dataset.state = "idle";
+        }, delay);
+      }
+
+      function shouldKeepTooltip() {
+        return Boolean(state.hoverMarker || state.tooltipHover || state.progressMarkerId);
+      }
+
+      function showTooltip(text, y, options = {}) {
+        if (!tooltip || !text) return;
+        const persistent = Boolean(options.persistent);
+        const duration = options.duration ?? tooltipFlashMs;
+        const railRect = rail.getBoundingClientRect();
+        const inset = 28;
+        const clampedY = clamp(y - railRect.top, inset, railRect.height - inset);
+        rail.style.setProperty("--rail-tooltip-y", `${clampedY}px`);
+        tooltip.textContent = text;
+        tooltip.dataset.visible = "true";
+        window.clearTimeout(state.hideTimer);
+
+        if (!persistent) {
+          state.hideTimer = window.setTimeout(() => {
+            if (!shouldKeepTooltip()) tooltip.dataset.visible = "false";
+          }, duration);
+        }
+      }
+
+      function hideTooltipSoon() {
+        window.clearTimeout(state.hideTimer);
+        state.hideTimer = window.setTimeout(() => {
+          if (!shouldKeepTooltip()) tooltip.dataset.visible = "false";
+        }, 180);
+      }
+
+      function hideTooltipNow() {
+        window.clearTimeout(state.hideTimer);
+        if (!state.hoverMarker && !state.tooltipHover) tooltip.dataset.visible = "false";
+      }
+
+      function getHeadings() {
+        return [...document.querySelectorAll("article h2[id], article h3[id]")];
+      }
+
+      function updateActiveMarker(metrics) {
+        const markerList = [...markers.querySelectorAll("[data-marker-id]")];
+        if (!markerList.length) return;
+        const activeOffset = metrics.thumbOffset + 1;
+        let active = null;
+        let progressMarker = null;
+        let progressDistance = Number.POSITIVE_INFINITY;
+
+        markerList.forEach((marker) => {
+          const heading = document.getElementById(marker.dataset.markerId);
+          if (!heading) return;
+          const markerOffset = getMarkerOffset(marker, metrics);
+          const distance = Math.abs(markerOffset - metrics.thumbOffset);
+          const isRead = metrics.maxScroll <= 0 || markerOffset <= activeOffset;
+          const canLockAtProgress =
+            marker.dataset.markerClamped !== "true" &&
+            metrics.progress > progressEdgeRelease &&
+            metrics.progress < 1 - progressEdgeRelease;
+          marker.dataset.read = String(isRead);
+          marker.dataset.atProgress = "false";
+          if (markerOffset <= activeOffset) active = marker;
+          if (canLockAtProgress && distance <= progressLockDistance && distance < progressDistance) {
+            progressMarker = marker;
+            progressDistance = distance;
+          }
+        });
+
+        markerList.forEach((marker) => {
+          marker.dataset.active = String(marker === active);
+          marker.dataset.atProgress = String(marker === progressMarker);
+        });
+
+        state.activeId = active?.dataset.markerId || "";
+        state.progressMarkerId = progressMarker?.dataset.markerId || "";
+      }
+
+      function updateRail(show = false) {
+        const previousThumbOffset = state.previousThumbOffset;
+        const previousProgressMarkerId = state.progressMarkerId;
+        const metrics = getMetrics();
+        state.metrics = metrics;
+        rail.dataset.overflow = String(metrics.maxScroll > 2);
+        rail.style.setProperty("--rail-progress", String(metrics.progress));
+        rail.style.setProperty("--rail-thumb-offset", `${metrics.thumbOffset}px`);
+        mobileProgress.style.setProperty("--rail-progress", String(metrics.progress));
+        updateActiveMarker(metrics);
+
+        if (show) {
+          showTransientState();
+          const isHardEdge = metrics.progress <= progressEdgeRelease || metrics.progress >= 1 - progressEdgeRelease;
+          if (isHardEdge && !state.hoverMarker && !state.tooltipHover) {
+            hideTooltipNow();
+            state.previousThumbOffset = metrics.thumbOffset;
+            return;
+          }
+
+          const progressMarker = state.progressMarkerId
+            ? markers.querySelector(`[data-marker-id="${CSS.escape(state.progressMarkerId)}"]`)
+            : null;
+          if (state.dragging && !progressMarker) {
+            hideTooltipNow();
+            state.previousThumbOffset = metrics.thumbOffset;
+            return;
+          }
+
+          const crossedMarker = !state.dragging && !progressMarker ? getCrossedMarker(previousThumbOffset, metrics) : null;
+          const markerToShow = progressMarker || crossedMarker;
+
+          if (markerToShow) {
+            showTooltip(markerToShow.dataset.label, getMarkerCenterY(markerToShow), {
+              persistent: Boolean(progressMarker),
+              duration: progressMarker ? tooltipFlashMs : 520
+            });
+          } else if (previousProgressMarkerId && !state.progressMarkerId && !shouldKeepTooltip()) {
+            hideTooltipSoon();
+          }
+        }
+        state.previousThumbOffset = metrics.thumbOffset;
+      }
+
+      function getMarkerCenterY(marker) {
+        const rect = marker.getBoundingClientRect();
+        return rect.top + rect.height / 2;
+      }
+
+      function getMarkerOffset(marker, metrics) {
+        const markerY = Number.parseFloat(marker.style.getPropertyValue("--marker-y")) || 0;
+        return (markerY / 100) * metrics.trackHeight;
+      }
+
+      function getCrossedMarker(previousThumbOffset, metrics) {
+        if (!Number.isFinite(previousThumbOffset)) return null;
+        const markerList = [...markers.querySelectorAll("[data-marker-id]")];
+        const low = Math.min(previousThumbOffset, metrics.thumbOffset) - 1;
+        const high = Math.max(previousThumbOffset, metrics.thumbOffset) + 1;
+        const crossed = markerList
+          .map((marker) => ({ marker, offset: getMarkerOffset(marker, metrics) }))
+          .filter(({ offset }) => offset >= low && offset <= high)
+          .sort((a, b) => Math.abs(a.offset - metrics.thumbOffset) - Math.abs(b.offset - metrics.thumbOffset))[0]?.marker;
+
+        return crossed || null;
+      }
+
+      function rebuildMarkers() {
+        markers.textContent = "";
+        const metrics = getMetrics();
+        const denominator = Math.max(1, metrics.maxScroll);
+
+        getHeadings().forEach((heading) => {
+          const marker = document.createElement("button");
+          const top = heading.getBoundingClientRect().top + window.scrollY;
+          const level = heading.tagName === "H2" ? "2" : "3";
+          marker.type = "button";
+          marker.className = "rail-marker";
+          marker.dataset.markerId = heading.id;
+          marker.dataset.label = heading.textContent.trim();
+          marker.dataset.level = level;
+          const rawRatio = top / denominator;
+          marker.dataset.markerClamped = String(rawRatio < 0 || rawRatio > 1);
+          marker.style.setProperty("--marker-y", `${clamp(rawRatio, 0, 1) * 100}%`);
+          marker.setAttribute("aria-label", heading.textContent.trim());
+
+          marker.addEventListener("pointerenter", () => {
+            if (state.dragging) return;
+            state.hoverMarker = marker;
+            showTooltip(marker.dataset.label, getMarkerCenterY(marker), { persistent: true });
+          });
+          marker.addEventListener("pointerleave", () => {
+            if (state.dragging) {
+              state.hoverMarker = null;
+              return;
+            }
+            state.hoverMarker = null;
+            const progressMarker = state.progressMarkerId
+              ? markers.querySelector(`[data-marker-id="${CSS.escape(state.progressMarkerId)}"]`)
+              : null;
+            if (progressMarker) {
+              showTooltip(progressMarker.dataset.label, getMarkerCenterY(progressMarker), { persistent: true });
+            } else {
+              hideTooltipSoon();
+            }
+          });
+          marker.addEventListener("click", () => {
+            scrollToMarker(marker);
+          });
+
+          markers.append(marker);
+        });
+
+        updateRail();
+      }
+
+      function jumpToPointer(clientY, metrics) {
+        const y = clientY - metrics.trackTop;
+        const ratio = metrics.trackHeight > 0 ? clamp(y / metrics.trackHeight, 0, 1) : 0;
+        window.scrollTo({
+          top: ratio * metrics.maxScroll,
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"
+        });
+      }
+
+      function scrollToMarker(marker) {
+        const metrics = getMetrics();
+        const markerOffset = getMarkerOffset(marker, metrics);
+        const ratio = metrics.trackHeight > 0 ? clamp(markerOffset / metrics.trackHeight, 0, 1) : 0;
+        window.scrollTo({
+          top: ratio * metrics.maxScroll,
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"
+        });
+      }
+
+      function isThumbHit(clientY, metrics) {
+        const pointerOffset = clientY - metrics.trackTop;
+        return Math.abs(pointerOffset - metrics.thumbOffset) <= 28;
+      }
+
+      function setImmediateScroll(top) {
+        doc.scrollTop = top;
+        body.scrollTop = top;
+        window.scrollTo({ top, left: 0, behavior: "auto" });
+      }
+
+      function startDrag(clientY, metrics) {
+        state.dragging = true;
+        state.hoverMarker = null;
+        state.dragStartY = clientY;
+        state.dragStartScroll = window.scrollY;
+        state.metrics = metrics;
+        state.scrollBehavior = doc.style.scrollBehavior;
+        doc.style.scrollBehavior = "auto";
+        doc.dataset.railDragging = "true";
+        rail.dataset.state = "dragging";
+        updateRail(true);
+      }
+
+      function moveDrag(clientY) {
+        if (!state.dragging || !state.metrics) return;
+        state.hoverMarker = null;
+        const metrics = state.metrics;
+        const delta = clientY - state.dragStartY;
+        const ratio = metrics.thumbTravel > 0 ? delta / metrics.thumbTravel : 0;
+        const nextScroll = clamp(state.dragStartScroll + ratio * metrics.maxScroll, 0, metrics.maxScroll);
+        setImmediateScroll(nextScroll);
+        updateRail(true);
+      }
+
+      function finishDrag() {
+        if (!state.dragging) return;
+        state.dragging = false;
+        state.hoverMarker = null;
+        doc.style.scrollBehavior = state.scrollBehavior;
+        delete doc.dataset.railDragging;
+        updateRail(true);
+        settleRailToIdle();
+        if (!state.progressMarkerId) hideTooltipNow();
+      }
+
+      track.addEventListener("pointerdown", (event) => {
+        if (event.button !== 0) return;
+        const metrics = getMetrics();
+        if (metrics.maxScroll <= 2) return;
+        event.preventDefault();
+        if (event.target === thumb || isThumbHit(event.clientY, metrics)) {
+          startDrag(event.clientY, metrics);
+          track.setPointerCapture?.(event.pointerId);
+        } else {
+          jumpToPointer(event.clientY, metrics);
+        }
+      });
+
+      window.addEventListener(
+        "pointermove",
+        (event) => {
+          if (!state.dragging) return;
+          event.preventDefault();
+          moveDrag(event.clientY);
+        },
+        { passive: false }
+      );
+
+      window.addEventListener("pointerup", finishDrag);
+      window.addEventListener("pointercancel", finishDrag);
+
+      rail.addEventListener("pointerenter", () => {
+        if (state.dragging) return;
+        window.clearTimeout(state.settleTimer);
+        rail.dataset.state = "hover";
+        const progressMarker = state.progressMarkerId
+          ? markers.querySelector(`[data-marker-id="${CSS.escape(state.progressMarkerId)}"]`)
+          : null;
+        if (progressMarker) {
+          showTooltip(progressMarker.dataset.label, getMarkerCenterY(progressMarker), { persistent: true });
+        }
+      });
+
+      rail.addEventListener("pointerleave", () => {
+        if (state.dragging) return;
+        window.clearTimeout(state.settleTimer);
+        rail.dataset.state = "idle";
+        hideTooltipSoon();
+      });
+
+      rail.addEventListener("pointermove", () => {
+        if (state.dragging) return;
+        if (rail.dataset.state === "scrolling") {
+          window.clearTimeout(state.settleTimer);
+          rail.dataset.state = "hover";
+        }
+      });
+
+      tooltip.addEventListener("pointerenter", () => {
+        if (tooltip.dataset.visible !== "true") return;
+        state.tooltipHover = true;
+        window.clearTimeout(state.hideTimer);
+      });
+
+      tooltip.addEventListener("pointerleave", () => {
+        state.tooltipHover = false;
+        hideTooltipSoon();
+      });
+
+      window.addEventListener(
+        "scroll",
+        () => {
+          updateRail(true);
+        },
+        { passive: true }
+      );
+
+      window.addEventListener("resize", () => {
+        rebuildMarkers();
+        updateRail();
+      });
+
+      rebuildMarkers();
+      updateRail();
+    </script>
+  </body>
+</html>

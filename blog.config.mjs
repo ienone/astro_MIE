@@ -80,7 +80,7 @@ const blogConfig = {
     cardView: true,
     cardViewScreenWidth: false,
     layoutBackgroundBlur: true,
-    eyebrow: "个人静态博客实验场"
+    eyebrow: "TO BE CONTINUED……"
   },
 
   mainSections: ["articles", "notes", "reviews"],

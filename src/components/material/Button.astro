@@ -1,0 +1,55 @@
+---
+import Icon from "../Icon.astro";
+
+interface Props {
+  variant?: "text" | "tonal";
+  icon?: string;
+  trailingIcon?: boolean;
+  class?: string;
+  href?: string;
+  target?: string;
+  type?: "button" | "submit" | "reset";
+  style?: Record<string, string> | string;
+  "aria-label"?: string;
+  "aria-controls"?: string;
+  "aria-expanded"?: string;
+  "aria-pressed"?: string;
+  [key: string]: unknown;
+}
+
+const {
+  variant = "tonal",
+  icon,
+  trailingIcon = false,
+  class: className,
+  type = "button",
+  "aria-label": ariaLabel,
+  "aria-controls": ariaControls,
+  "aria-expanded": ariaExpanded,
+  "aria-pressed": ariaPressed,
+  ...attrs
+} = Astro.props;
+const hostClass = ["mie-material-button", className].filter(Boolean).join(" ");
+const hasIcon = Boolean(icon);
+const sharedAttrs = {
+  ...attrs,
+  class: hostClass,
+  type,
+  "has-icon": hasIcon ? true : undefined,
+  "trailing-icon": trailingIcon ? true : undefined
+};
+---
+
+{
+  variant === "text" ? (
+    <md-text-button {...sharedAttrs} aria-label={ariaLabel} aria-controls={ariaControls} aria-expanded={ariaExpanded} aria-pressed={ariaPressed}>
+      {icon && <span slot="icon" class="mie-material-button__icon"><Icon name={icon} /></span>}
+      <slot />
+    </md-text-button>
+  ) : (
+    <md-filled-tonal-button {...sharedAttrs} aria-label={ariaLabel} aria-controls={ariaControls} aria-expanded={ariaExpanded} aria-pressed={ariaPressed}>
+      {icon && <span slot="icon" class="mie-material-button__icon"><Icon name={icon} /></span>}
+      <slot />
+    </md-filled-tonal-button>
+  )
+}

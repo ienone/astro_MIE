@@ -1,0 +1,29 @@
+<script>
+  import "@material/web/button/filled-tonal-button.js";
+  import "@material/web/button/text-button.js";
+  import "@material/web/chips/assist-chip.js";
+  import "@material/web/iconbutton/filled-tonal-icon-button.js";
+  import "@material/web/ripple/ripple.js";
+  import "@material/web/textfield/outlined-text-field.js";
+
+  const ariaAttributeMap = {
+    "data-aria-label": "aria-label",
+    "data-aria-controls": "aria-controls",
+    "data-aria-expanded": "aria-expanded",
+    "data-aria-pressed": "aria-pressed"
+  };
+
+  function syncMaterialAriaAttributes(root = document) {
+    Object.entries(ariaAttributeMap).forEach(([source, target]) => {
+      root.querySelectorAll(`[${source}]`).forEach((element) => {
+        const value = element.getAttribute(source);
+        if (value !== null) element.setAttribute(target, value);
+      });
+    });
+  }
+
+  queueMicrotask(() => syncMaterialAriaAttributes());
+  window.requestAnimationFrame(() => syncMaterialAriaAttributes());
+  document.addEventListener("DOMContentLoaded", () => syncMaterialAriaAttributes(), { once: true });
+  document.addEventListener("astro:page-load", () => syncMaterialAriaAttributes());
+</script>

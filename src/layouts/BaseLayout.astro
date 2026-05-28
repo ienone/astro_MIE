@@ -4,8 +4,11 @@ import Analytics from "../components/Analytics.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import ImageLightbox from "../components/ImageLightbox.astro";
+import MaterialWeb from "../components/MaterialWeb.astro";
 import PageEffects from "../components/PageEffects.astro";
+import ScrollSystem from "../components/ScrollSystem.astro";
 import SearchOverlay from "../components/SearchOverlay.astro";
+import { createMaterialColorStyle } from "../lib/material-colors";
 import { siteConfig } from "../lib/site";
 import "katex/dist/katex.min.css";
 import "../styles/global.css";
@@ -37,11 +40,16 @@ const headerLayout = siteConfig.theme?.header?.layout ?? "fixed";
 const searchEnabled = siteConfig.features?.search !== false;
 const imageZoomEnabled = siteConfig.features?.imageZoom !== false;
 const verification = siteConfig.verification ?? {};
+const siteMaterialColorStyle = createMaterialColorStyle(siteConfig.assets.defaultThemeColor);
+const lightThemeColor = siteMaterialColorStyle["--mie-light-surface"] ?? "#fafdfa";
+const darkThemeColor = siteMaterialColorStyle["--mie-dark-surface"] ?? "#191c1b";
 ---
 
 <!doctype html>
 <html
   lang={siteConfig.language || "en"}
+  class="mie-dynamic-color"
+  style={siteMaterialColorStyle}
   data-default-appearance={defaultAppearance}
   data-auto-switch-appearance={String(autoSwitchAppearance)}
   data-header-layout={headerLayout}
@@ -66,12 +74,13 @@ const verification = siteConfig.verification ?? {};
     {verification.pinterest && <meta name="p:domain_verify" content={verification.pinterest} />}
     {verification.yandex && <meta name="yandex-verification" content={verification.yandex} />}
     {verification.fediverse && <meta name="fediverse:creator" content={verification.fediverse} />}
-    <meta name="theme-color" content="#f8f3e7" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#171b18" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content={lightThemeColor} media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content={darkThemeColor} media="(prefers-color-scheme: dark)" />
     <Analytics />
     <ClientRouter fallback="animate" />
   </head>
-  <body>
+  <body class="mie-dynamic-color">
+    <MaterialWeb />
     <script is:inline>
       function applyStoredTheme() {
         const storedTheme = localStorage.getItem("theme");
@@ -104,5 +113,6 @@ const verification = siteConfig.verification ?? {};
     {searchEnabled && <SearchOverlay />}
     {imageZoomEnabled && <ImageLightbox />}
     <PageEffects />
+    <ScrollSystem />
   </body>
 </html>

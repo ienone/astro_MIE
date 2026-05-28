@@ -7,11 +7,14 @@ sections, and default media are examples until a downstream blog replaces them.
 ## Design Direction
 
 - Material 3 Expressive inspired color, motion, and surface layering.
+- Material semantic tokens and local dynamic-color aliases are the styling foundation.
 - Readable long-form article layouts with strong typography and generous spacing.
 - Config-driven navigation with support for dropdown groups.
 - Article-level theme colors applied to cards, heroes, links, pagination, and related content.
 - Heavy blurred hero backgrounds that use the post or site background image as ambience.
 - Portable MDX article blocks for repeated content structures.
+
+Detailed implementation direction now lives in `docs/material-design-system.md`.
 
 ## Content Model
 
