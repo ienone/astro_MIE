@@ -1,8 +1,8 @@
 .pswp {
-  --pswp-bg: rgba(10, 13, 12, 0.9);
-  --pswp-icon-color: #fffdf7;
-  --pswp-icon-color-secondary: rgba(255, 253, 247, 0.72);
-  --pswp-placeholder-bg: rgba(255, 253, 247, 0.08);
+  --pswp-bg: color-mix(in srgb, var(--md-sys-color-scrim) 86%, var(--md-sys-color-surface) 14%);
+  --pswp-icon-color: var(--md-sys-color-inverse-on-surface);
+  --pswp-icon-color-secondary: color-mix(in srgb, var(--md-sys-color-inverse-on-surface) 72%, transparent);
+  --pswp-placeholder-bg: color-mix(in srgb, var(--md-sys-color-inverse-on-surface) 8%, transparent);
   backdrop-filter: blur(14px) saturate(1.08);
 }
 
@@ -15,7 +15,7 @@
 
 .pswp__button:hover,
 .pswp__button:focus-visible {
-  background: rgba(255, 253, 247, 0.14);
+  background: color-mix(in srgb, var(--md-sys-color-inverse-on-surface) 14%, transparent);
   transform: translateY(-1px);
 }
 
@@ -23,7 +23,7 @@
   display: inline-grid;
   width: auto;
   min-width: 54px;
-  color: #fffdf7;
+  color: var(--md-sys-color-inverse-on-surface);
   font-size: 0.9rem;
   font-weight: 800;
   place-items: center;
@@ -36,10 +36,10 @@
   bottom: 24px;
   max-width: min(760px, calc(100vw - 32px));
   transform: translateX(50%);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid color-mix(in srgb, var(--md-sys-color-inverse-on-surface) 18%, transparent);
   border-radius: 999px;
-  background: rgba(15, 18, 16, 0.62);
-  color: #fffdf7;
+  background: color-mix(in srgb, var(--md-sys-color-inverse-surface) 72%, transparent);
+  color: var(--md-sys-color-inverse-on-surface);
   font-size: 0.92rem;
   line-height: 1.5;
   padding: 8px 14px;

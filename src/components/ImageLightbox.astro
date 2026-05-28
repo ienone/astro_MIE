@@ -3,6 +3,7 @@ import "photoswipe/style.css";
 ---
 
 <script>
+  import PhotoSwipe from "photoswipe";
   import PhotoSwipeLightbox from "photoswipe/lightbox";
 
   const lightboxWindow = window as Window &
@@ -21,15 +22,63 @@ import "photoswipe/style.css";
     return { width, height };
   }
 
+  function getImageData(image: HTMLImageElement) {
+    const src = image.currentSrc || image.src;
+    const { width, height } = getImageDimensions(image);
+    return {
+      src,
+      msrc: src,
+      width,
+      height,
+      alt: image.alt,
+      caption: getImageCaption(image)
+    };
+  }
+
+  function openPreparedImage(event: Event) {
+    const image = event.currentTarget;
+    if (!(image instanceof HTMLImageElement)) return;
+
+    const index = Number(image.dataset.lightboxIndex);
+    if (!Number.isInteger(index) || index < 0) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    lightboxWindow.__astroMiePhotoSwipe?.loadAndOpen(index);
+  }
+
+  function prepareLightboxImage(image: HTMLImageElement) {
+    image.dataset.zoomReady = "true";
+    image.setAttribute("role", "button");
+    image.setAttribute("aria-label", image.alt ? `查看图片：${image.alt}` : "查看图片");
+    if (!image.hasAttribute("tabindex")) image.tabIndex = 0;
+    if (image.dataset.lightboxReady === "true") return;
+
+    image.dataset.lightboxReady = "true";
+    image.addEventListener("click", openPreparedImage);
+    image.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      openPreparedImage(event);
+    });
+  }
+
   function setupArticleLightbox() {
     lightboxWindow.__astroMiePhotoSwipe?.destroy();
+    lightboxWindow.__astroMiePhotoSwipe = undefined;
 
-    const gallery = document.querySelector(".article-main .prose");
-    if (!(gallery instanceof HTMLElement) || !gallery.querySelector("img")) return;
+    const gallery = document.querySelector("[data-article-shell]");
+    const imageSelector = ".article-cover img:not([data-lightbox-ignore]), .article-main .prose img:not([data-lightbox-ignore])";
+    if (!(gallery instanceof HTMLElement)) return;
+
+    const images = [...gallery.querySelectorAll(imageSelector)].filter((image): image is HTMLImageElement => image instanceof HTMLImageElement);
+    if (!images.length) return;
+    images.forEach((image, index) => {
+      image.dataset.lightboxIndex = String(index);
+      prepareLightboxImage(image);
+    });
 
     const lightbox = new PhotoSwipeLightbox({
-      gallery,
-      children: "img:not([data-lightbox-ignore])",
+      dataSource: images.map(getImageData),
       bgOpacity: 0.86,
       wheelToZoom: true,
       initialZoomLevel: "fit",
@@ -41,23 +90,7 @@ import "photoswipe/style.css";
         left: viewportSize.x < 700 ? 12 : 48,
         right: viewportSize.x < 700 ? 12 : 48
       }),
-      pswpModule: () => import("photoswipe")
-    });
-
-    lightbox.addFilter("itemData", (itemData) => {
-      const image = itemData.element instanceof HTMLImageElement ? itemData.element : undefined;
-      if (!image) return itemData;
-
-      const { width, height } = getImageDimensions(image);
-      return {
-        ...itemData,
-        src: image.currentSrc || image.src,
-        msrc: image.currentSrc || image.src,
-        width,
-        height,
-        alt: image.alt,
-        caption: getImageCaption(image)
-      };
+      pswpModule: PhotoSwipe
     });
 
     lightbox.on("uiRegister", () => {

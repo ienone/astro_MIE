@@ -368,23 +368,50 @@
     }
 
     function applyTocState(hidden) {
+      const toc = layout.querySelector(".toc");
       layout.dataset.tocState = hidden ? "hidden" : "visible";
-      if (toggle instanceof HTMLButtonElement) {
-        toggle.setAttribute("aria-pressed", hidden ? "true" : "false");
-        toggle.setAttribute("aria-label", hidden ? "显示目录" : "隐藏目录");
+      if (toc instanceof HTMLElement) {
+        toc.toggleAttribute("aria-hidden", hidden);
+        if ("inert" in toc) toc.inert = hidden;
       }
-      if (label instanceof HTMLElement) label.textContent = hidden ? "显示目录" : "沉浸阅读";
+      if (toggle instanceof HTMLElement) {
+        toggle.setAttribute("aria-pressed", hidden ? "true" : "false");
+        toggle.setAttribute("aria-label", hidden ? "显示目录" : "进入沉浸阅读");
+        toggle.setAttribute("title", hidden ? "显示目录" : "进入沉浸阅读");
+      }
+      if (label instanceof HTMLElement) label.textContent = hidden ? "显示目录" : "进入沉浸阅读";
     }
 
     applyTocState(readStoredState());
 
-    if (!(toggle instanceof HTMLButtonElement) || toggle.dataset.tocToggleReady === "true") return;
+    if (!(toggle instanceof HTMLElement) || toggle.dataset.tocToggleReady === "true") return;
     toggle.dataset.tocToggleReady = "true";
     toggle.addEventListener("click", () => {
       const hidden = layout.dataset.tocState !== "hidden";
       applyTocState(hidden);
       writeStoredState(hidden);
       window.__astroMieUpdateArticleState?.();
+    });
+  }
+
+  function setupSeriesNav() {
+    document.querySelectorAll("[data-series-nav]").forEach((nav) => {
+      if (!(nav instanceof HTMLElement) || nav.dataset.seriesReady === "true") return;
+
+      const toggle = nav.querySelector("[data-series-toggle]");
+      if (!(toggle instanceof HTMLElement)) return;
+
+      function applySeriesState(expanded) {
+        nav.dataset.expanded = expanded ? "true" : "false";
+        toggle.setAttribute("aria-expanded", expanded ? "true" : "false");
+        toggle.setAttribute("aria-label", expanded ? "收折系列文章" : "展开系列文章");
+      }
+
+      nav.dataset.seriesReady = "true";
+      applySeriesState(nav.dataset.expanded === "true");
+      toggle.addEventListener("click", () => {
+        applySeriesState(nav.dataset.expanded !== "true");
+      });
     });
   }
 
@@ -441,6 +468,7 @@
   function initPageEffects() {
     setupRevealMotion();
     setupArticleTocToggle();
+    setupSeriesNav();
     setupArticleReading();
   }
 

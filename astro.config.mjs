@@ -54,5 +54,8 @@ export default defineConfig({
     build: {
       assetsInlineLimit: 0,
     },
+    optimizeDeps: {
+      exclude: ["photoswipe"],
+    },
   },
 });
