@@ -11,6 +11,7 @@ import {
   getPostTransitionName,
   getPostUrl,
   getPostSummary,
+  getTermMaterialColorStyle,
   readingTime,
   wordCount,
   getSectionLabel
@@ -19,11 +20,13 @@ import {
 interface Props {
   post: PostEntry;
   compact?: boolean;
+  variant?: "standard" | "compact";
   showSummary?: boolean;
   showMeta?: boolean;
 }
 
-const { post, compact = false, showSummary = true, showMeta = true } = Astro.props;
+const { post, compact = false, variant, showSummary = true, showMeta = true } = Astro.props;
+const isCompact = variant ? variant === "compact" : compact;
 const image = getPostImage(post);
 const url = getPostUrl(post);
 const summary = getPostSummary(post);
@@ -36,7 +39,7 @@ const titleTransitionName = getPostTransitionName(post, "title");
 ---
 
 <article
-  class:list={["post-card", "mie-dynamic-color", { compact }]}
+  class:list={["post-card", "mie-dynamic-color", isCompact ? "post-card--compact" : "post-card--standard", { compact: isCompact }]}
   style={style}
   data-post-card
   data-post-transition-cover={coverTransitionName}
@@ -67,7 +70,7 @@ const titleTransitionName = getPostTransitionName(post, "title");
           loading="lazy"
           decoding="async"
           widths={[360, 540, 720, 960]}
-          sizes={compact ? "(min-width: 900px) 33vw, 50vw" : "(min-width: 900px) 360px, 100vw"}
+          sizes={isCompact ? "(min-width: 900px) 332px, 100vw" : "(min-width: 900px) 372px, 100vw"}
           fit="cover"
           position={imagePosition}
           style={{ objectPosition: imagePosition }}
@@ -94,8 +97,8 @@ const titleTransitionName = getPostTransitionName(post, "title");
       {showSummary && summary && <p>{summary}</p>}
       {showMeta && (
         <div class="meta-row">
-          <span>{stats}</span>
-          {post.data.tags.slice(0, 3).map((tag) => <span>{tag}</span>)}
+          <span class="meta-stat">{stats}</span>
+          {post.data.tags.slice(0, 3).map((tag) => <span class="tag-pill mie-dynamic-color" style={getTermMaterialColorStyle("tags", tag)}>{tag}</span>)}
         </div>
       )}
     </div>

@@ -11,6 +11,7 @@ const listConfig = siteConfig.list ?? {};
 const pageSize = getPagerSize();
 const pagePosts = getPageItems(posts, 1, pageSize);
 const totalPages = getTotalPages(posts, pageSize);
+const postListVariant = listConfig.showCards === false || listConfig.cardView === false ? "list" : "grid";
 ---
 
 <BaseLayout title="All posts" description="Browse all Markdown and MDX posts by publication date.">
@@ -18,7 +19,7 @@ const totalPages = getTotalPages(posts, pageSize);
   <section class="content-section">
     <PostList
       posts={pagePosts}
-      compact={listConfig.cardView === false}
+      variant={postListVariant}
       showSummary={listConfig.showSummary !== false}
       showCards={listConfig.showCards !== false}
       groupByYear={listConfig.groupByYear === true}

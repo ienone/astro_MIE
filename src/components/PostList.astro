@@ -1,11 +1,12 @@
 ---
 import PostCard from "./PostCard.astro";
-import Ripple from "./material/Ripple.astro";
-import { formatDate, getArchiveGroups, getPostMaterialColorStyle, getPostUrl, type PostEntry } from "../lib/posts";
+import PostListItem from "./PostListItem.astro";
+import { getArchiveGroups, type PostEntry } from "../lib/posts";
 
 interface Props {
   posts: PostEntry[];
   compact?: boolean;
+  variant?: "grid" | "compact-grid" | "list";
   showSummary?: boolean;
   showCards?: boolean;
   groupByYear?: boolean;
@@ -15,18 +16,22 @@ interface Props {
 const {
   posts,
   compact = false,
+  variant,
   showSummary = true,
   showCards = true,
   groupByYear = false,
   cardViewScreenWidth = false
 } = Astro.props;
 const archiveGroups = groupByYear ? getArchiveGroups(posts) : [];
+const resolvedVariant = !showCards ? "list" : variant ?? (compact ? "compact-grid" : "grid");
+const renderCards = resolvedVariant !== "list";
+const compactCards = resolvedVariant === "compact-grid";
 ---
 
 {
-  posts.length ? showCards ? (
-    <div class:list={["post-grid", { compact, "screen-width": cardViewScreenWidth }]}>
-      {posts.map((post) => <PostCard post={post} compact={compact} showSummary={showSummary} />)}
+  posts.length ? renderCards ? (
+    <div class:list={["post-grid", `post-grid--${resolvedVariant}`, { compact: compactCards, "screen-width": cardViewScreenWidth }]}>
+      {posts.map((post) => <PostCard post={post} variant={compactCards ? "compact" : "standard"} showSummary={showSummary} />)}
     </div>
   ) : groupByYear ? (
     <div class="archive-list compact">
@@ -36,11 +41,7 @@ const archiveGroups = groupByYear ? getArchiveGroups(posts) : [];
             <h2>{year}</h2>
             <div>
               {yearPosts.map((post) => (
-                <a class="archive-item mie-dynamic-color" href={getPostUrl(post)} style={getPostMaterialColorStyle(post)}>
-                  <Ripple />
-                  <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
-                  <span>{post.data.title}</span>
-                </a>
+                <PostListItem post={post} showSummary={showSummary} />
               ))}
             </div>
           </section>
@@ -50,11 +51,7 @@ const archiveGroups = groupByYear ? getArchiveGroups(posts) : [];
   ) : (
     <div class="archive-list compact">
       {posts.map((post) => (
-        <a class="archive-item mie-dynamic-color" href={getPostUrl(post)} style={getPostMaterialColorStyle(post)}>
-          <Ripple />
-          <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
-          <span>{post.data.title}</span>
-        </a>
+        <PostListItem post={post} showSummary={showSummary} />
       ))}
     </div>
   ) : (

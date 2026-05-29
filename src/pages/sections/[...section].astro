@@ -29,11 +29,12 @@ const { section, posts } = Astro.props;
 const title = getSectionLabel(section);
 const description = getSectionDescription(section) || `Posts in the ${title} section.`;
 const termConfig = siteConfig.term ?? {};
+const postListVariant = termConfig.cardView === true ? "grid" : "compact-grid";
 ---
 
 <BaseLayout title={title} description={description}>
   {termConfig.showHero !== false && <PageHeader eyebrow="Section" title={title} description={`${description} ${posts.length} posts.`} style={getSectionMaterialColorStyle(section)} />}
   <section class="content-section">
-    <PostList posts={posts} compact={termConfig.cardView !== true} groupByYear={termConfig.groupByYear === true} cardViewScreenWidth={termConfig.cardViewScreenWidth === true} />
+    <PostList posts={posts} variant={postListVariant} groupByYear={termConfig.groupByYear === true} cardViewScreenWidth={termConfig.cardViewScreenWidth === true} />
   </section>
 </BaseLayout>

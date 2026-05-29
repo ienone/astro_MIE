@@ -54,12 +54,12 @@ const style = accent ? { "--review-accent": accent } : undefined;
     --review-accent: var(--md-sys-color-primary);
     display: grid;
     grid-template-columns: minmax(120px, 180px) minmax(0, 1fr);
-    gap: 18px;
+    gap: var(--mie-card-gap);
     border: 1px solid color-mix(in srgb, var(--review-accent) 36%, var(--md-sys-color-outline-variant));
-    border-radius: var(--md-sys-shape-corner-large);
+    border-radius: var(--mie-card-radius);
     background: color-mix(in srgb, var(--review-accent) 8%, var(--md-sys-color-surface-container));
     margin: 1.5rem 0;
-    padding: 16px;
+    padding: var(--mie-card-padding);
   }
 
   .review-card__poster {

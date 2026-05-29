@@ -1,5 +1,5 @@
 import { getCollection, type CollectionEntry } from "astro:content";
-import { createMaterialColorStyle, createMaterialColorStyleFromString } from "./material-colors";
+import { createMaterialColorStyle, createMaterialColorStyleFromString, createMorandiMaterialColorStyleFromString } from "./material-colors";
 import { getSectionConfig, siteConfig } from "./site";
 
 export type PostEntry = CollectionEntry<"posts">;
@@ -52,7 +52,7 @@ export function getPostMaterialColorStyle(post: PostEntry) {
 }
 
 export function getTermMaterialColorStyle(kind: TaxonomyKind, term: string) {
-  return createMaterialColorStyleFromString(`${kind}:${term}`, siteConfig.assets.defaultThemeColor);
+  return createMorandiMaterialColorStyleFromString(`${kind}:${term}`, siteConfig.assets.defaultThemeColor);
 }
 
 export function getSectionMaterialColorStyle(section: string) {

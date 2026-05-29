@@ -1,0 +1,53 @@
+---
+import OptimizedImage from "./OptimizedImage.astro";
+import Ripple from "./material/Ripple.astro";
+import {
+  formatDate,
+  getPostImage,
+  getPostImagePosition,
+  getPostMaterialColorStyle,
+  getPostSummary,
+  getPostUrl,
+  getSectionLabel,
+  readingTime,
+  wordCount,
+  type PostEntry
+} from "../lib/posts";
+
+interface Props {
+  post: PostEntry;
+  showSummary?: boolean;
+}
+
+const { post, showSummary = true } = Astro.props;
+const image = getPostImage(post);
+const imagePosition = getPostImagePosition(post);
+const summary = getPostSummary(post);
+const stats = `${wordCount(post.body).toLocaleString("en-US")} words · ${readingTime(post.body)}`;
+---
+
+<a class="archive-item archive-item--rich mie-dynamic-color" href={getPostUrl(post)} style={getPostMaterialColorStyle(post)}>
+  <Ripple />
+  <span class="archive-item-media" aria-hidden="true">
+    <OptimizedImage
+      src={image}
+      alt=""
+      loading="lazy"
+      decoding="async"
+      widths={[180, 260, 360, 520]}
+      sizes="(min-width: 760px) 180px, 100vw"
+      fit="cover"
+      position={imagePosition}
+      style={{ objectPosition: imagePosition }}
+    />
+  </span>
+  <span class="archive-item-body">
+    <span class="archive-item-kicker">
+      <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
+      <span>{getSectionLabel(post.data.section)}</span>
+    </span>
+    <span class="archive-item-title">{post.data.title}</span>
+    {showSummary && summary && <span class="archive-item-summary">{summary}</span>}
+    <span class="archive-item-meta">{stats}</span>
+  </span>
+</a>

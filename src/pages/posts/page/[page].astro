@@ -21,6 +21,7 @@ export async function getStaticPaths() {
 const { page, posts, totalPages } = Astro.props;
 const listConfig = siteConfig.list ?? {};
 const pagePosts = getPageItems(posts, page, getPagerSize());
+const postListVariant = listConfig.showCards === false || listConfig.cardView === false ? "list" : "grid";
 ---
 
 <BaseLayout title={`All posts · Page ${page}`} description="Browse all Markdown and MDX posts by publication date.">
@@ -28,7 +29,7 @@ const pagePosts = getPageItems(posts, page, getPagerSize());
   <section class="content-section">
     <PostList
       posts={pagePosts}
-      compact={listConfig.cardView === false}
+      variant={postListVariant}
       showSummary={listConfig.showSummary !== false}
       showCards={listConfig.showCards !== false}
       groupByYear={listConfig.groupByYear === true}

@@ -122,6 +122,45 @@
   --scrollbar-marker-opacity: 0.54;
   --content-width: 1180px;
   --article-width: 760px;
+  --mie-page-inline-gutter: 16px;
+  --mie-scrollbar-inline-inset: max(6px, env(safe-area-inset-right));
+  --mie-scrollbar-width: 58px;
+  --mie-scrollbar-width-expanded: 68px;
+  --mie-scrollbar-clear-gap: 12px;
+  --mie-header-inline-gutter: max(
+    var(--mie-page-inline-gutter),
+    calc(var(--mie-scrollbar-inline-inset) + var(--mie-scrollbar-width-expanded) + var(--mie-scrollbar-clear-gap))
+  );
+  --mie-header-width: min(
+    var(--content-width),
+    calc(100% - var(--mie-header-inline-gutter) - var(--mie-header-inline-gutter))
+  );
+  --mie-footer-inline-gutter: var(--mie-header-inline-gutter);
+  --mie-footer-width: min(
+    var(--content-width),
+    calc(100% - var(--mie-footer-inline-gutter) - var(--mie-footer-inline-gutter))
+  );
+  --mie-card-gap: 18px;
+  --mie-card-gap-compact: 12px;
+  --mie-card-padding-compact: 12px;
+  --mie-card-padding: 16px;
+  --mie-card-padding-prominent: 18px;
+  --mie-card-radius: var(--md-sys-shape-corner-large);
+  --mie-card-radius-prominent: var(--md-sys-shape-corner-extra-large);
+  --mie-card-border-color: var(--md-sys-color-outline-variant);
+  --mie-card-surface: var(--md-sys-color-surface-container);
+  --mie-card-surface-high: var(--md-sys-color-surface-container-high);
+  --mie-card-shadow: var(--md-sys-elevation-level1);
+  --mie-card-shadow-hover: var(--md-sys-elevation-level3);
+  --mie-post-card-min: 300px;
+  --mie-post-card-max: 372px;
+  --mie-post-card-compact-min: 260px;
+  --mie-post-card-compact-max: 332px;
+  --mie-term-card-min: 180px;
+  --mie-term-card-max: 268px;
+  --mie-row-card-max: 860px;
+  --mie-archive-card-max: 1000px;
+  --mie-card-media-ratio: 16 / 9;
   --motion-fast: 160ms ease;
   --motion-medium: 260ms cubic-bezier(0.2, 0, 0, 1);
   --motion-page: 420ms cubic-bezier(0.2, 0, 0, 1);

@@ -80,18 +80,38 @@
 }
 
 .post-grid {
+  --post-card-min: var(--mie-post-card-min);
+  --post-card-max: var(--mie-post-card-max);
+  --post-card-gap: var(--mie-card-gap);
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--post-card-min)), var(--post-card-max)));
+  justify-content: center;
+  align-items: stretch;
+  gap: var(--post-card-gap);
   perspective: 1400px;
 }
 
-.post-grid.compact {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+.post-grid.compact,
+.post-grid--compact-grid {
+  --post-card-min: var(--mie-post-card-compact-min);
+  --post-card-max: var(--mie-post-card-compact-max);
+  --post-card-gap: var(--mie-card-gap-compact);
+}
+
+.post-grid.screen-width {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--post-card-min)), 1fr));
+  justify-content: stretch;
 }
 
 .post-card {
   min-width: 0;
+  width: min(100%, var(--post-card-max));
+  justify-self: center;
+}
+
+.post-grid.screen-width .post-card {
+  width: 100%;
+  justify-self: stretch;
 }
 
 .post-card-link {
@@ -99,10 +119,10 @@
   display: grid;
   height: 100%;
   overflow: hidden;
-  border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: var(--md-sys-shape-corner-extra-large);
-  background: var(--md-sys-color-surface-container);
-  box-shadow: var(--md-sys-elevation-level1);
+  border: 1px solid var(--mie-card-border-color);
+  border-radius: var(--mie-card-radius-prominent);
+  background: var(--mie-card-surface);
+  box-shadow: var(--mie-card-shadow);
   isolation: isolate;
   --md-ripple-hover-color: var(--md-sys-color-primary);
   --md-ripple-pressed-color: var(--md-sys-color-primary);
@@ -128,8 +148,8 @@
 
 .post-card-link:hover {
   transform: translateY(-6px) rotateX(1.2deg);
-  box-shadow: var(--md-sys-elevation-level3);
-  border-color: color-mix(in srgb, var(--md-sys-color-primary) 60%, var(--md-sys-color-outline-variant));
+  box-shadow: var(--mie-card-shadow-hover);
+  border-color: color-mix(in srgb, var(--md-sys-color-primary) 60%, var(--mie-card-border-color));
 }
 
 .post-card-link:hover::before {
@@ -146,12 +166,18 @@
   z-index: 2;
 }
 
+.post-card-link > md-ripple,
+.term-card > md-ripple {
+  position: absolute;
+  inset: 0;
+}
+
 .post-card-media {
   position: relative;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: var(--mie-card-media-ratio);
   overflow: hidden;
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  background: var(--md-sys-color-surface-container-high);
+  border-radius: var(--mie-card-radius-prominent) var(--mie-card-radius-prominent) 0 0;
+  background: var(--mie-card-surface-high);
   contain: paint;
 }
 
@@ -201,7 +227,12 @@
   position: relative;
   display: grid;
   gap: 10px;
-  padding: 18px;
+  padding: var(--mie-card-padding-prominent);
+}
+
+.post-card.compact .post-card-body {
+  gap: 8px;
+  padding: var(--mie-card-padding);
 }
 
 .post-card h2 {
@@ -209,6 +240,10 @@
   font-size: 1.18rem;
   line-height: 1.3;
   transition: color var(--motion-hover);
+}
+
+.post-card.compact h2 {
+  font-size: 1.08rem;
 }
 
 .post-title-transition {
@@ -235,27 +270,49 @@
 .taxonomy-row,
 .tag-strip {
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 7px;
 }
 
 .meta-row span,
 .taxonomy-row a,
 .tag-strip a {
-  border: 1px solid var(--md-sys-color-outline-variant);
+  --mie-tag-fill: color-mix(in srgb, var(--md-sys-color-surface-container-high) 78%, var(--md-sys-color-primary) 22%);
+  --mie-tag-fill-hover: color-mix(in srgb, var(--md-sys-color-surface-container-high) 68%, var(--md-sys-color-primary) 32%);
+  --mie-tag-outline: color-mix(in srgb, var(--md-sys-color-primary) 24%, var(--md-sys-color-outline-variant));
+  --mie-tag-outline-hover: color-mix(in srgb, var(--md-sys-color-primary) 34%, var(--md-sys-color-outline));
+  --mie-tag-ink: color-mix(in srgb, var(--md-sys-color-on-surface) 82%, var(--md-sys-color-primary) 18%);
+  --mie-tag-count-fill: color-mix(in srgb, var(--md-sys-color-surface-container-highest) 76%, var(--md-sys-color-primary) 24%);
+  --mie-tag-count-ink: color-mix(in srgb, var(--md-sys-color-on-surface) 72%, var(--md-sys-color-primary) 28%);
+  border: 1px solid var(--mie-tag-outline);
   border-radius: var(--md-sys-shape-corner-full);
-  background: color-mix(
-    in srgb,
-    var(--md-sys-color-surface-container-high) 76%,
-    var(--md-sys-color-primary-container)
-  );
-  color: var(--md-sys-color-on-surface-variant);
+  background: var(--mie-tag-fill);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--md-sys-color-surface) 56%, transparent),
+    0 1px 0 color-mix(in srgb, var(--md-sys-color-shadow) 4%, transparent);
+  color: var(--mie-tag-ink);
   font-size: 0.82rem;
-  padding: 6px 10px;
+  font-weight: 730;
+  line-height: 1.2;
+  padding: 6px 11px;
   transition:
     background var(--motion-hover),
     border-color var(--motion-hover),
+    box-shadow var(--motion-hover),
     color var(--motion-hover),
     transform var(--motion-hover);
+}
+
+.meta-row .meta-stat {
+  --mie-tag-fill: color-mix(in srgb, var(--md-sys-color-surface-container-high) 86%, var(--md-sys-color-surface-container-highest));
+  --mie-tag-fill-hover: color-mix(in srgb, var(--md-sys-color-surface-container-highest) 90%, var(--md-sys-color-primary-container));
+  --mie-tag-outline: var(--md-sys-color-outline-variant);
+  --mie-tag-outline-hover: color-mix(in srgb, var(--md-sys-color-outline) 72%, var(--md-sys-color-primary));
+  --mie-tag-ink: var(--md-sys-color-on-surface-variant);
+  font-weight: 690;
+}
+
+.meta-row .tag-pill {
+  white-space: nowrap;
 }
 
 .taxonomy-row a,
@@ -274,36 +331,57 @@
 .taxonomy-row .mie-material-chip,
 .tag-strip .mie-material-chip,
 .term-grid.compact .mie-material-chip {
+  --mie-tag-fill: color-mix(in srgb, var(--md-sys-color-surface-container-high) 78%, var(--md-sys-color-primary) 22%);
+  --mie-tag-fill-hover: color-mix(in srgb, var(--md-sys-color-surface-container-high) 68%, var(--md-sys-color-primary) 32%);
+  --mie-tag-outline: color-mix(in srgb, var(--md-sys-color-primary) 24%, var(--md-sys-color-outline-variant));
+  --mie-tag-outline-hover: color-mix(in srgb, var(--md-sys-color-primary) 34%, var(--md-sys-color-outline));
+  --mie-tag-ink: color-mix(in srgb, var(--md-sys-color-on-surface) 82%, var(--md-sys-color-primary) 18%);
+  --mie-tag-count-fill: color-mix(in srgb, var(--md-sys-color-surface-container-highest) 76%, var(--md-sys-color-primary) 24%);
+  --mie-tag-count-ink: color-mix(in srgb, var(--md-sys-color-on-surface) 72%, var(--md-sys-color-primary) 28%);
   --md-assist-chip-container-height: 34px;
   --md-assist-chip-container-shape: var(--md-sys-shape-corner-full);
-  --md-assist-chip-elevated-container-color: color-mix(
-    in srgb,
-    var(--md-sys-color-surface-container-high) 76%,
-    var(--md-sys-color-primary-container)
-  );
+  --md-assist-chip-elevated-container-color: var(--mie-tag-fill);
   --md-assist-chip-elevated-container-elevation: var(--md-sys-elevation-level0);
   --md-assist-chip-elevated-container-shadow-color: var(--md-sys-color-shadow);
   --md-assist-chip-elevated-focus-container-elevation: var(--md-sys-elevation-level0);
   --md-assist-chip-elevated-hover-container-elevation: var(--md-sys-elevation-level1);
   --md-assist-chip-elevated-pressed-container-elevation: var(--md-sys-elevation-level0);
-  --md-assist-chip-hover-label-text-color: var(--md-sys-color-on-primary-container);
-  --md-assist-chip-hover-leading-icon-color: var(--md-sys-color-on-primary-container);
+  --md-assist-chip-hover-label-text-color: var(--mie-tag-ink);
+  --md-assist-chip-hover-leading-icon-color: var(--mie-tag-ink);
   --md-assist-chip-hover-state-layer-color: var(--md-sys-color-primary);
-  --md-assist-chip-hover-state-layer-opacity: var(--md-sys-state-hover-opacity);
-  --md-assist-chip-label-text-color: var(--md-sys-color-on-surface);
+  --md-assist-chip-hover-state-layer-opacity: 0.06;
+  --md-assist-chip-label-text-color: var(--mie-tag-ink);
   --md-assist-chip-label-text-weight: 700;
-  --md-assist-chip-outline-color: var(--md-sys-color-outline-variant);
+  --md-assist-chip-outline-color: var(--mie-tag-outline);
   --md-assist-chip-outline-width: 1px;
-  --md-assist-chip-pressed-label-text-color: var(--md-sys-color-on-primary-container);
-  --md-assist-chip-pressed-leading-icon-color: var(--md-sys-color-on-primary-container);
+  --md-assist-chip-pressed-label-text-color: var(--mie-tag-ink);
+  --md-assist-chip-pressed-leading-icon-color: var(--mie-tag-ink);
   --md-assist-chip-pressed-state-layer-color: var(--md-sys-color-primary);
   --md-assist-chip-pressed-state-layer-opacity: var(--md-sys-state-pressed-opacity);
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  border: 1px solid var(--mie-tag-outline);
+  border-radius: var(--md-sys-shape-corner-full);
+  background: var(--mie-tag-fill);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--md-sys-color-surface) 56%, transparent),
+    0 1px 0 color-mix(in srgb, var(--md-sys-color-shadow) 4%, transparent);
+  color: var(--mie-tag-ink);
+  padding: 0 11px;
+  transition:
+    background var(--motion-hover),
+    border-color var(--motion-hover),
+    box-shadow var(--motion-hover),
+    color var(--motion-hover),
+    filter var(--motion-hover),
+    transform var(--motion-hover);
 }
 
 .post-card-link:hover .meta-row span {
-  border-color: color-mix(in srgb, var(--md-sys-color-primary) 38%, var(--md-sys-color-outline-variant));
-  background: var(--md-sys-color-secondary-container);
-  color: var(--md-sys-color-on-secondary-container);
+  border-color: var(--mie-tag-outline-hover);
+  background: var(--mie-tag-fill-hover);
+  color: var(--mie-tag-ink);
 }
 
 .tag-strip a {
@@ -318,9 +396,12 @@
 .taxonomy-row a:focus-visible,
 .tag-strip a:hover,
 .tag-strip a:focus-visible {
-  border-color: color-mix(in srgb, var(--md-sys-color-primary) 48%, var(--md-sys-color-outline));
-  background: var(--md-sys-color-primary-container);
-  color: var(--md-sys-color-on-primary-container);
+  border-color: var(--mie-tag-outline-hover);
+  background: var(--mie-tag-fill-hover);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--md-sys-color-surface) 62%, transparent),
+    0 8px 18px color-mix(in srgb, var(--md-sys-color-primary) 12%, transparent);
+  color: var(--mie-tag-ink);
   transform: translateY(-2px);
 }
 
@@ -330,8 +411,16 @@
 .tag-strip .mie-material-chip:focus-visible,
 .term-grid.compact .mie-material-chip:hover,
 .term-grid.compact .mie-material-chip:focus-visible {
+  border-color: var(--mie-tag-outline-hover);
+  background: var(--mie-tag-fill-hover);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--md-sys-color-surface) 62%, transparent),
+    0 8px 18px color-mix(in srgb, var(--md-sys-color-primary) 12%, transparent);
+  color: var(--mie-tag-ink);
+  filter: saturate(1.03) contrast(1.01);
   transform: translateY(-2px);
-  --md-assist-chip-outline-color: color-mix(in srgb, var(--md-sys-color-primary) 48%, var(--md-sys-color-outline));
+  --md-assist-chip-elevated-container-color: var(--mie-tag-fill-hover);
+  --md-assist-chip-outline-color: var(--mie-tag-outline-hover);
 }
 
 .tag-strip a > span:first-of-type {
@@ -342,8 +431,8 @@
   display: inline-grid;
   min-width: 1.65em;
   border-radius: var(--md-sys-shape-corner-full);
-  background: var(--md-sys-color-primary-container);
-  color: var(--md-sys-color-on-primary-container);
+  background: var(--mie-tag-count-fill);
+  color: var(--mie-tag-count-ink);
   font-weight: 900;
   place-items: center;
 }
@@ -354,9 +443,11 @@
   min-width: 1.65em;
   min-height: 1.65em;
   margin-left: 8px;
+  border: 1px solid color-mix(in srgb, var(--md-sys-color-primary) 16%, transparent);
   border-radius: var(--md-sys-shape-corner-full);
-  background: var(--md-sys-color-primary-container);
-  color: var(--md-sys-color-on-primary-container);
+  background: var(--mie-tag-count-fill);
+  color: var(--mie-tag-count-ink);
+  font-size: 0.78em;
   font-weight: 900;
   place-items: center;
 }
@@ -418,9 +509,13 @@
 }
 
 .term-grid {
+  --term-card-min: var(--mie-term-card-min);
+  --term-card-max: var(--mie-term-card-max);
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--term-card-min)), var(--term-card-max)));
+  justify-content: start;
+  align-items: stretch;
+  gap: var(--mie-card-gap-compact);
 }
 
 .term-grid.compact {
@@ -435,17 +530,19 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 86px;
+  width: min(100%, var(--term-card-max));
+  min-height: 82px;
+  gap: 12px;
   overflow: hidden;
-  border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: var(--md-sys-shape-corner-large);
+  border: 1px solid var(--mie-card-border-color);
+  border-radius: var(--mie-card-radius);
   background: color-mix(
     in srgb,
-    var(--md-sys-color-surface-container) 72%,
+    var(--mie-card-surface) 72%,
     var(--md-sys-color-primary-container)
   );
-  box-shadow: var(--md-sys-elevation-level1);
-  padding: 20px;
+  box-shadow: var(--mie-card-shadow);
+  padding: var(--mie-card-padding);
   --md-ripple-hover-color: var(--md-sys-color-primary);
   --md-ripple-pressed-color: var(--md-sys-color-primary);
   transition:
@@ -479,9 +576,9 @@
   background: color-mix(
     in srgb,
     var(--md-sys-color-primary-container) 78%,
-    var(--md-sys-color-surface-container)
+    var(--mie-card-surface)
   );
-  box-shadow: var(--md-sys-elevation-level3);
+  box-shadow: var(--mie-card-shadow-hover);
   transform: translateY(-4px);
 }
 

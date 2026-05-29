@@ -27,12 +27,13 @@ export async function getStaticPaths() {
 const { term, posts, page, totalPages, slug } = Astro.props;
 const termConfig = siteConfig.term ?? {};
 const pagePosts = getPageItems(posts, page, getPagerSize());
+const postListVariant = termConfig.cardView === true ? "grid" : "compact-grid";
 ---
 
 <BaseLayout title={`Series: ${term} · Page ${page}`} description={`Posts in the ${term} series.`}>
   {termConfig.showHero !== false && <PageHeader eyebrow="Series" title={term} description={`${posts.length} posts. Page ${page}.`} style={getTermMaterialColorStyle("series", term)} />}
   <section class="content-section">
-    <PostList posts={pagePosts} compact={termConfig.cardView !== true} groupByYear={termConfig.groupByYear === true} cardViewScreenWidth={termConfig.cardViewScreenWidth === true} />
+    <PostList posts={pagePosts} variant={postListVariant} groupByYear={termConfig.groupByYear === true} cardViewScreenWidth={termConfig.cardViewScreenWidth === true} />
     <PaginationNav currentPage={page} totalPages={totalPages} basePath={`/series/${slug}`} />
   </section>
 </BaseLayout>

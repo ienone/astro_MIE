@@ -6,6 +6,21 @@ export type MaterialColorStyle = Record<`--${string}`, string>;
 
 const FALLBACK_SEED = "#146b5b";
 
+const MORANDI_SEEDS = [
+  "#8fa39a",
+  "#9aa6aa",
+  "#a89c8d",
+  "#b19a9a",
+  "#9f98ac",
+  "#aaa27f",
+  "#8d9caf",
+  "#a58f98",
+  "#8f9f8a",
+  "#b0a08c",
+  "#879f9b",
+  "#a6a08f"
+];
+
 const SCHEME_ROLES = [
   "primary",
   "onPrimary",
@@ -139,6 +154,16 @@ export function createMaterialColorStyleFromString(value: string, fallbackSeed =
   const lightness = (42 + ((hash >>> 16) % 12)) / 100;
 
   return createMaterialColorStyle(hslToHex(hue, saturation, lightness));
+}
+
+export function createMorandiMaterialColorStyleFromString(value: string, fallbackSeed = FALLBACK_SEED): MaterialColorStyle {
+  const normalizedValue = value.trim();
+  if (!normalizedValue) return createMaterialColorStyle(fallbackSeed);
+
+  const hash = hashString(normalizedValue);
+  const seed = MORANDI_SEEDS[hash % MORANDI_SEEDS.length] ?? fallbackSeed;
+
+  return createMaterialColorStyle(seed);
 }
 
 function getSchemeRoles(scheme: { toJSON(): MaterialRoleMap }, theme: ReturnType<typeof themeFromSourceColor>, mode: "light" | "dark") {

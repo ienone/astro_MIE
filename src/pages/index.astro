@@ -3,7 +3,6 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import Icon from "../components/Icon.astro";
 import OptimizedImage from "../components/OptimizedImage.astro";
 import PostList from "../components/PostList.astro";
-import MaterialButton from "../components/material/Button.astro";
 import MaterialChip from "../components/material/Chip.astro";
 import MaterialIconButton from "../components/material/IconButton.astro";
 import Ripple from "../components/material/Ripple.astro";
@@ -77,7 +76,7 @@ function getSocialText(link: { label: string; displayLabel?: string }) {
         <p class="eyebrow">Browse</p>
         <h2>Popular tags</h2>
       </div>
-      <MaterialButton class="text-link" href="/tags/">All tags</MaterialButton>
+      <MaterialIconButton class="section-icon-link" icon="arrow-right" href="/tags/" aria-label="View all tags" title="View all tags" />
     </div>
     <div class="tag-strip">
       {

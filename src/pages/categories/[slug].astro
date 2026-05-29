@@ -19,12 +19,13 @@ const termConfig = siteConfig.term ?? {};
 const pageSize = getPagerSize();
 const pagePosts = getPageItems(posts, 1, pageSize);
 const totalPages = getTotalPages(posts, pageSize);
+const postListVariant = termConfig.cardView === true ? "grid" : "compact-grid";
 ---
 
 <BaseLayout title={`Category: ${term}`} description={`Posts in the ${term} category.`}>
   {termConfig.showHero !== false && <PageHeader eyebrow="Category" title={term} description={`${posts.length} posts.`} style={getTermMaterialColorStyle("categories", term)} />}
   <section class="content-section">
-    <PostList posts={pagePosts} compact={termConfig.cardView !== true} groupByYear={termConfig.groupByYear === true} cardViewScreenWidth={termConfig.cardViewScreenWidth === true} />
+    <PostList posts={pagePosts} variant={postListVariant} groupByYear={termConfig.groupByYear === true} cardViewScreenWidth={termConfig.cardViewScreenWidth === true} />
     <PaginationNav currentPage={1} totalPages={totalPages} basePath={`/categories/${Astro.params.slug}`} />
   </section>
 </BaseLayout>
