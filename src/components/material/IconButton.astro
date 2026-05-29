@@ -10,6 +10,7 @@ interface Props {
   "aria-label"?: string;
   "aria-controls"?: string;
   "aria-expanded"?: string;
+  "aria-pressed"?: string;
   title?: string;
   [key: string]: unknown;
 }
@@ -21,6 +22,7 @@ const {
   "aria-label": ariaLabel,
   "aria-controls": ariaControls,
   "aria-expanded": ariaExpanded,
+  "aria-pressed": ariaPressed,
   title,
   ...attrs
 } = Astro.props;
@@ -34,6 +36,7 @@ const hostClass = ["mie-material-icon-button", className].filter(Boolean).join("
   aria-label={ariaLabel}
   aria-controls={ariaControls}
   aria-expanded={ariaExpanded}
+  aria-pressed={ariaPressed}
   title={title ?? ariaLabel}
 >
   <Icon name={icon} />

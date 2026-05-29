@@ -1,6 +1,6 @@
 ---
 import Icon from "./Icon.astro";
-import MaterialButton from "./material/Button.astro";
+import MaterialIconButton from "./material/IconButton.astro";
 import Ripple from "./material/Ripple.astro";
 import { isExternalLink, siteConfig } from "../lib/site";
 
@@ -22,6 +22,7 @@ const footerLinks = [...defaultFooterLinks, ...(footerConfig.links ?? [])].filte
 const footerActionHrefs = new Set(footerLinks.map((link) => link.href));
 const footerSocialLinks = siteConfig.author.links.filter((link) => !footerActionHrefs.has(link.href));
 const showFooterSocial = Astro.url.pathname !== "/";
+const showFooterUtilities = (showMenu && footerLinks.length > 0) || showAppearanceSwitcher || showScrollToTop;
 
 function getSocialText(link: { label: string; displayLabel?: string }) {
   return link.displayLabel || link.label;
@@ -35,15 +36,6 @@ function getSocialText(link: { label: string; displayLabel?: string }) {
       <p>{siteConfig.description}</p>
     </div>
     <div class="footer-links">
-      {showMenu && <div class="footer-actions" aria-label="Footer links">
-        {
-          footerLinks.map((link) => (
-            <MaterialButton variant="text" href={link.href} icon={link.icon} target={isExternalLink(link.href) ? "_blank" : undefined} rel={isExternalLink(link.href) ? "noopener noreferrer" : undefined}>
-              {link.label}
-            </MaterialButton>
-          ))
-        }
-      </div>}
       {
         showMenu && showFooterSocial && footerSocialLinks.length > 0 && (
           <div class="footer-social social-links" aria-label="社交平台">
@@ -64,10 +56,24 @@ function getSocialText(link: { label: string; displayLabel?: string }) {
           </div>
         )
       }
-      {(showAppearanceSwitcher || showScrollToTop) && (
-        <div class="footer-actions footer-controls" aria-label="Footer controls">
-          {showAppearanceSwitcher && <MaterialButton variant="text" icon="sun-moon" data-theme-toggle>Theme</MaterialButton>}
-          {showScrollToTop && <MaterialButton variant="text" icon="chevron-down" data-scroll-top>Top</MaterialButton>}
+      {showFooterUtilities && (
+        <div class="footer-actions footer-controls" aria-label="Footer utilities">
+          {
+            showMenu &&
+              footerLinks.map((link) => (
+                <MaterialIconButton
+                  class="footer-icon-button"
+                  href={link.href}
+                  icon={link.icon ?? "arrow-right"}
+                  target={isExternalLink(link.href) ? "_blank" : undefined}
+                  rel={isExternalLink(link.href) ? "noopener noreferrer" : undefined}
+                  aria-label={link.label}
+                  title={link.label}
+                />
+              ))
+          }
+          {showAppearanceSwitcher && <MaterialIconButton class="footer-icon-button" icon="sun-moon" data-theme-toggle aria-label="Toggle theme" title="Toggle theme" />}
+          {showScrollToTop && <MaterialIconButton class="footer-icon-button" icon="arrow-up" data-scroll-top aria-label="Back to top" title="Back to top" />}
         </div>
       )}
       {(showCopyright || showThemeAttribution) && (

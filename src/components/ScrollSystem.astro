@@ -309,6 +309,17 @@
     root.style.setProperty("--scrollbar-thumb-offset", `${thumbOffset}px`);
   }
 
+  function updateScrollbarScene(root) {
+    const hero = document.querySelector(".article-hero");
+    if (!(hero instanceof HTMLElement)) {
+      delete root.dataset.scrollbarScene;
+      return;
+    }
+
+    const rect = hero.getBoundingClientRect();
+    root.dataset.scrollbarScene = rect.bottom > 96 ? "hero" : "content";
+  }
+
   function updateScrollbar(show = false) {
     scrollbarState.raf = 0;
     const { root, track, markers } = getScrollbarElements();
@@ -323,6 +334,7 @@
     const previousProgressMarkerId = scrollbarState.progressMarkerId;
     const metrics = getPageMetrics(track);
     scrollbarState.metrics = metrics;
+    updateScrollbarScene(root);
     root.dataset.scrollbarOverflow = String(metrics.maxScroll > 2);
     root.style.setProperty("--scrollbar-progress", String(metrics.progress));
     root.style.setProperty("--scrollbar-thumb-offset", `${metrics.thumbOffset}px`);

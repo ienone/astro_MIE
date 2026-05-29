@@ -3,7 +3,7 @@
   position: sticky;
   top: 0;
   z-index: 20;
-  width: min(var(--content-width), calc(100% - 32px));
+  width: var(--mie-header-width);
   margin: 0 auto;
   padding-top: var(--header-floating-offset);
   transform: translate3d(0, 0, 0);
@@ -27,6 +27,12 @@ body > .site-header {
 
 :root[data-scrolled="true"] .site-header {
   transform: translate3d(0, -6px, 0);
+}
+
+@media (max-width: 780px) {
+  .site-header {
+    --mie-header-inline-gutter: var(--mie-page-inline-gutter);
+  }
 }
 
 .nav-shell,

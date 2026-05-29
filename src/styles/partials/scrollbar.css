@@ -28,9 +28,9 @@ html[data-mie-scrollbar-dragging="true"] {
   --scrollbar-tooltip-y: 50%;
   position: fixed;
   inset-block: 22px;
-  inset-inline-end: max(6px, env(safe-area-inset-right));
-  z-index: 180;
-  width: 58px;
+  inset-inline-end: var(--mie-scrollbar-inline-inset);
+  z-index: 18;
+  width: var(--mie-scrollbar-width);
   opacity: 0.9;
   pointer-events: auto;
   transition:
@@ -60,7 +60,12 @@ html[data-mie-scrollbar-dragging="true"] {
 }
 
 .mie-scrollbar[data-scrollbar-state="dragging"] {
-  width: 68px;
+  width: var(--mie-scrollbar-width-expanded);
+}
+
+.mie-scrollbar[data-scrollbar-scene="hero"] {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .mie-scrollbar-track {
