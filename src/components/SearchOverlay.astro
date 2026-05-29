@@ -4,10 +4,10 @@ import MaterialTextField from "./material/TextField.astro";
 import Ripple from "./material/Ripple.astro";
 ---
 
-<dialog class="search-overlay" data-search-dialog aria-label="站内搜索" data-pagefind-ignore>
+<dialog class="search-overlay" data-search-dialog aria-labelledby="site-search-title" data-pagefind-ignore>
   <div class="search-panel">
     <form class="search-panel-head" method="dialog">
-      <label for="site-search">搜索文章</label>
+      <h2 class="search-panel-title" id="site-search-title">站内搜索</h2>
       <div class="search-panel-actions">
         <a class="search-page-link" href="/search/" data-search-page-link hidden><Ripple /><span>在搜索页中显示结果</span></a>
         <MaterialIconButton class="icon-button" icon="x" type="submit" data-search-close aria-label="关闭搜索" />
