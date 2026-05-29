@@ -232,8 +232,8 @@ const showEditAction = showEdit && Boolean(editUrl);
 
         {showPostPagination && (
           <nav class="post-pagination" aria-label="Previous and next posts" data-pagefind-ignore>
-            {previousPost && <a class="mie-dynamic-color" href={getPostUrl(previousPost)} style={getPostMaterialColorStyle(previousPost)}><Ripple /><span>{invertPagination ? "Newer post" : "Older post"}</span>{previousPost.data.title}</a>}
-            {nextPost && <a class="mie-dynamic-color" href={getPostUrl(nextPost)} style={getPostMaterialColorStyle(nextPost)}><Ripple /><span>{invertPagination ? "Older post" : "Newer post"}</span>{nextPost.data.title}</a>}
+            {previousPost && <a class="post-pagination-link post-pagination-link--previous mie-dynamic-color" href={getPostUrl(previousPost)} style={getPostMaterialColorStyle(previousPost)}><Ripple /><span>{invertPagination ? "Newer post" : "Older post"}</span>{previousPost.data.title}</a>}
+            {nextPost && <a class="post-pagination-link post-pagination-link--next mie-dynamic-color" href={getPostUrl(nextPost)} style={getPostMaterialColorStyle(nextPost)}><Ripple /><span>{invertPagination ? "Older post" : "Newer post"}</span>{nextPost.data.title}</a>}
           </nav>
         )}
 

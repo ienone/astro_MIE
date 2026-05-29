@@ -212,20 +212,44 @@
   --md-ripple-hover-color: var(--md-sys-color-primary);
   --md-ripple-pressed-color: var(--md-sys-color-primary);
   transition:
+    background var(--motion-hover),
     border-color var(--motion-hover),
-    box-shadow var(--motion-hover),
-    transform var(--motion-hover);
+    transform var(--motion-fast);
+}
+
+.search-result::before {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--md-sys-color-primary-container) 48%, transparent), transparent 70%);
+  content: '';
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-hover);
 }
 
 .search-result:hover,
 .search-result:focus-visible {
   border-color: color-mix(in srgb, var(--md-sys-color-primary) 56%, var(--md-sys-color-outline));
-  box-shadow: var(--md-sys-elevation-level1);
-  transform: translateY(-2px);
+  background: var(--md-sys-color-surface-container-high);
+}
+
+.search-result:hover::before,
+.search-result:focus-visible::before {
+  opacity: 1;
+}
+
+.search-result:active {
+  transform: scale(0.996);
 }
 
 .search-result span {
   font-weight: 800;
+  transition: color var(--motion-hover);
+}
+
+.search-result:hover span,
+.search-result:focus-visible span {
+  color: color-mix(in srgb, var(--md-sys-color-primary) 78%, var(--md-sys-color-on-surface));
 }
 
 .search-result small,

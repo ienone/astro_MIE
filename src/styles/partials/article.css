@@ -854,17 +854,15 @@
   cursor: zoom-in;
   margin-inline: auto;
   transition:
-    box-shadow var(--motion-hover),
     filter var(--motion-hover),
     transform var(--motion-hover);
 }
 
 .prose img[data-zoom-ready="true"]:hover,
 .prose img[data-zoom-ready="true"]:focus-visible {
-  box-shadow: var(--md-sys-elevation-level1);
   filter: saturate(1.06) contrast(1.02);
   outline: none;
-  transform: translateY(-2px);
+  transform: scale(1.01);
 }
 
 .prose figure {
@@ -1061,8 +1059,18 @@
   transition:
     border-color var(--motion-fast),
     background var(--motion-fast),
-    box-shadow var(--motion-fast),
     transform var(--motion-fast);
+}
+
+.post-pagination a::before,
+.archive-item::before {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--md-sys-color-primary-container) 48%, transparent), transparent 68%);
+  content: '';
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-hover);
 }
 
 .post-pagination a {
@@ -1086,9 +1094,20 @@
     var(--md-sys-color-primary) 68%,
     var(--md-sys-color-outline)
   );
-  background: var(--md-sys-color-primary-container);
-  box-shadow: var(--md-sys-elevation-level1);
-  transform: translateY(-2px);
+  background: color-mix(in srgb, var(--md-sys-color-primary-container) 72%, var(--mie-card-surface));
+}
+
+.post-pagination a:hover::before,
+.post-pagination a:focus-visible::before,
+.archive-item:hover::before,
+.archive-item:focus-visible::before {
+  opacity: 1;
+}
+
+.post-pagination a:active,
+.archive-item:active,
+.portable-button:active {
+  transform: scale(0.996);
 }
 
 .post-pagination span {
@@ -1097,6 +1116,17 @@
   font-size: 0.82rem;
   font-weight: 800;
   margin-bottom: 6px;
+  transition: transform var(--motion-hover);
+}
+
+.post-pagination-link--previous:hover span,
+.post-pagination-link--previous:focus-visible span {
+  transform: translateX(-3px);
+}
+
+.post-pagination-link--next:hover span,
+.post-pagination-link--next:focus-visible span {
+  transform: translateX(3px);
 }
 
 .related-section {
@@ -1175,6 +1205,12 @@
   font-weight: 850;
   line-height: 1.35;
   text-overflow: ellipsis;
+  transition: color var(--motion-hover);
+}
+
+.archive-item:hover .archive-item-title,
+.archive-item:focus-visible .archive-item-title {
+  color: color-mix(in srgb, var(--md-sys-color-primary) 78%, var(--md-sys-color-on-surface));
 }
 
 .archive-item-summary {

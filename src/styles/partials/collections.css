@@ -127,10 +127,9 @@
   --md-ripple-hover-color: var(--md-sys-color-primary);
   --md-ripple-pressed-color: var(--md-sys-color-primary);
   transition:
-    transform var(--motion-emphasized),
-    box-shadow var(--motion-emphasized),
     border-color var(--motion-hover),
-    background var(--motion-hover);
+    background var(--motion-hover),
+    transform var(--motion-fast);
 }
 
 .post-card-link::before {
@@ -146,18 +145,19 @@
   transition: opacity var(--motion-emphasized);
 }
 
-.post-card-link:hover {
-  transform: translateY(-6px) rotateX(1.2deg);
-  box-shadow: var(--mie-card-shadow-hover);
+.post-card-link:hover,
+.post-card-link:focus-visible {
   border-color: color-mix(in srgb, var(--md-sys-color-primary) 60%, var(--mie-card-border-color));
+  background: color-mix(in srgb, var(--mie-card-surface) 86%, var(--md-sys-color-primary-container));
 }
 
-.post-card-link:hover::before {
+.post-card-link:hover::before,
+.post-card-link:focus-visible::before {
   opacity: 1;
 }
 
 .post-card-link:active {
-  transform: translateY(-1px) scale(0.996);
+  transform: scale(0.996);
   border-color: var(--md-sys-color-primary);
 }
 
@@ -219,8 +219,10 @@
     transform var(--motion-emphasized);
 }
 
-.post-card-link:hover .post-cover-transition img {
+.post-card-link:hover .post-cover-transition img,
+.post-card-link:focus-visible .post-cover-transition img {
   filter: saturate(1.08) contrast(1.02);
+  transform: scale(1.025);
 }
 
 .post-card-body {
@@ -570,8 +572,7 @@
   transition:
     border-color var(--motion-hover),
     background var(--motion-hover),
-    box-shadow var(--motion-emphasized),
-    transform var(--motion-emphasized);
+    transform var(--motion-fast);
 }
 
 .term-card::before {
@@ -594,20 +595,22 @@
 
 .term-card:hover,
 .term-card:focus-visible {
-  border-color: color-mix(in srgb, var(--md-sys-color-primary) 48%, var(--md-sys-color-outline));
+  border-color: color-mix(in srgb, var(--md-sys-color-primary) 56%, var(--md-sys-color-outline));
   background: color-mix(
     in srgb,
     var(--md-sys-color-primary-container) 78%,
     var(--mie-card-surface)
   );
-  box-shadow: var(--mie-card-shadow-hover);
-  transform: translateY(-4px);
 }
 
 .term-card:hover::before,
 .term-card:focus-visible::before {
   width: 13px;
   opacity: 1;
+}
+
+.term-card:active {
+  transform: scale(0.996);
 }
 
 .term-card strong {
@@ -664,6 +667,10 @@
   --md-filled-tonal-button-label-text-weight: 800;
   --md-filled-tonal-button-pressed-state-layer-color: var(--md-sys-color-primary);
   --md-filled-tonal-button-pressed-state-layer-opacity: var(--md-sys-state-pressed-opacity);
+  transition: transform var(--motion-fast);
+}
+
+.pagination-link .mie-material-button__icon {
   transition: transform var(--motion-hover);
 }
 
@@ -672,10 +679,24 @@
 .pagination-page:hover,
 .pagination-page:focus-visible,
 .pagination-page.current {
-  transform: translateY(-2px);
   --md-filled-tonal-button-container-color: var(--md-sys-color-primary-container);
   --md-filled-tonal-button-icon-color: var(--md-sys-color-on-primary-container);
   --md-filled-tonal-button-label-text-color: var(--md-sys-color-on-primary-container);
+}
+
+.pagination-link:first-child:hover .mie-material-button__icon,
+.pagination-link:first-child:focus-visible .mie-material-button__icon {
+  transform: translateX(-2px);
+}
+
+.pagination-link:last-child:hover .mie-material-button__icon,
+.pagination-link:last-child:focus-visible .mie-material-button__icon {
+  transform: translateX(2px);
+}
+
+.pagination-link:active,
+.pagination-page:active {
+  transform: scale(0.98);
 }
 
 .pagination-link.disabled {
