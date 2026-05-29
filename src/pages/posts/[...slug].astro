@@ -7,6 +7,7 @@ import ShareLinks from "../../components/ShareLinks.astro";
 import Toc from "../../components/Toc.astro";
 import MaterialButton from "../../components/material/Button.astro";
 import MaterialChip from "../../components/material/Chip.astro";
+import MaterialIconButton from "../../components/material/IconButton.astro";
 import Icon from "../../components/Icon.astro";
 import Ripple from "../../components/material/Ripple.astro";
 import {
@@ -23,6 +24,7 @@ import {
   getPostTransitionName,
   getPostUrl,
   getRelatedPosts,
+  getSectionLabel,
   getTermMaterialColorStyle,
   readingTime,
   termToSlug,
@@ -92,6 +94,9 @@ const seriesNavId = `series-nav-${getPostSlug(post).replace(/[^a-zA-Z0-9_-]/g, "
 const previousPost = invertPagination ? newer : older;
 const nextPost = invertPagination ? older : newer;
 const editUrl = getPostEditUrl(post);
+const authorName = siteConfig.author.displayName || siteConfig.author.name;
+const showTocAction = hasToc && showZenMode;
+const showEditAction = showEdit && Boolean(editUrl);
 ---
 
 <BaseLayout
@@ -113,8 +118,12 @@ const editUrl = getPostEditUrl(post);
     >
       {showHero && backgroundImage && <OptimizedImage class="article-background" src={backgroundImage} alt="" loading="lazy" decoding="async" fetchpriority="low" widths={backgroundImageWidths} sizes="100vw" fit="cover" />}
       <div class="article-hero-content">
-        {showBreadcrumbs && <a class="breadcrumb" href="/posts/">Posts</a>}
-        {showDraftLabel && post.data.draft && <p class="draft-label">Draft</p>}
+        <div class="article-kicker">
+          {showBreadcrumbs && <a class="breadcrumb" href="/posts/">Posts</a>}
+          <span>{getSectionLabel(post.data.section)}</span>
+          {showDate && <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>}
+          {showDraftLabel && post.data.draft && <span class="draft-label">Draft</span>}
+        </div>
         <h1
           class="post-title-transition"
           data-post-transition-title={titleTransitionName}
@@ -132,40 +141,24 @@ const editUrl = getPostEditUrl(post);
           {post.data.title}
         </h1>
         {postSummary && <p class="article-description" data-pagefind-meta="description">{postSummary}</p>}
-        {showAuthor && (
-          <div class="article-author" data-pagefind-ignore>
-            {siteConfig.author.avatar && <img src={siteConfig.author.avatar} alt="" loading="lazy" decoding="async" />}
-            <div>
-              <span>Written by</span>
-              <strong>{siteConfig.author.displayName || siteConfig.author.name}</strong>
-              {siteConfig.author.bio && <p>{siteConfig.author.bio}</p>}
-            </div>
+        <div class="article-hero-foot">
+          <div class="article-meta">
+            {showAuthor && authorName && <span>By <strong>{authorName}</strong></span>}
+            {showDateUpdated && post.data.updatedDate && <span>Updated {formatDate(post.data.updatedDate)}</span>}
+            {showWordCount && <span>{wordCount(post.body).toLocaleString("en-US")} words</span>}
+            {showReadingTime && <span>{readingTime(post.body)}</span>}
           </div>
-        )}
-        <div class="article-meta">
-          {showDate && <span>{formatDate(post.data.date)}</span>}
-          {showDateUpdated && post.data.updatedDate && <span>Updated {formatDate(post.data.updatedDate)}</span>}
-          {showWordCount && <span>{wordCount(post.body).toLocaleString("en-US")} words</span>}
-          {showReadingTime && <span>{readingTime(post.body)}</span>}
+          {(showTocAction || showEditAction) && (
+            <div class="article-actions" data-pagefind-ignore>
+              {showTocAction && <MaterialIconButton class="article-view-toggle article-view-toggle--toc" icon="immersive-read" data-toc-toggle aria-controls="article-toc" aria-pressed="false" aria-label="进入沉浸阅读" title="进入沉浸阅读" />}
+              {showEditAction && <MaterialButton class="article-view-toggle" href={editUrl} icon="edit" target="_blank" rel="noopener noreferrer">编辑本文</MaterialButton>}
+            </div>
+          )}
         </div>
         {showTaxonomies && (
           <div class="taxonomy-row">
             {post.data.categories.map((category) => <MaterialChip class="taxonomy-chip mie-dynamic-color" href={`/categories/${termToSlug(category)}/`} style={getTermMaterialColorStyle("categories", category)} elevated>{category}</MaterialChip>)}
             {post.data.tags.map((tag) => <MaterialChip class="taxonomy-chip mie-dynamic-color" href={`/tags/${termToSlug(tag)}/`} style={getTermMaterialColorStyle("tags", tag)} elevated>{tag}</MaterialChip>)}
-          </div>
-        )}
-        {hasToc && showZenMode && (
-          <div class="article-actions" data-pagefind-ignore>
-            <button class="article-view-toggle article-view-toggle--toc" type="button" data-toc-toggle aria-controls="article-toc" aria-pressed="false" aria-label="进入沉浸阅读" title="进入沉浸阅读">
-              <Ripple />
-              <Icon name="immersive-read" />
-            </button>
-            {showEdit && editUrl && <MaterialButton class="article-view-toggle" href={editUrl} icon="edit" target="_blank" rel="noopener noreferrer">编辑本文</MaterialButton>}
-          </div>
-        )}
-        {(!hasToc || !showZenMode) && showEdit && editUrl && (
-          <div class="article-actions" data-pagefind-ignore>
-            <MaterialButton class="article-view-toggle" href={editUrl} icon="edit" target="_blank" rel="noopener noreferrer">编辑本文</MaterialButton>
           </div>
         )}
       </div>
@@ -191,7 +184,7 @@ const editUrl = getPostEditUrl(post);
               decoding="async"
               fetchpriority="high"
               widths={[640, 960, 1280, 1600]}
-              sizes="(min-width: 980px) 420px, 100vw"
+              sizes="100vw"
               fit="cover"
               position={imagePosition}
               style={{ objectPosition: imagePosition }}
@@ -252,8 +245,8 @@ const editUrl = getPostEditUrl(post);
                 <h2>Related posts</h2>
               </div>
             </div>
-            <div class="post-grid compact">
-              {related.map((item) => <PostCard post={item} compact />)}
+            <div class="post-grid post-grid--compact-grid compact">
+              {related.map((item) => <PostCard post={item} variant="compact" />)}
             </div>
           </section>
         )}
