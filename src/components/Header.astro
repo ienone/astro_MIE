@@ -58,41 +58,57 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
     <div class="nav-actions">
       {searchEnabled && <MaterialIconButton class="icon-button" icon="search" data-search-open aria-label="Open search" />}
       <MaterialIconButton class="icon-button" icon="sun-moon" data-theme-toggle aria-label="Toggle theme" />
-      <MaterialIconButton class="menu-button" icon="menu" data-menu-toggle aria-label="Open menu" aria-expanded="false" aria-controls="mobile-nav" />
+      <MaterialIconButton class="menu-button" icon="menu" data-menu-toggle aria-label="Open menu" aria-expanded="false" aria-controls="mobile-nav-overlay" />
     </div>
   </nav>
+</header>
 
-  <div class="mobile-nav" id="mobile-nav" data-mobile-nav hidden>
-    {
-      siteConfig.nav.map((item) =>
-        Array.isArray(item.children) ? (
-          <details class="mobile-nav-group">
-            <summary>
+<div class="mobile-nav-overlay" id="mobile-nav-overlay" data-mobile-nav-overlay hidden>
+  <section class="mobile-nav" data-mobile-nav role="dialog" aria-modal="true" aria-labelledby="mobile-nav-title" tabindex="-1">
+    <div class="mobile-nav-head">
+      <div>
+        <p class="eyebrow">Navigation</p>
+        <h2 id="mobile-nav-title">Site menu</h2>
+      </div>
+      <MaterialIconButton class="mobile-nav-close" icon="x" data-mobile-nav-close aria-label="Close menu" title="Close menu" />
+    </div>
+
+    <nav class="mobile-nav-list" aria-label="Mobile navigation">
+      {
+        siteConfig.nav.map((item) =>
+          Array.isArray(item.children) ? (
+            <details class="mobile-nav-group" data-mobile-nav-group>
+              <summary class="mobile-nav-group-summary">
+                <Ripple />
+                <Icon name={item.icon} />
+                <span>{item.label}</span>
+                <span class="mobile-nav-chevron"><Icon name="chevron-down" /></span>
+              </summary>
+              <div class="mobile-nav-group-body">
+                <div class="mobile-nav-sublist">
+                  {item.children.map((child) => (
+                    <a class="mobile-nav-subitem" href={child.href} data-nav-href={child.href} {...linkAttrs(child.href, child.external, child.rel)}>
+                      <Ripple />
+                      <Icon name={child.icon} />
+                      <span>{child.label}</span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </details>
+          ) : (
+            <a class="mobile-nav-item" href={item.href ?? "#"} data-nav-href={item.href} {...linkAttrs(item.href, item.external, item.rel)}>
               <Ripple />
               <Icon name={item.icon} />
               <span>{item.label}</span>
-            </summary>
-            <div>
-              {item.children.map((child) => (
-                <a href={child.href} data-nav-href={child.href} {...linkAttrs(child.href, child.external, child.rel)}>
-                  <Ripple />
-                  <Icon name={child.icon} />
-                  <span>{child.label}</span>
-                </a>
-              ))}
-            </div>
-          </details>
-        ) : (
-          <a href={item.href ?? "#"} data-nav-href={item.href} {...linkAttrs(item.href, item.external, item.rel)}>
-            <Ripple />
-            <Icon name={item.icon} />
-            <span>{item.label}</span>
-          </a>
+              <span class="mobile-nav-current">Current</span>
+            </a>
+          )
         )
-      )
-    }
-  </div>
-</header>
+      }
+    </nav>
+  </section>
+</div>
 
 <script>
   const headerWindow = window as Window &
@@ -100,6 +116,8 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
       __astroMieHeaderBound?: boolean;
       __astroMieHeaderRaf?: number;
       __astroMieHeaderScrolled?: boolean;
+      __astroMieNavCloseTimer?: number;
+      __astroMieMobileNavCloseTimer?: number;
     };
 
   function normalizePath(path: string) {
@@ -135,23 +153,44 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
     return normalizePath(window.location.pathname);
   }
 
+  function moveNavIndicatorTo(target: Element | null, mode = "active") {
+    const navLinks = document.querySelector("[data-nav-links]");
+    if (!(navLinks instanceof HTMLElement)) return;
+
+    if (!(target instanceof HTMLElement)) {
+      navLinks.style.setProperty("--nav-indicator-opacity", "0");
+      delete navLinks.dataset.indicatorMode;
+      return;
+    }
+
+    const navRect = navLinks.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    navLinks.style.setProperty("--nav-indicator-x", `${targetRect.left - navRect.left}px`);
+    navLinks.style.setProperty("--nav-indicator-y", `${targetRect.top - navRect.top}px`);
+    navLinks.style.setProperty("--nav-indicator-width", `${targetRect.width}px`);
+    navLinks.style.setProperty("--nav-indicator-height", `${targetRect.height}px`);
+    navLinks.style.setProperty("--nav-indicator-opacity", "1");
+    navLinks.dataset.indicatorMode = mode;
+  }
+
   function updateNavIndicator() {
     const navLinks = document.querySelector("[data-nav-links]");
     if (!(navLinks instanceof HTMLElement)) return;
 
     const active = navLinks.querySelector('[aria-current="page"], [data-active="true"]');
-    if (!(active instanceof HTMLElement)) {
-      navLinks.style.setProperty("--nav-indicator-opacity", "0");
-      return;
-    }
+    moveNavIndicatorTo(active instanceof HTMLElement ? active : null, "active");
+  }
 
-    const navRect = navLinks.getBoundingClientRect();
-    const activeRect = active.getBoundingClientRect();
-    navLinks.style.setProperty("--nav-indicator-x", `${activeRect.left - navRect.left}px`);
-    navLinks.style.setProperty("--nav-indicator-y", `${activeRect.top - navRect.top}px`);
-    navLinks.style.setProperty("--nav-indicator-width", `${activeRect.width}px`);
-    navLinks.style.setProperty("--nav-indicator-height", `${activeRect.height}px`);
-    navLinks.style.setProperty("--nav-indicator-opacity", "1");
+  function updateMobileNavGroups() {
+    document.querySelectorAll("[data-mobile-nav-group]").forEach((group) => {
+      const active = Boolean(group.querySelector('[aria-current="page"]'));
+      if (active) {
+        group.setAttribute("data-active", "true");
+        if (group instanceof HTMLDetailsElement) group.open = true;
+      } else {
+        group.removeAttribute("data-active");
+      }
+    });
   }
 
   function updateActiveNav() {
@@ -166,6 +205,7 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
       });
       const navLinks = document.querySelector("[data-nav-links]");
       if (navLinks instanceof HTMLElement) navLinks.style.setProperty("--nav-indicator-opacity", "0");
+      updateMobileNavGroups();
       return;
     }
 
@@ -199,9 +239,13 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
     document.querySelectorAll("[data-nav-group]").forEach((group) => {
       const trigger = group.querySelector("[data-nav-trigger]");
       const active = Boolean(group.querySelector('[aria-current="page"]'));
-      if (trigger instanceof HTMLElement) trigger.dataset.active = String(active);
+      if (trigger instanceof HTMLElement) {
+        if (active) trigger.dataset.active = "true";
+        else delete trigger.dataset.active;
+      }
     });
 
+    updateMobileNavGroups();
     updateNavIndicator();
   }
 
@@ -214,14 +258,31 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
   }
 
   function closeNavMenus(except?: Element) {
+    if (headerWindow.__astroMieNavCloseTimer) {
+      window.clearTimeout(headerWindow.__astroMieNavCloseTimer);
+      headerWindow.__astroMieNavCloseTimer = undefined;
+    }
+
+    let closed = false;
+
     document.querySelectorAll("[data-nav-group]").forEach((group) => {
       if (except && group === except) return;
       if (!(group instanceof HTMLElement)) return;
+      if (group.dataset.open === "true") closed = true;
 
       delete group.dataset.open;
       const trigger = group.querySelector("[data-nav-trigger]");
       if (trigger instanceof HTMLElement) trigger.setAttribute("aria-expanded", "false");
     });
+
+    if (closed && !except) updateNavIndicator();
+  }
+
+  function scheduleCloseNavMenus() {
+    if (headerWindow.__astroMieNavCloseTimer) window.clearTimeout(headerWindow.__astroMieNavCloseTimer);
+    headerWindow.__astroMieNavCloseTimer = window.setTimeout(() => {
+      closeNavMenus();
+    }, 140);
   }
 
   function toggleNavGroup(trigger: HTMLElement) {
@@ -232,14 +293,27 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
     closeNavMenus(shouldOpen ? group : undefined);
 
     if (shouldOpen) {
-      group.dataset.open = "true";
-      trigger.setAttribute("aria-expanded", "true");
+      openNavGroup(trigger);
     } else {
       delete group.dataset.open;
       trigger.setAttribute("aria-expanded", "false");
+      updateNavIndicator();
+    }
+  }
+
+  function openNavGroup(trigger: HTMLElement) {
+    const group = trigger.closest("[data-nav-group]");
+    if (!(group instanceof HTMLElement)) return;
+
+    if (headerWindow.__astroMieNavCloseTimer) {
+      window.clearTimeout(headerWindow.__astroMieNavCloseTimer);
+      headerWindow.__astroMieNavCloseTimer = undefined;
     }
 
-    updateNavIndicator();
+    closeNavMenus(group);
+    group.dataset.open = "true";
+    trigger.setAttribute("aria-expanded", "true");
+    moveNavIndicatorTo(trigger, "open");
   }
 
   function markDropdownPress(link: HTMLElement) {
@@ -286,24 +360,119 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
     }
   }
 
-  function setMobileMenu(open: boolean) {
+  function setMobileMenu(open: boolean, restoreFocus = true) {
     const menuButton = document.querySelector("[data-menu-toggle]");
+    const overlay = document.querySelector("[data-mobile-nav-overlay]");
     const mobileNav = document.querySelector("[data-mobile-nav]");
-    if (!(menuButton instanceof HTMLElement) || !(mobileNav instanceof HTMLElement)) return;
+    if (!(menuButton instanceof HTMLElement) || !(overlay instanceof HTMLElement) || !(mobileNav instanceof HTMLElement)) return;
+
+    if (headerWindow.__astroMieMobileNavCloseTimer) {
+      window.clearTimeout(headerWindow.__astroMieMobileNavCloseTimer);
+      headerWindow.__astroMieMobileNavCloseTimer = undefined;
+    }
 
     menuButton.setAttribute("aria-expanded", String(open));
     if (open) {
-      mobileNav.hidden = false;
+      updateMobileNavGroups();
+      overlay.hidden = false;
+      document.documentElement.dataset.mobileNavOpen = "true";
       window.requestAnimationFrame(() => {
-        mobileNav.dataset.open = "true";
+        overlay.dataset.open = "true";
+        mobileNav.focus({ preventScroll: true });
       });
       return;
     }
 
-    mobileNav.dataset.open = "false";
-    window.setTimeout(() => {
-      if (menuButton.getAttribute("aria-expanded") === "false") mobileNav.hidden = true;
+    overlay.dataset.open = "false";
+    delete document.documentElement.dataset.mobileNavOpen;
+    headerWindow.__astroMieMobileNavCloseTimer = window.setTimeout(() => {
+      if (menuButton.getAttribute("aria-expanded") === "false") overlay.hidden = true;
+      if (restoreFocus) menuButton.focus({ preventScroll: true });
     }, 260);
+  }
+
+  function isMobileMenuOpen() {
+    return document.documentElement.dataset.mobileNavOpen === "true";
+  }
+
+  function trapMobileNavFocus(event: KeyboardEvent) {
+    const mobileNav = document.querySelector("[data-mobile-nav]");
+    if (!(mobileNav instanceof HTMLElement)) return;
+
+    const focusable = [
+      ...mobileNav.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), summary, md-filled-tonal-icon-button, [tabindex]:not([tabindex="-1"])'
+      )
+    ].filter((item) => !item.hasAttribute("disabled") && item.offsetParent !== null);
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (!first || !last) return;
+
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
+  function setupNavIndicatorPreview(header: Element) {
+    const navLinks = header.querySelector("[data-nav-links]");
+    if (navLinks instanceof HTMLElement && navLinks.dataset.navIndicatorHostReady !== "true") {
+      navLinks.dataset.navIndicatorHostReady = "true";
+      navLinks.addEventListener("pointerleave", updateNavIndicator);
+      navLinks.addEventListener("focusout", (event) => {
+        const next = event.relatedTarget instanceof Node ? event.relatedTarget : null;
+        if (!next || !navLinks.contains(next)) updateNavIndicator();
+      });
+    }
+
+    header.querySelectorAll(".nav-link, [data-nav-trigger]").forEach((item) => {
+      if (!(item instanceof HTMLElement) || item.dataset.navIndicatorReady === "true") return;
+      item.dataset.navIndicatorReady = "true";
+      const indicatorMode = item.matches("[data-nav-trigger]") ? "open" : "preview";
+      item.addEventListener("pointerenter", () => {
+        moveNavIndicatorTo(item, indicatorMode);
+      });
+      item.addEventListener("focusin", () => {
+        moveNavIndicatorTo(item, indicatorMode);
+      });
+    });
+  }
+
+  function setupMobileNav() {
+    const overlay = document.querySelector("[data-mobile-nav-overlay]");
+    if (!(overlay instanceof HTMLElement) || overlay.dataset.mobileNavReady === "true") return;
+
+    overlay.dataset.mobileNavReady = "true";
+    overlay.addEventListener("click", (event) => {
+      const target = event.target instanceof Element ? event.target : null;
+      if (target === overlay || target?.closest("[data-mobile-nav-close]")) {
+        setMobileMenu(false);
+        return;
+      }
+
+      if (target?.closest(".mobile-nav-item, .mobile-nav-subitem")) setMobileMenu(false, false);
+    });
+  }
+
+  function setupNavGroups(header: Element) {
+    header.querySelectorAll("[data-nav-group]").forEach((group) => {
+      if (!(group instanceof HTMLElement) || group.dataset.navGroupReady === "true") return;
+      const trigger = group.querySelector("[data-nav-trigger]");
+      if (!(trigger instanceof HTMLElement)) return;
+
+      group.dataset.navGroupReady = "true";
+      group.addEventListener("pointerenter", () => openNavGroup(trigger));
+      group.addEventListener("pointerleave", scheduleCloseNavMenus);
+      group.addEventListener("focusin", () => openNavGroup(trigger));
+      group.addEventListener("focusout", (event) => {
+        const next = event.relatedTarget instanceof Node ? event.relatedTarget : null;
+        if (!next || !group.contains(next)) scheduleCloseNavMenus();
+      });
+    });
   }
 
   function setupHeader() {
@@ -313,6 +482,7 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
 
     if (header instanceof HTMLElement && header.dataset.headerReady !== "true") {
       header.dataset.headerReady = "true";
+      setupNavIndicatorPreview(header);
 
       header.querySelectorAll("[data-nav-trigger]").forEach((trigger) => {
         if (!(trigger instanceof HTMLElement)) return;
@@ -333,6 +503,10 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
         setMobileMenu(!isOpen);
       });
     }
+
+    if (header instanceof HTMLElement) setupNavIndicatorPreview(header);
+    if (header instanceof HTMLElement) setupNavGroups(header);
+    setupMobileNav();
 
     toggles.forEach((toggle) => {
       if (!(toggle instanceof HTMLElement) || toggle.dataset.themeToggleReady === "true") return;
@@ -364,7 +538,17 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
       closeNavMenus();
     });
     document.addEventListener("keydown", (event) => {
+      if (event.key === "Tab" && isMobileMenuOpen()) {
+        trapMobileNavFocus(event);
+        return;
+      }
+
       if (event.key !== "Escape") return;
+      if (isMobileMenuOpen()) {
+        setMobileMenu(false);
+        return;
+      }
+
       closeNavMenus();
     });
     document.addEventListener("astro:page-load", setupHeader);
