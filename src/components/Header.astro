@@ -257,7 +257,7 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
     document.documentElement.dataset.scrolled = String(scrolled);
   }
 
-  function closeNavMenus(except?: Element) {
+  function closeNavMenus(except?: Element, restoreIndicator = true) {
     if (headerWindow.__astroMieNavCloseTimer) {
       window.clearTimeout(headerWindow.__astroMieNavCloseTimer);
       headerWindow.__astroMieNavCloseTimer = undefined;
@@ -275,7 +275,7 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
       if (trigger instanceof HTMLElement) trigger.setAttribute("aria-expanded", "false");
     });
 
-    if (closed && !except) updateNavIndicator();
+    if (closed && !except && restoreIndicator) updateNavIndicator();
   }
 
   function scheduleCloseNavMenus() {
@@ -434,9 +434,11 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
       item.dataset.navIndicatorReady = "true";
       const indicatorMode = item.matches("[data-nav-trigger]") ? "open" : "preview";
       item.addEventListener("pointerenter", () => {
+        closeNavMenus(item.closest("[data-nav-group]") ?? undefined, false);
         moveNavIndicatorTo(item, indicatorMode);
       });
       item.addEventListener("focusin", () => {
+        closeNavMenus(item.closest("[data-nav-group]") ?? undefined, false);
         moveNavIndicatorTo(item, indicatorMode);
       });
     });
