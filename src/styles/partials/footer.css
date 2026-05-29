@@ -76,16 +76,28 @@
 .footer-actions .mie-material-icon-button:hover,
 .footer-actions .mie-material-icon-button:focus-visible {
   color: var(--md-sys-color-on-primary-container);
-  transform: translateY(-2px);
   --md-filled-tonal-icon-button-container-color: var(--md-sys-color-primary-container);
   --md-filled-tonal-icon-button-hover-icon-color: var(--md-sys-color-on-primary-container);
   --md-filled-tonal-icon-button-icon-color: var(--md-sys-color-on-primary-container);
+}
+
+.footer-actions .mie-material-icon-button:active {
+  transform: scale(0.96);
 }
 
 .footer-actions .mie-material-icon-button .icon,
 .footer-social .icon {
   width: 1.08em;
   height: 1.08em;
+}
+
+.footer-actions .mie-material-icon-button .icon {
+  transition: transform var(--motion-hover);
+}
+
+.footer-actions .mie-material-icon-button:hover .icon,
+.footer-actions .mie-material-icon-button:focus-visible .icon {
+  transform: scale(1.07);
 }
 
 .footer-meta {

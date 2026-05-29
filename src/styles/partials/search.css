@@ -135,7 +135,10 @@
 .search-page-link:hover,
 .search-page-link:focus-visible {
   background: color-mix(in srgb, var(--md-sys-color-primary) 18%, var(--md-sys-color-primary-container));
-  transform: translateY(-1px);
+}
+
+.search-page-link:active {
+  transform: scale(0.98);
 }
 
 .search-page-link > :not(md-ripple),
@@ -186,7 +189,7 @@
 }
 
 .search-field:focus-within {
-  transform: translateY(-1px);
+  --md-outlined-text-field-container-color: var(--md-sys-color-surface-container-high);
 }
 
 .search-results {

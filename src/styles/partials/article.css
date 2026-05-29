@@ -182,19 +182,27 @@
   font-size: inherit;
   font-weight: 850;
   padding: 0;
+  text-decoration-line: underline;
+  text-decoration-color: color-mix(in srgb, var(--md-sys-color-primary) 0%, transparent);
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.2em;
   transition:
+    background var(--motion-hover),
     color var(--motion-hover),
-    transform var(--motion-hover);
+    text-decoration-color var(--motion-hover),
+    text-underline-offset var(--motion-hover);
 }
 
 .breadcrumb:hover,
 .breadcrumb:focus-visible {
+  background: color-mix(in srgb, var(--md-sys-color-primary-container) 42%, transparent);
   color: color-mix(
     in srgb,
     var(--md-sys-color-primary) 92%,
     var(--md-sys-color-on-surface)
   );
-  transform: translateY(-1px);
+  text-decoration-color: currentColor;
+  text-underline-offset: 0.28em;
 }
 
 .article-meta {
@@ -334,7 +342,19 @@
     var(--md-sys-color-primary) 82%,
     var(--md-sys-color-on-surface)
   );
-  transform: translateY(-1px);
+}
+
+.article-view-toggle .icon {
+  transition: transform var(--motion-hover);
+}
+
+.article-view-toggle:hover .icon,
+.article-view-toggle:focus-visible .icon {
+  transform: scale(1.06);
+}
+
+.article-view-toggle:active {
+  transform: scale(0.98);
 }
 
 .mie-material-button.article-view-toggle:hover,
@@ -1008,10 +1028,18 @@
 
 .share-links .mie-material-button:hover,
 .share-links .mie-material-button:focus-visible {
-  transform: translateY(-2px);
   --md-filled-tonal-button-container-color: var(--md-sys-color-primary-container);
   --md-filled-tonal-button-icon-color: var(--md-sys-color-on-primary-container);
   --md-filled-tonal-button-label-text-color: var(--md-sys-color-on-primary-container);
+}
+
+.share-links .mie-material-button:hover .mie-material-button__icon,
+.share-links .mie-material-button:focus-visible .mie-material-button__icon {
+  transform: translateX(1px);
+}
+
+.share-links .mie-material-button:active {
+  transform: scale(0.98);
 }
 
 .post-pagination {

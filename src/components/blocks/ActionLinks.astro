@@ -54,7 +54,10 @@ const { links = [], label = "Related links" } = Astro.props;
 
   .action-links__item:hover,
   .action-links__item:focus-visible {
-    transform: translateY(-1px);
     --md-filled-tonal-button-container-color: color-mix(in srgb, var(--md-sys-color-primary) 18%, var(--md-sys-color-primary-container));
+  }
+
+  .action-links__item:active {
+    transform: scale(0.98);
   }
 </style>

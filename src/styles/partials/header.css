@@ -371,14 +371,36 @@ md-ripple {
   --md-filled-tonal-icon-button-pressed-state-layer-opacity: var(--md-sys-state-pressed-opacity);
 }
 
+.icon-button .icon,
+.menu-button .icon {
+  transition: transform var(--motion-hover);
+}
+
 .icon-button:hover,
 .menu-button:hover {
   background: var(--md-sys-color-secondary-container);
   color: var(--md-sys-color-on-secondary-container);
-  transform: translateY(-1px);
   --md-filled-tonal-icon-button-container-color: var(--md-sys-color-secondary-container);
   --md-filled-tonal-icon-button-hover-icon-color: var(--md-sys-color-on-secondary-container);
   --md-filled-tonal-icon-button-icon-color: var(--md-sys-color-on-secondary-container);
+}
+
+.icon-button:hover .icon,
+.icon-button:focus-visible .icon,
+.menu-button:hover .icon,
+.menu-button:focus-visible .icon {
+  transform: scale(1.06);
+}
+
+.icon-button:active,
+.menu-button:active {
+  transform: scale(0.96);
+}
+
+.icon-button:focus-visible,
+.menu-button:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--md-sys-color-secondary) 42%, transparent);
+  outline-offset: 2px;
 }
 
 .menu-button {
