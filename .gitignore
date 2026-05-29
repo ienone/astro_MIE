@@ -23,6 +23,12 @@ pnpm-debug.log*
 .netlify/
 .wrangler/
 
+# Local QA/browser artifacts
+.codex-temp/
+
+# Local planning notes
+docs/theme-optimization-guidance.md
+
 # OS/editor noise
 .DS_Store
 Thumbs.db
