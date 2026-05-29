@@ -203,4 +203,63 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
   }
+
+  .home-hero-bg {
+    animation: none !important;
+  }
+
+  .icon-button:hover .icon,
+  .icon-button:focus-visible .icon,
+  .menu-button:hover .icon,
+  .menu-button:focus-visible .icon,
+  .footer-actions .mie-material-icon-button:hover .icon,
+  .footer-actions .mie-material-icon-button:focus-visible .icon,
+  .article-view-toggle:hover .icon,
+  .article-view-toggle:focus-visible .icon,
+  .share-links .mie-material-button:hover .mie-material-button__icon,
+  .share-links .mie-material-button:focus-visible .mie-material-button__icon,
+  .post-card-link:hover .post-cover-transition img,
+  .post-card-link:focus-visible .post-cover-transition img,
+  .archive-item:hover .archive-item-media img,
+  .archive-item:focus-visible .archive-item-media img,
+  .prose img[data-zoom-ready=true]:hover,
+  .prose img[data-zoom-ready=true]:focus-visible,
+  .tag-strip a:hover > span:last-child,
+  .tag-strip a:focus-visible > span:last-child,
+  .tag-strip .mie-material-chip:hover .tag-count,
+  .tag-strip .mie-material-chip:focus-visible .tag-count,
+  .term-grid.compact .mie-material-chip:hover .tag-count,
+  .term-grid.compact .mie-material-chip:focus-visible .tag-count,
+  .term-card:hover strong,
+  .term-card:focus-visible strong,
+  .post-pagination-link--previous:hover span,
+  .post-pagination-link--previous:focus-visible span,
+  .post-pagination-link--next:hover span,
+  .post-pagination-link--next:focus-visible span,
+  .pagination-link:first-child:hover .mie-material-button__icon,
+  .pagination-link:first-child:focus-visible .mie-material-button__icon,
+  .pagination-link:last-child:hover .mie-material-button__icon,
+  .pagination-link:last-child:focus-visible .mie-material-button__icon,
+  .action-links__item:active,
+  .icon-button:active,
+  .menu-button:active,
+  .footer-actions .mie-material-icon-button:active,
+  .article-view-toggle:active,
+  .share-links .mie-material-button:active,
+  .taxonomy-row a:active,
+  .tag-strip a:active,
+  .taxonomy-row .mie-material-chip:active,
+  .tag-strip .mie-material-chip:active,
+  .term-grid.compact .mie-material-chip:active,
+  .post-card-link:active,
+  .term-card:active,
+  .pagination-link:active,
+  .pagination-page:active,
+  .post-pagination a:active,
+  .archive-item:active,
+  .portable-button:active,
+  .search-page-link:active,
+  .search-result:active {
+    transform: none !important;
+  }
 }
