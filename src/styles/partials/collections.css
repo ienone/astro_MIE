@@ -47,8 +47,11 @@
 
 .text-link:hover,
 .text-link:focus-visible {
-  transform: translateY(-2px);
   --md-filled-tonal-button-container-color: color-mix(in srgb, var(--md-sys-color-primary) 18%, var(--md-sys-color-primary-container));
+}
+
+.text-link:active {
+  transform: scale(0.98);
 }
 
 .section-icon-link {
@@ -67,10 +70,22 @@
   transition: transform var(--motion-hover);
 }
 
+.section-icon-link .icon {
+  transition: transform var(--motion-hover);
+}
+
 .section-icon-link:hover,
 .section-icon-link:focus-visible {
-  transform: translateY(-2px);
   --md-filled-tonal-icon-button-container-color: color-mix(in srgb, var(--md-sys-color-primary) 18%, var(--md-sys-color-primary-container));
+}
+
+.section-icon-link:hover .icon,
+.section-icon-link:focus-visible .icon {
+  transform: translateX(1px);
+}
+
+.section-icon-link:active {
+  transform: scale(0.96);
 }
 
 .text-link > :not(md-ripple),

@@ -16,7 +16,10 @@
 .pswp__button:hover,
 .pswp__button:focus-visible {
   background: color-mix(in srgb, var(--md-sys-color-inverse-on-surface) 14%, transparent);
-  transform: translateY(-1px);
+}
+
+.pswp__button:active {
+  transform: scale(0.96);
 }
 
 .pswp__button--download {

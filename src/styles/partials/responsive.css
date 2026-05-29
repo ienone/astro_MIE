@@ -208,6 +208,8 @@
     animation: none !important;
   }
 
+  .section-icon-link:hover .icon,
+  .section-icon-link:focus-visible .icon,
   .icon-button:hover .icon,
   .icon-button:focus-visible .icon,
   .menu-button:hover .icon,
@@ -241,6 +243,8 @@
   .pagination-link:last-child:hover .mie-material-button__icon,
   .pagination-link:last-child:focus-visible .mie-material-button__icon,
   .action-links__item:active,
+  .text-link:active,
+  .section-icon-link:active,
   .icon-button:active,
   .menu-button:active,
   .footer-actions .mie-material-icon-button:active,
@@ -259,7 +263,8 @@
   .archive-item:active,
   .portable-button:active,
   .search-page-link:active,
-  .search-result:active {
+  .search-result:active,
+  .pswp__button:active {
     transform: none !important;
   }
 }
