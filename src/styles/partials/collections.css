@@ -297,8 +297,8 @@
   transition:
     background var(--motion-hover),
     border-color var(--motion-hover),
-    box-shadow var(--motion-hover),
     color var(--motion-hover),
+    filter var(--motion-hover),
     transform var(--motion-hover);
 }
 
@@ -344,7 +344,7 @@
   --md-assist-chip-elevated-container-elevation: var(--md-sys-elevation-level0);
   --md-assist-chip-elevated-container-shadow-color: var(--md-sys-color-shadow);
   --md-assist-chip-elevated-focus-container-elevation: var(--md-sys-elevation-level0);
-  --md-assist-chip-elevated-hover-container-elevation: var(--md-sys-elevation-level1);
+  --md-assist-chip-elevated-hover-container-elevation: var(--md-sys-elevation-level0);
   --md-assist-chip-elevated-pressed-container-elevation: var(--md-sys-elevation-level0);
   --md-assist-chip-hover-label-text-color: var(--mie-tag-ink);
   --md-assist-chip-hover-leading-icon-color: var(--mie-tag-ink);
@@ -372,7 +372,6 @@
   transition:
     background var(--motion-hover),
     border-color var(--motion-hover),
-    box-shadow var(--motion-hover),
     color var(--motion-hover),
     filter var(--motion-hover),
     transform var(--motion-hover);
@@ -398,11 +397,8 @@
 .tag-strip a:focus-visible {
   border-color: var(--mie-tag-outline-hover);
   background: var(--mie-tag-fill-hover);
-  box-shadow:
-    inset 0 1px 0 color-mix(in srgb, var(--md-sys-color-surface) 62%, transparent),
-    0 8px 18px color-mix(in srgb, var(--md-sys-color-primary) 12%, transparent);
   color: var(--mie-tag-ink);
-  transform: translateY(-2px);
+  filter: saturate(1.04) contrast(1.01);
 }
 
 .taxonomy-row .mie-material-chip:hover,
@@ -413,12 +409,8 @@
 .term-grid.compact .mie-material-chip:focus-visible {
   border-color: var(--mie-tag-outline-hover);
   background: var(--mie-tag-fill-hover);
-  box-shadow:
-    inset 0 1px 0 color-mix(in srgb, var(--md-sys-color-surface) 62%, transparent),
-    0 8px 18px color-mix(in srgb, var(--md-sys-color-primary) 12%, transparent);
   color: var(--mie-tag-ink);
-  filter: saturate(1.03) contrast(1.01);
-  transform: translateY(-2px);
+  filter: saturate(1.04) contrast(1.01);
   --md-assist-chip-elevated-container-color: var(--mie-tag-fill-hover);
   --md-assist-chip-outline-color: var(--mie-tag-outline-hover);
 }
@@ -435,6 +427,11 @@
   color: var(--mie-tag-count-ink);
   font-weight: 900;
   place-items: center;
+  transition:
+    background var(--motion-hover),
+    border-color var(--motion-hover),
+    color var(--motion-hover),
+    transform var(--motion-hover);
 }
 
 .tag-strip .tag-count,
@@ -450,6 +447,31 @@
   font-size: 0.78em;
   font-weight: 900;
   place-items: center;
+  transition:
+    background var(--motion-hover),
+    border-color var(--motion-hover),
+    color var(--motion-hover),
+    transform var(--motion-hover);
+}
+
+.tag-strip a:hover > span:last-child,
+.tag-strip a:focus-visible > span:last-child,
+.tag-strip .mie-material-chip:hover .tag-count,
+.tag-strip .mie-material-chip:focus-visible .tag-count,
+.term-grid.compact .mie-material-chip:hover .tag-count,
+.term-grid.compact .mie-material-chip:focus-visible .tag-count {
+  border-color: color-mix(in srgb, var(--md-sys-color-primary) 32%, transparent);
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+  transform: scale(1.04);
+}
+
+.taxonomy-row a:active,
+.tag-strip a:active,
+.taxonomy-row .mie-material-chip:active,
+.tag-strip .mie-material-chip:active,
+.term-grid.compact .mie-material-chip:active {
+  transform: scale(0.98);
 }
 
 .page-header {
