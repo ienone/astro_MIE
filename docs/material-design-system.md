@@ -101,18 +101,21 @@ Material Web 的使用路径是“注册、封装、逐步替换”：
 - `ScrollSystem.astro` 提供全站自绘滚动条、拖动、轨道跳转和文章 heading marker。
 - `tokens.css` 开始提供 Material semantic aliases。
 - `scrollbar.css` 隐藏 JS 可用时的原生滚动条，并提供无 JS fallback。
-- Header 图标按钮、搜索关闭按钮、首页 CTA、首页 tag chip、文章 taxonomy chip、文章目录/编辑操作、footer 链接与控件、分页控件、分享按钮、taxonomy compact 列表和 MDX `ActionLinks` 已开始从手写按钮迁移到 Material Web wrapper。
+- Header 图标按钮、搜索关闭按钮、首页 tag chip、文章 taxonomy chip、文章目录/编辑操作、footer 控件、分页控件、分享按钮、taxonomy compact 列表和 MDX `ActionLinks` 已通过 Material Web wrapper 或 Material token 统一状态语法。
+- 小控件 hover 上浮已经基本清理完成。当前按钮、icon button、chip、搜索入口和文章操作控件主要依赖 tonal fill、state layer、ripple、icon micro-motion 和 pressed scale。
+- 当前源码交互审计中，状态块里的 `translateY(...)` 只剩 mobile nav 面板打开入场，不是普通控件 hover。后续优化重点应从“取消上浮”转向“内容入口、社交链接、blur/elevation 和性能预算”。
 - Footer 社交链接、导航链接/下拉、文章卡片、section/term 卡片、前后篇分页卡片、archive item、review/media block 仍保留 `md-ripple` 或博客专用交互结构作为过渡层，其中 archive item 已改为文章级动态色彩入口。
 - 首页、列表页、文章页、搜索浮层、PhotoSwipe lightbox 和文章代码块已开始使用 `--md-sys-color-*`、inverse surface、scrim 和 elevation token。
 
 ## 继续迁移边界
 
-优先继续迁移这些“明确是控件”的表面：
+优先继续打磨这些“明确是控件或控件行为”的表面：
 
-1. footer 社交链接是否继续保持展开标签动效，或拆成 Material icon button + tooltip；
-2. search overlay 内部的搜索结果操作；
-3. mobile nav 内的操作项；
-4. 后续 dialog、tabs、menu、switch、text field 等真正需要 Material Web 行为的控件。
+1. 首页和 footer 社交链接：当前展开标签动效会改变宽度，需要决定桌面保留、移动端关闭，或改成 Material icon button + tooltip；
+2. search overlay 和 search page：搜索结果更偏列表激活语法，不应像普通卡片漂浮；
+3. mobile nav：保留 dialog-like surface 和 list item selected state，避免继续增加强动效；
+4. 后续 dialog、tabs、menu、switch、text field 等真正需要 Material Web 行为的控件，仍然必须先进入 `components/material/` 包装层；
+5. 小控件 pressed scale 和 icon micro-motion 可抽成少量主题 token，避免各处局部写不同数值。
 
 暂时不强制替换这些“博客阅读结构”：
 
@@ -121,3 +124,13 @@ Material Web 的使用路径是“注册、封装、逐步替换”：
 3. review/media block，它们更接近文章内容组件，适合用 Material token 和 ripple 统一状态，而不是直接塞进通用 button/chip。
 
 后续实现应优先扩展 token 和包装层，而不是在每个页面局部继续手写一次按钮/状态/滚动逻辑。新的 `<md-*>` 组件进入页面前，必须先放进 `components/material/` 包装层并在文档中说明使用边界。
+
+## 下一阶段重点
+
+当前 Material 迁移的第一阶段已经完成：语义 token、动态色、Material wrapper、ripple/state layer、主题切换、shared transition 和小控件 hover 收敛都已具备。接下来优先级如下：
+
+1. **社交链接与控件收尾**：评估 `.social-link` 的宽度展开动画，统一 pressed scale 和 icon micro-motion token。
+2. **内容入口精修**：post card、term card、archive item、search result、previous/next post card 按角色拆分交互语法。
+3. **blur / elevation 收敛**：保留 header、search overlay、mobile nav、TOC、lightbox 等 floating surface 的玻璃感，普通内容容器优先使用 tonal surface、border 和 overlay。
+4. **文章页阅读精修**：让 article hero、TOC、正文链接、图片、series nav 和 pagination 都服务阅读，而不是抢注意力。
+5. **性能预算**：PhotoSwipe、KaTeX、Material Web、ScrollSystem 和 CSS bundle 都需要按需加载或配置开关评估。

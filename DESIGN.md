@@ -15,6 +15,8 @@ sections, and default media are examples until a downstream blog replaces them.
 - Portable MDX article blocks for repeated content structures.
 
 Detailed implementation direction now lives in `docs/material-design-system.md`.
+Interaction, motion, visual-density, and performance optimization guidance lives
+in `docs/theme-optimization-guidance.md`.
 
 ## Content Model
 
