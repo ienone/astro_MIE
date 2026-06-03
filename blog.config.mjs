@@ -71,12 +71,13 @@ const blogConfig = {
   },
 
   homepage: {
-    layout: "hero_fixcolor",
-    homepageImage: "/img/background.svg",
-    showRecent: true,
-    showRecentItems: 6,
-    showMoreLink: true,
-    showMoreLinkDest: "/posts/",
+    contentFlow: {
+      mode: "latest",
+      limit: 6,
+      moreLink: "/posts/",
+      title: "Latest posts",
+      eyebrow: "Latest"
+    },
     cardView: true,
     cardViewScreenWidth: false,
     layoutBackgroundBlur: true,
@@ -146,8 +147,7 @@ const blogConfig = {
         { label: "Series", href: "/series/", icon: "list-tree" },
         { label: "Archive", href: "/archives/", icon: "archive" }
       ]
-    },
-    { label: "GitHub", href: "https://github.com/ienone", icon: "github", external: true }
+    }
   ],
 
   footer: {

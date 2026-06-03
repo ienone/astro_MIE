@@ -73,6 +73,10 @@
     gap: 4px;
   }
 
+  .home-fusion-proxy-copy span {
+    display: none;
+  }
+
   .icon-button,
   .menu-button {
     width: 36px;
@@ -85,12 +89,11 @@
     --md-filled-tonal-icon-button-icon-size: 19px;
   }
 
-  .home-hero {
-    min-height: 430px;
+  .home-intro {
     border-radius: var(--radius-lg);
   }
 
-  .home-hero h1,
+  .home-intro h1,
   .article-hero h1,
   .page-header h1 {
     overflow-wrap: anywhere;
@@ -100,10 +103,6 @@
   .page-header {
     border-radius: var(--radius-lg);
     padding: 20px 20px 20px 22px;
-  }
-
-  .home-hero-content {
-    padding: 32px 18px;
   }
 
   .section-heading {
@@ -202,10 +201,6 @@
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-  }
-
-  .home-hero-bg {
-    animation: none !important;
   }
 
   .section-icon-link:hover .icon,

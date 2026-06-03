@@ -12,10 +12,14 @@ export interface LinkConfig {
 export interface HomepageConfig {
   layout?: string;
   homepageImage?: string;
-  showRecent?: boolean;
-  showRecentItems?: number;
-  showMoreLink?: boolean;
-  showMoreLinkDest?: string;
+  contentFlow?: {
+    mode?: "latest" | "tag";
+    tag?: string;
+    limit?: number;
+    moreLink?: string;
+    title?: string;
+    eyebrow?: string;
+  };
   cardView?: boolean;
   cardViewScreenWidth?: boolean;
   layoutBackgroundBlur?: boolean;

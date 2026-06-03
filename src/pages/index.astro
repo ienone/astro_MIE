@@ -3,16 +3,46 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import Icon from "../components/Icon.astro";
 import OptimizedImage from "../components/OptimizedImage.astro";
 import PostList from "../components/PostList.astro";
+import MaterialButton from "../components/material/Button.astro";
 import MaterialChip from "../components/material/Chip.astro";
 import MaterialIconButton from "../components/material/IconButton.astro";
 import Ripple from "../components/material/Ripple.astro";
-import { getAllPosts, getTermMaterialColorStyle, getTerms } from "../lib/posts";
+import {
+  getAllPosts,
+  getConfiguredSectionKeys,
+  getPostsByTermSlug,
+  getSectionLabel,
+  getSectionMaterialColorStyle,
+  getTermMaterialColorStyle,
+  getTerms,
+  postMatchesSection,
+  termToSlug
+} from "../lib/posts";
 import { isExternalLink, siteConfig } from "../lib/site";
 
 const posts = await getAllPosts();
 const homepage = siteConfig.homepage ?? {};
-const recent = posts.slice(0, homepage.showRecentItems ?? 6);
-const tags = getTerms(posts, "tags").slice(0, 12);
+const contentFlow = homepage.contentFlow ?? {};
+const contentFlowMode = contentFlow.mode === "tag" ? "tag" : "latest";
+const contentFlowLimit = Math.max(1, Math.floor(contentFlow.limit ?? 6));
+const configuredTagSlug = contentFlow.tag ? termToSlug(contentFlow.tag) : "";
+const flowSource = contentFlowMode === "tag" && configuredTagSlug ? getPostsByTermSlug(posts, "tags", configuredTagSlug) : posts;
+const flowPosts = flowSource.slice(0, contentFlowLimit);
+const flowTerm = contentFlowMode === "tag" ? getTerms(posts, "tags").find((tag) => tag.slug === configuredTagSlug) : undefined;
+const flowTitle = contentFlow.title ?? (contentFlowMode === "tag" ? flowTerm?.term || contentFlow.tag || "Selected posts" : "Latest posts");
+const flowEyebrow = contentFlow.eyebrow ?? (contentFlowMode === "tag" ? "Selection" : "Latest");
+const flowMoreLink = contentFlow.moreLink ?? (contentFlowMode === "tag" && configuredTagSlug ? `/tags/${configuredTagSlug}/` : "/posts/");
+const tags = getTerms(posts, "tags").slice(0, 10);
+const categories = getTerms(posts, "categories").slice(0, 6);
+const series = getTerms(posts, "series").slice(0, 6);
+const sections = getConfiguredSectionKeys(posts)
+  .map((section) => ({
+    section,
+    count: posts.filter((post) => postMatchesSection(post, section)).length
+  }))
+  .filter((item) => item.count > 0)
+  .slice(0, 6);
+const primarySocial = siteConfig.author.links.find((link) => link.icon === "github") ?? siteConfig.author.links[0];
 
 function getSocialText(link: { label: string; displayLabel?: string }) {
   return link.displayLabel || link.label;
@@ -20,19 +50,23 @@ function getSocialText(link: { label: string; displayLabel?: string }) {
 ---
 
 <BaseLayout>
-  <section class="home-hero">
-    <OptimizedImage class="home-hero-bg" src={siteConfig.assets.homeBackground} alt="" loading="eager" decoding="async" fetchpriority="high" widths={[960, 1440, 1920]} sizes="100vw" fit="cover" />
-    <div class="home-hero-scrim"></div>
-    <div class="home-hero-content">
-      {siteConfig.author.avatar && <OptimizedImage class="avatar" src={siteConfig.author.avatar} alt="" width={110} height={110} decoding="async" />}
-      <p class="eyebrow">{homepage.eyebrow ?? "Personal static blog"}</p>
-      <h1>{siteConfig.name}</h1>
-      <p>{siteConfig.author.headline}</p>
-      <div class="hero-links social-links" aria-label="社交平台">
+  <section class="home-scene home-intro" data-home-scene="intro" data-home-fusion-source data-pointer-light="surface">
+    <div class="home-intro-copy" data-home-fusion-identity>
+      {siteConfig.branding.logo && <OptimizedImage class="avatar" src={siteConfig.branding.logo} alt="" width={56} height={56} decoding="async" />}
+      <div>
+        <p class="eyebrow">{homepage.eyebrow ?? "Personal static blog"}</p>
+        <h1>{siteConfig.name}</h1>
+        {siteConfig.author.headline && <p>{siteConfig.author.headline}</p>}
+      </div>
+    </div>
+    <div class="home-intro-actions">
+      <div class="hero-links social-links" aria-label="Social platforms" data-home-fusion-socials>
         {
           siteConfig.author.links.map((link) => (
             <a
               class="social-link"
+              data-home-fusion-primary-social={primarySocial && link.href === primarySocial.href ? "true" : undefined}
+              data-pointer-light="control"
               href={link.href}
               target={isExternalLink(link.href) ? "_blank" : undefined}
               rel={isExternalLink(link.href) ? "noopener noreferrer" : undefined}
@@ -49,44 +83,90 @@ function getSocialText(link: { label: string; displayLabel?: string }) {
     </div>
   </section>
 
-  {
-    homepage.showRecent !== false && (
-      <section class="content-section">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">Latest</p>
-            <h2>Latest posts</h2>
-          </div>
-          <MaterialIconButton
-            class="section-icon-link"
-            icon="arrow-right"
-            href={homepage.showMoreLinkDest ?? "/posts/"}
-            aria-label="View all posts"
-            title="View all posts"
-          />
-        </div>
-        <PostList posts={recent} />
-      </section>
-    )
-  }
-
-  <section class="content-section">
+  <section class="home-scene content-section home-content-flow" data-home-scene="content-flow" data-pointer-light="surface">
     <div class="section-heading">
       <div>
-        <p class="eyebrow">Browse</p>
-        <h2>Popular tags</h2>
+        <p class="eyebrow">{flowEyebrow}</p>
+        <h2>{flowTitle}</h2>
+      </div>
+      <MaterialIconButton
+        class="section-icon-link"
+        icon="arrow-right"
+        href={flowMoreLink}
+        aria-label="View more posts"
+        title="View more posts"
+      />
+    </div>
+    {
+      flowPosts.length ? (
+        <PostList posts={flowPosts} cardViewScreenWidth />
+      ) : (
+        <p class="empty-state">No posts match this content flow yet.</p>
+      )
+    }
+  </section>
+
+  <section class="home-scene content-section home-discovery" data-home-scene="discovery" data-pointer-light="surface">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Discover</p>
+        <h2>Explore the archive</h2>
       </div>
       <MaterialIconButton class="section-icon-link" icon="arrow-right" href="/tags/" aria-label="View all tags" title="View all tags" />
     </div>
-    <div class="tag-strip">
-      {
-        tags.map((tag) => (
-          <MaterialChip class="tag-chip mie-dynamic-color" href={`/tags/${tag.slug}/`} style={getTermMaterialColorStyle("tags", tag.term)} elevated>
-            <span>{tag.term}</span>
-            <span class="tag-count">{tag.count}</span>
-          </MaterialChip>
-        ))
-      }
+    <div class="home-discovery-grid" data-flip-group="home-discovery">
+      <div class="home-discovery-panel" data-pointer-light="card" data-flip-id="tags">
+        <h3>Tags</h3>
+        <div class="tag-strip">
+          {
+            tags.map((tag) => (
+              <MaterialChip class="tag-chip mie-dynamic-color" href={`/tags/${tag.slug}/`} style={getTermMaterialColorStyle("tags", tag.term)} data-pointer-light="control">
+                <span>{tag.term}</span>
+                <span class="tag-count">{tag.count}</span>
+              </MaterialChip>
+            ))
+          }
+        </div>
+      </div>
+      <div class="home-discovery-panel" data-pointer-light="card" data-flip-id="sections">
+        <h3>Sections</h3>
+        <div class="term-grid compact">
+          {
+            sections.map(({ section, count }) => (
+              <MaterialChip class="tag-chip mie-dynamic-color" href={`/sections/${section}/`} style={getSectionMaterialColorStyle(section)} data-pointer-light="control">
+                <span>{getSectionLabel(section)}</span>
+                <span class="tag-count">{count}</span>
+              </MaterialChip>
+            ))
+          }
+        </div>
+      </div>
+      <div class="home-discovery-panel" data-pointer-light="card" data-flip-id="series">
+        <h3>Series</h3>
+        <div class="tag-strip">
+          {
+            series.length
+              ? series.map((item) => (
+                  <MaterialChip class="tag-chip mie-dynamic-color" href={`/series/${item.slug}/`} style={getTermMaterialColorStyle("series", item.term)} data-pointer-light="control">
+                    <span>{item.term}</span>
+                    <span class="tag-count">{item.count}</span>
+                  </MaterialChip>
+                ))
+              : categories.map((item) => (
+                  <MaterialChip class="tag-chip mie-dynamic-color" href={`/categories/${item.slug}/`} style={getTermMaterialColorStyle("categories", item.term)} data-pointer-light="control">
+                    <span>{item.term}</span>
+                    <span class="tag-count">{item.count}</span>
+                  </MaterialChip>
+                ))
+          }
+        </div>
+      </div>
     </div>
+  </section>
+
+  <section class="home-scene home-actions" data-home-scene="actions">
+    <MaterialButton href="/archives/" icon="archive" data-pointer-light="control">Archive</MaterialButton>
+    <MaterialButton href="/posts/" icon="file-text" data-pointer-light="control">All posts</MaterialButton>
+    <MaterialButton href="/rss.xml" icon="rss" data-pointer-light="control">RSS</MaterialButton>
   </section>
 </BaseLayout>
