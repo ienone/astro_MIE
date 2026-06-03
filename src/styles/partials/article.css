@@ -1051,6 +1051,7 @@
 .post-pagination a,
 .archive-item {
   position: relative;
+  box-sizing: border-box;
   overflow: hidden;
   border: 1px solid var(--mie-card-border-color);
   border-radius: var(--mie-card-radius);
@@ -1155,6 +1156,7 @@
   display: grid;
   grid-template-columns: minmax(118px, 172px) minmax(0, 1fr);
   align-items: center;
+  width: 100%;
   min-height: 132px;
   gap: var(--mie-card-gap);
 }

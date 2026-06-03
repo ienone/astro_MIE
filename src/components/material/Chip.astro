@@ -17,5 +17,5 @@ const hostClass = ["mie-material-chip", className].filter(Boolean).join(" ");
 
 <md-assist-chip {...attrs} class={hostClass} elevated={elevated ? true : undefined}>
   {icon && <span slot="icon" class="mie-material-chip__icon"><Icon name={icon} /></span>}
-  <slot />
+  <span class="mie-material-chip__content"><slot /></span>
 </md-assist-chip>

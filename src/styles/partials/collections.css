@@ -55,8 +55,8 @@
 }
 
 .section-icon-link {
-  display: inline-grid;
-  place-items: center;
+  overflow: hidden;
+  border-radius: var(--md-sys-shape-corner-full);
   --md-filled-tonal-icon-button-container-color: var(--md-sys-color-primary-container);
   --md-filled-tonal-icon-button-container-height: 42px;
   --md-filled-tonal-icon-button-container-width: 42px;
@@ -77,6 +77,11 @@
 .section-icon-link:hover,
 .section-icon-link:focus-visible {
   --md-filled-tonal-icon-button-container-color: color-mix(in srgb, var(--md-sys-color-primary) 18%, var(--md-sys-color-primary-container));
+}
+
+.section-icon-link:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--md-sys-color-primary) 38%, transparent);
+  outline-offset: 2px;
 }
 
 .section-icon-link:hover .icon,
@@ -119,7 +124,9 @@
 }
 
 .post-card {
+  display: grid;
   min-width: 0;
+  height: 100%;
   width: min(100%, var(--post-card-max));
   justify-self: center;
 }
@@ -132,6 +139,7 @@
 .post-card-link {
   position: relative;
   display: grid;
+  box-sizing: border-box;
   height: 100%;
   overflow: hidden;
   border: 1px solid var(--mie-card-border-color);
@@ -310,7 +318,7 @@
   font-size: 0.82rem;
   font-weight: 730;
   line-height: 1.2;
-  padding: 6px 11px;
+  padding: 6px 12px;
   transition:
     background var(--motion-hover),
     border-color var(--motion-hover),
@@ -329,6 +337,24 @@
 }
 
 .meta-row .tag-pill {
+  --mie-tag-fill: color-mix(in srgb, var(--md-sys-color-surface-container-high) 90%, var(--md-sys-color-primary) 10%);
+  --mie-tag-fill-hover: color-mix(in srgb, var(--md-sys-color-surface-container-high) 82%, var(--md-sys-color-primary) 18%);
+  --mie-tag-outline: color-mix(in srgb, var(--md-sys-color-primary) 20%, var(--md-sys-color-outline-variant));
+  --mie-tag-outline-hover: color-mix(in srgb, var(--md-sys-color-primary) 30%, var(--md-sys-color-outline-variant));
+  --mie-tag-ink: color-mix(in srgb, var(--md-sys-color-on-surface) 86%, var(--md-sys-color-primary) 14%);
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  height: 34px;
+  min-height: 34px;
+  border-color: var(--mie-tag-outline);
+  background: var(--mie-tag-fill);
+  box-shadow: none;
+  color: var(--mie-tag-ink);
+  font-size: 0.84rem;
+  font-weight: 680;
+  line-height: 1rem;
+  padding: 0 15px;
   white-space: nowrap;
 }
 
@@ -348,13 +374,13 @@
 .taxonomy-row .mie-material-chip,
 .tag-strip .mie-material-chip,
 .term-grid.compact .mie-material-chip {
-  --mie-tag-fill: color-mix(in srgb, var(--md-sys-color-surface-container-high) 78%, var(--md-sys-color-primary) 22%);
-  --mie-tag-fill-hover: color-mix(in srgb, var(--md-sys-color-surface-container-high) 68%, var(--md-sys-color-primary) 32%);
-  --mie-tag-outline: color-mix(in srgb, var(--md-sys-color-primary) 24%, var(--md-sys-color-outline-variant));
-  --mie-tag-outline-hover: color-mix(in srgb, var(--md-sys-color-primary) 34%, var(--md-sys-color-outline));
-  --mie-tag-ink: color-mix(in srgb, var(--md-sys-color-on-surface) 82%, var(--md-sys-color-primary) 18%);
-  --mie-tag-count-fill: color-mix(in srgb, var(--md-sys-color-surface-container-highest) 76%, var(--md-sys-color-primary) 24%);
-  --mie-tag-count-ink: color-mix(in srgb, var(--md-sys-color-on-surface) 72%, var(--md-sys-color-primary) 28%);
+  --mie-tag-fill: color-mix(in srgb, var(--md-sys-color-surface-container-high) 90%, var(--md-sys-color-primary) 10%);
+  --mie-tag-fill-hover: color-mix(in srgb, var(--md-sys-color-surface-container-high) 82%, var(--md-sys-color-primary) 18%);
+  --mie-tag-outline: color-mix(in srgb, var(--md-sys-color-primary) 20%, var(--md-sys-color-outline-variant));
+  --mie-tag-outline-hover: color-mix(in srgb, var(--md-sys-color-primary) 30%, var(--md-sys-color-outline-variant));
+  --mie-tag-ink: color-mix(in srgb, var(--md-sys-color-on-surface) 86%, var(--md-sys-color-primary) 14%);
+  --mie-tag-count-fill: color-mix(in srgb, var(--md-sys-color-primary-container) 68%, var(--md-sys-color-surface-container-highest));
+  --mie-tag-count-ink: var(--md-sys-color-on-primary-container);
   --md-assist-chip-container-height: 34px;
   --md-assist-chip-container-shape: var(--md-sys-shape-corner-full);
   --md-assist-chip-elevated-container-color: var(--mie-tag-fill);
@@ -368,36 +394,65 @@
   --md-assist-chip-hover-state-layer-color: var(--md-sys-color-primary);
   --md-assist-chip-hover-state-layer-opacity: 0.06;
   --md-assist-chip-label-text-color: var(--mie-tag-ink);
-  --md-assist-chip-label-text-weight: 700;
+  --md-assist-chip-label-text-line-height: 1rem;
+  --md-assist-chip-label-text-size: 0.84rem;
+  --md-assist-chip-label-text-weight: 680;
+  --md-assist-chip-leading-space: 0;
   --md-assist-chip-outline-color: var(--mie-tag-outline);
-  --md-assist-chip-outline-width: 1px;
+  --md-assist-chip-outline-width: 0;
   --md-assist-chip-pressed-label-text-color: var(--mie-tag-ink);
   --md-assist-chip-pressed-leading-icon-color: var(--mie-tag-ink);
   --md-assist-chip-pressed-state-layer-color: var(--md-sys-color-primary);
   --md-assist-chip-pressed-state-layer-opacity: var(--md-sys-state-pressed-opacity);
+  --md-assist-chip-trailing-space: 0;
   display: inline-flex;
   align-items: center;
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  width: max-content;
+  max-width: 100%;
+  height: 34px;
   min-height: 34px;
   border: 1px solid var(--mie-tag-outline);
   border-radius: var(--md-sys-shape-corner-full);
   background: var(--mie-tag-fill);
-  box-shadow:
-    inset 0 1px 0 color-mix(in srgb, var(--md-sys-color-surface) 56%, transparent),
-    0 1px 0 color-mix(in srgb, var(--md-sys-color-shadow) 4%, transparent);
+  box-shadow: none;
   color: var(--mie-tag-ink);
-  padding: 0 11px;
+  contain: layout paint;
+  padding: 0;
   transition:
     background var(--motion-hover),
     border-color var(--motion-hover),
     color var(--motion-hover),
-    filter var(--motion-hover),
-    transform var(--motion-hover);
+    filter var(--motion-hover);
+  vertical-align: top;
+}
+
+.mie-material-chip__content {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+  gap: 8px;
+  padding: 0 9px 0 15px;
+}
+
+.mie-material-chip__content:not(:has(.tag-count)) {
+  padding-inline-end: 15px;
 }
 
 .post-card-link:hover .meta-row span {
   border-color: var(--mie-tag-outline-hover);
   background: var(--mie-tag-fill-hover);
   color: var(--mie-tag-ink);
+}
+
+.post-card-link:hover .meta-row .tag-pill,
+.post-card-link:focus-visible .meta-row .tag-pill {
+  box-shadow: none;
+  filter: saturate(1.04) contrast(1.01);
 }
 
 .tag-strip a {
@@ -454,21 +509,24 @@
 .tag-strip .tag-count,
 .term-grid .tag-count {
   display: inline-grid;
-  min-width: 1.65em;
-  min-height: 1.65em;
-  margin-left: 8px;
-  border: 1px solid color-mix(in srgb, var(--md-sys-color-primary) 16%, transparent);
+  box-sizing: border-box;
+  width: max-content;
+  min-width: 1.72em;
+  height: 1.62em;
+  margin-left: 0;
+  border: 0;
   border-radius: var(--md-sys-shape-corner-full);
   background: var(--mie-tag-count-fill);
   color: var(--mie-tag-count-ink);
-  font-size: 0.78em;
-  font-weight: 900;
+  font-size: 0.8em;
+  font-weight: 780;
+  line-height: 1;
+  padding: 0 0.48em;
   place-items: center;
   transition:
     background var(--motion-hover),
     border-color var(--motion-hover),
-    color var(--motion-hover),
-    transform var(--motion-hover);
+    color var(--motion-hover);
 }
 
 .tag-strip a:hover > span:last-child,
@@ -478,9 +536,8 @@
 .term-grid.compact .mie-material-chip:hover .tag-count,
 .term-grid.compact .mie-material-chip:focus-visible .tag-count {
   border-color: color-mix(in srgb, var(--md-sys-color-primary) 32%, transparent);
-  background: var(--md-sys-color-primary);
+  background: color-mix(in srgb, var(--md-sys-color-primary) 88%, var(--md-sys-color-primary-container));
   color: var(--md-sys-color-on-primary);
-  transform: scale(1.04);
 }
 
 .taxonomy-row a:active,
@@ -489,6 +546,12 @@
 .tag-strip .mie-material-chip:active,
 .term-grid.compact .mie-material-chip:active {
   transform: scale(0.98);
+}
+
+.taxonomy-row .mie-material-chip:active,
+.tag-strip .mie-material-chip:active,
+.term-grid.compact .mie-material-chip:active {
+  transform: none;
 }
 
 .page-header {

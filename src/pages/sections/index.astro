@@ -17,7 +17,7 @@ const taxonomyConfig = siteConfig.taxonomy ?? {};
   {taxonomyConfig.showHero !== false && <PageHeader eyebrow="Sections" title="Sections" description="Sections come from site configuration and can appear in top-level or dropdown navigation." style={getCollectionMaterialColorStyle("sections")} />}
   <section class="content-section">
     <div class="term-grid">
-      {sections.map(([section, count]) => <a class="term-card mie-dynamic-color" href={`/sections/${section}/`} style={getSectionMaterialColorStyle(section)}><Ripple /><span>{getSectionLabel(section)}</span>{taxonomyConfig.showTermCount !== false && <strong>{count}</strong>}</a>)}
+      {sections.map(([section, count]) => <a class="term-card mie-dynamic-color" href={`/sections/${section}/`} style={getSectionMaterialColorStyle(section)} data-pointer-light="card"><Ripple /><span>{getSectionLabel(section)}</span>{taxonomyConfig.showTermCount !== false && <strong>{count}</strong>}</a>)}
     </div>
   </section>
 </BaseLayout>

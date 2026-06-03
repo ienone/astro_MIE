@@ -30,7 +30,7 @@ const { terms, basePath, kind = getKindFromBasePath(basePath), showCount = true,
   {
     terms.map((item) =>
       cardView ? (
-        <a class="term-card mie-dynamic-color" href={`${basePath}/${item.slug}/`} style={getTermMaterialColorStyle(kind, item.term)}>
+        <a class="term-card mie-dynamic-color" href={`${basePath}/${item.slug}/`} style={getTermMaterialColorStyle(kind, item.term)} data-pointer-light="card">
           <Ripple />
           <span>{item.term}</span>
           {showCount && <strong>{item.count}</strong>}

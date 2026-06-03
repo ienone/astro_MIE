@@ -2,6 +2,10 @@ html {
   scrollbar-gutter: stable both-edges;
 }
 
+:root[data-mobile-nav-open="true"] {
+  overflow: hidden;
+}
+
 html[data-mie-custom-scrollbar="ready"] {
   scrollbar-width: none;
 }

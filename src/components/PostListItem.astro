@@ -26,7 +26,7 @@ const summary = getPostSummary(post);
 const stats = `${wordCount(post.body).toLocaleString("en-US")} words · ${readingTime(post.body)}`;
 ---
 
-<a class="archive-item archive-item--rich mie-dynamic-color" href={getPostUrl(post)} style={getPostMaterialColorStyle(post)}>
+<a class="archive-item archive-item--rich mie-dynamic-color" href={getPostUrl(post)} style={getPostMaterialColorStyle(post)} data-pointer-light="card">
   <Ripple />
   <span class="archive-item-media" aria-hidden="true">
     <OptimizedImage
