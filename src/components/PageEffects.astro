@@ -301,41 +301,17 @@
     });
   }
 
-  function setupRevealMotion() {
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const revealTargets = document.querySelectorAll(
-      ".home-hero, .article-hero, .page-header, .content-section, .post-card, .term-card, .archive-item"
+  function getUnifiedScrollState() {
+    return (
+      window.__astroMieScroll?.state ?? {
+        scroll: window.scrollY,
+        limit: Math.max(0, document.documentElement.scrollHeight - window.innerHeight),
+        progress: 0,
+        velocity: 0,
+        direction: 0,
+        isScrolling: false
+      }
     );
-
-    const canObserve = !reduceMotion && "IntersectionObserver" in window;
-
-    if (canObserve) {
-      window.__astroMieRevealObserver ??= new IntersectionObserver(
-        (entries, observer) => {
-          entries.forEach((entry) => {
-            if (!entry.isIntersecting || !(entry.target instanceof HTMLElement)) return;
-            entry.target.classList.add("is-visible");
-            observer.unobserve(entry.target);
-          });
-        },
-        { rootMargin: "0px 0px -8%", threshold: 0.12 }
-      );
-    }
-
-    revealTargets.forEach((element, index) => {
-      if (!(element instanceof HTMLElement)) return;
-      if (element.dataset.reveal === "ready") return;
-
-      const rect = element.getBoundingClientRect();
-      const initiallyVisible = rect.top < window.innerHeight * 0.92 && rect.bottom > 0;
-      const revealImmediately = !canObserve || initiallyVisible;
-
-      if (revealImmediately) element.classList.add("is-visible");
-      element.style.setProperty("--reveal-index", String(index % 8));
-      element.dataset.reveal = "ready";
-
-      if (!revealImmediately) window.__astroMieRevealObserver?.observe(element);
-    });
   }
 
   function setupArticleTocToggle() {
@@ -420,6 +396,10 @@
     const progress = document.querySelector("[data-reading-progress]");
     const headings = [...document.querySelectorAll(".article-main .prose h2[id], .article-main .prose h3[id]")];
     const tocLinks = [...document.querySelectorAll("[data-toc-link]")];
+    let articleTop = 0;
+    let articleBottom = 0;
+    let headingOffsets = [];
+    let metricsRefreshRaf = 0;
 
     function setActiveHeading(activeId) {
       tocLinks.forEach((link) => {
@@ -434,6 +414,25 @@
       });
     }
 
+    window.__astroMieRefreshArticleMetrics = () => {
+      if (!(article instanceof HTMLElement)) {
+        articleTop = 0;
+        articleBottom = 0;
+        headingOffsets = [];
+        return;
+      }
+
+      const scrollTop = getUnifiedScrollState().scroll;
+      articleTop = article.getBoundingClientRect().top + scrollTop;
+      articleBottom = articleTop + article.offsetHeight;
+      headingOffsets = headings
+        .filter((heading) => heading instanceof HTMLElement)
+        .map((heading) => ({
+          id: heading.id,
+          offset: heading.getBoundingClientRect().top + scrollTop
+        }));
+    };
+
     window.__astroMieUpdateArticleState = () => {
       if (!(article instanceof HTMLElement)) {
         if (progress instanceof HTMLElement) progress.style.setProperty("--reading-progress", "0");
@@ -441,32 +440,66 @@
       }
 
       if (progress instanceof HTMLElement) {
-        const top = article.getBoundingClientRect().top + window.scrollY;
-        const bottom = top + article.offsetHeight;
-        const distance = Math.max(1, bottom - top - window.innerHeight);
-        const ratio = Math.min(1, Math.max(0, (window.scrollY - top) / distance));
+        const scrollState = getUnifiedScrollState();
+        const scrollTop = scrollState.scroll;
+        const distance = Math.max(1, articleBottom - articleTop - window.innerHeight);
+        const ratio = Math.min(1, Math.max(0, (scrollTop - articleTop) / distance));
         progress.style.setProperty("--reading-progress", String(ratio));
       }
 
-      if (!headings.length || !tocLinks.length) return;
+      if (!headingOffsets.length || !tocLinks.length) return;
 
-      const threshold = window.scrollY + 160;
-      let active = headings[0];
-      for (const heading of headings) {
-        if (!(heading instanceof HTMLElement)) continue;
-        const offset = heading.getBoundingClientRect().top + window.scrollY;
-        if (offset <= threshold) active = heading;
+      const scrollTop = getUnifiedScrollState().scroll;
+      const threshold = scrollTop + 160;
+      let activeId = headingOffsets[0]?.id;
+      for (const heading of headingOffsets) {
+        if (heading.offset <= threshold) activeId = heading.id;
         else break;
       }
 
-      if (active instanceof HTMLElement) setActiveHeading(active.id);
+      if (activeId) setActiveHeading(activeId);
     };
 
+    function scheduleArticleMetricsRefresh() {
+      window.cancelAnimationFrame(metricsRefreshRaf);
+      metricsRefreshRaf = window.requestAnimationFrame(() => {
+        window.__astroMieRefreshArticleMetrics?.();
+        window.__astroMieUpdateArticleState?.();
+      });
+    }
+
+    window.__astroMieArticleMetricsController?.abort?.();
+    window.__astroMieArticleMetricsResizeObserver?.disconnect?.();
+
+    const metricsController = "AbortController" in window ? new AbortController() : undefined;
+    window.__astroMieArticleMetricsController = metricsController;
+
+    if (article instanceof HTMLElement && "ResizeObserver" in window) {
+      const resizeObserver = new ResizeObserver(scheduleArticleMetricsRefresh);
+      resizeObserver.observe(article);
+      const prose = article.querySelector(".prose");
+      if (prose instanceof HTMLElement) resizeObserver.observe(prose);
+      window.__astroMieArticleMetricsResizeObserver = resizeObserver;
+    }
+
+    if (article instanceof HTMLElement) {
+      article.querySelectorAll("img, iframe, video, embed, object").forEach((element) => {
+        element.addEventListener("load", scheduleArticleMetricsRefresh, { signal: metricsController?.signal });
+        element.addEventListener("loadedmetadata", scheduleArticleMetricsRefresh, { signal: metricsController?.signal });
+      });
+    }
+
+    if ("fonts" in document) document.fonts?.ready.then(scheduleArticleMetricsRefresh);
+
+    window.__astroMieRefreshArticleMetrics();
     window.__astroMieUpdateArticleState();
+    window.setTimeout(() => {
+      window.__astroMieRefreshArticleMetrics?.();
+      window.__astroMieUpdateArticleState?.();
+    }, 120);
   }
 
   function initPageEffects() {
-    setupRevealMotion();
     setupArticleTocToggle();
     setupSeriesNav();
     setupArticleReading();
@@ -476,15 +509,26 @@
     window.__astroMieBaseBound = true;
     setupRouteTransitionState();
 
-    window.addEventListener(
-      "scroll",
-      () => {
-        if (window.__astroMieArticleRaf) window.cancelAnimationFrame(window.__astroMieArticleRaf);
-        window.__astroMieArticleRaf = window.requestAnimationFrame(() => window.__astroMieUpdateArticleState?.());
-      },
-      { passive: true }
-    );
-    window.addEventListener("resize", () => window.__astroMieUpdateArticleState?.());
+    function scheduleUnifiedPageEffects() {
+      if (window.__astroMieArticleRaf) window.cancelAnimationFrame(window.__astroMieArticleRaf);
+      window.__astroMieArticleRaf = window.requestAnimationFrame(() => {
+        window.__astroMieUpdateArticleState?.();
+      });
+    }
+
+    const subscribeToScrollRuntime = () => {
+      if (window.__astroMieScroll && !window.__astroMiePageEffectsScrollUnsubscribe) {
+        window.__astroMiePageEffectsScrollUnsubscribe = window.__astroMieScroll.subscribe(scheduleUnifiedPageEffects);
+      }
+    };
+
+    subscribeToScrollRuntime();
+    document.addEventListener("astro-mie:scroll-ready", subscribeToScrollRuntime);
+    if (!window.__astroMieScroll) window.addEventListener("scroll", scheduleUnifiedPageEffects, { passive: true });
+    window.addEventListener("resize", () => {
+      window.__astroMieRefreshArticleMetrics?.();
+      scheduleUnifiedPageEffects();
+    });
 
     document.addEventListener("astro:page-load", initPageEffects);
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initPageEffects, { once: true });
