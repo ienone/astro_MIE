@@ -557,6 +557,47 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
     return Math.max(1, width);
   }
 
+  let cachedHomeFusionGeometry: ReturnType<typeof measureHomeFusionGeometry> | undefined;
+  let cachedHomeFusionRange: ReturnType<typeof getHomeFusionRange> | undefined;
+  let cachedHomeFusionSource: HTMLElement | undefined;
+  let cachedFoldedBrandWidth: number | undefined;
+
+  function refreshHomeFusionMeasurements() {
+    cachedFoldedBrandWidth = measureFoldedBrandWidth();
+
+    if (!isHomePath()) {
+      cachedHomeFusionGeometry = undefined;
+      cachedHomeFusionRange = undefined;
+      cachedHomeFusionSource = undefined;
+      return;
+    }
+
+    const elements = getHomeFusionElements();
+    if (!elements) {
+      cachedHomeFusionGeometry = undefined;
+      cachedHomeFusionRange = undefined;
+      cachedHomeFusionSource = undefined;
+      return;
+    }
+
+    cachedHomeFusionGeometry = measureHomeFusionGeometry(elements);
+    cachedHomeFusionRange = getHomeFusionRange(elements.source);
+    cachedHomeFusionSource = elements.source;
+  }
+
+  function getCachedHomeFusionLayout(elements: NonNullable<ReturnType<typeof getHomeFusionElements>>) {
+    if (!cachedHomeFusionGeometry || !cachedHomeFusionRange || cachedHomeFusionSource !== elements.source) return null;
+    return {
+      geometry: cachedHomeFusionGeometry,
+      range: cachedHomeFusionRange
+    };
+  }
+
+  function refreshHomeFusionMeasurementsAndRender() {
+    refreshHomeFusionMeasurements();
+    renderHomeFusion();
+  }
+
   function clearHomeFusionProxyStyles() {
     const identityProxy = document.querySelector("[data-home-fusion-identity-proxy]");
     const socialProxy = document.querySelector("[data-home-fusion-social-proxy]");
@@ -588,7 +629,8 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
     root.dataset.homeFusionState = "folded";
     root.style.setProperty("--home-fusion-progress", "1");
     root.style.setProperty("--home-brand-progress", "1");
-    root.style.setProperty("--home-brand-slot-width", `${measureFoldedBrandWidth()}px`);
+    if (cachedFoldedBrandWidth === undefined) cachedFoldedBrandWidth = measureFoldedBrandWidth();
+    root.style.setProperty("--home-brand-slot-width", `${cachedFoldedBrandWidth}px`);
     root.style.setProperty("--home-nav-gap", "18px");
     root.style.setProperty("--home-social-target-progress", socialSlot instanceof HTMLElement ? "1" : "0");
     root.style.setProperty("--home-social-slot-width", socialSlot instanceof HTMLElement ? "42px" : "0px");
@@ -618,11 +660,14 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
     }
 
     const scroll = getScrollPosition();
-    const { start, end } = getHomeFusionRange(elements.source);
+    const layout = getCachedHomeFusionLayout(elements);
+    if (!layout) return;
+
+    const { start, end } = layout.range;
     const rawProgress = clamp((scroll - start) / Math.max(1, end - start));
     const progress = reduceMotion ? (rawProgress > 0.08 ? 1 : 0) : rawProgress;
     const state = progress <= 0.01 ? "expanded" : progress >= 0.92 ? "folded" : "merging";
-    const geometry = measureHomeFusionGeometry(elements);
+    const { geometry } = layout;
 
     root.dataset.homeFusion = "true";
     root.dataset.homeFusionState = state;
@@ -1060,7 +1105,7 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
     });
 
     updateHeaderScrollState();
-    renderHomeFusion();
+    refreshHomeFusionMeasurementsAndRender();
     updateActiveNav();
   }
 
@@ -1081,11 +1126,11 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
     window.addEventListener("resize", () => {
       updateNavIndicator();
       window.clearTimeout(headerWindow.__astroMieHomeFusionResizeTimer);
-      headerWindow.__astroMieHomeFusionResizeTimer = window.setTimeout(renderHomeFusion, 80);
+      headerWindow.__astroMieHomeFusionResizeTimer = window.setTimeout(refreshHomeFusionMeasurementsAndRender, 80);
     });
     if (!headerWindow.__astroMieHomeFusionFontReady && "fonts" in document) {
       headerWindow.__astroMieHomeFusionFontReady = true;
-      document.fonts?.ready.then(renderHomeFusion);
+      document.fonts?.ready.then(refreshHomeFusionMeasurementsAndRender);
     }
     document.addEventListener("click", (event) => {
       const target = event.target instanceof Element ? event.target : null;
