@@ -6,6 +6,12 @@ import { isExternalLink, siteConfig } from "../lib/site";
 
 const searchEnabled = siteConfig.features?.search !== false;
 const highlightCurrentMenuArea = siteConfig.features?.highlightCurrentMenuArea !== false;
+const homepage = siteConfig.homepage ?? {};
+const primarySocial = siteConfig.author.links.find((link) => link.icon === "github") ?? siteConfig.author.links[0];
+
+function getSocialText(link: { label: string; displayLabel?: string }) {
+  return link.displayLabel || link.label;
+}
 
 function linkAttrs(href = "", explicitExternal = false, rel?: string) {
   const external = explicitExternal || isExternalLink(href);
@@ -56,12 +62,50 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
     </div>
 
     <div class="nav-actions">
+      {
+        primarySocial && (
+          <a
+            class="nav-social-fusion-slot"
+            data-home-fusion-social-slot
+            data-pointer-light="control"
+            href={primarySocial.href}
+            aria-label={primarySocial.displayLabel ? `${primarySocial.label}: ${primarySocial.displayLabel}` : primarySocial.label}
+            title={getSocialText(primarySocial)}
+            tabindex="-1"
+            aria-hidden="true"
+            {...linkAttrs(primarySocial.href)}
+          >
+            <span class="nav-social-fusion-target" data-home-fusion-social-target>
+              <Icon name={primarySocial.icon} />
+            </span>
+          </a>
+        )
+      }
       {searchEnabled && <MaterialIconButton class="icon-button" icon="search" data-search-open aria-label="Open search" />}
       <MaterialIconButton class="icon-button" icon="sun-moon" data-theme-toggle aria-label="Toggle theme" />
       <MaterialIconButton class="menu-button" icon="menu" data-menu-toggle aria-label="Open menu" aria-expanded="false" aria-controls="mobile-nav-overlay" />
     </div>
   </nav>
 </header>
+
+<div class="home-fusion-proxy-layer" data-home-fusion-proxy-layer aria-hidden="true">
+  <div class="home-fusion-identity-proxy" data-home-fusion-identity-proxy>
+    {siteConfig.branding.logo && <img class="home-fusion-proxy-avatar" src={siteConfig.branding.logo} alt="" width="56" height="56" decoding="async" />}
+    <div class="home-fusion-proxy-copy">
+      <p class="eyebrow">{homepage.eyebrow ?? "Personal static blog"}</p>
+      <strong>{siteConfig.name}</strong>
+      {siteConfig.author.headline && <span>{siteConfig.author.headline}</span>}
+    </div>
+  </div>
+  {
+    primarySocial && (
+      <div class="home-fusion-social-proxy" data-home-fusion-social-proxy>
+        <Icon name={primarySocial.icon} />
+        <span class="home-fusion-social-proxy-label">{getSocialText(primarySocial)}</span>
+      </div>
+    )
+  }
+</div>
 
 <div class="mobile-nav-overlay" id="mobile-nav-overlay" data-mobile-nav-overlay hidden>
   <section class="mobile-nav" data-mobile-nav role="dialog" aria-modal="true" aria-labelledby="mobile-nav-title" tabindex="-1">
@@ -118,6 +162,9 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
       __astroMieHeaderScrolled?: boolean;
       __astroMieNavCloseTimer?: number;
       __astroMieMobileNavCloseTimer?: number;
+      __astroMieHomeFusionRaf?: number;
+      __astroMieHomeFusionResizeTimer?: number;
+      __astroMieHomeFusionFontReady?: boolean;
     };
 
   function normalizePath(path: string) {
@@ -255,6 +302,500 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
 
     headerWindow.__astroMieHeaderScrolled = scrolled;
     document.documentElement.dataset.scrolled = String(scrolled);
+  }
+
+  function clamp(value: number, min = 0, max = 1) {
+    return Math.min(max, Math.max(min, value));
+  }
+
+  function lerp(start: number, end: number, progress: number) {
+    return start + (end - start) * progress;
+  }
+
+  function ease(progress: number) {
+    const t = clamp(progress);
+    return t * t * (3 - 2 * t);
+  }
+
+  function easeOut(progress: number) {
+    return 1 - Math.pow(1 - clamp(progress), 3);
+  }
+
+  function mapRange(value: number, inMin: number, inMax: number, outMin = 0, outMax = 1) {
+    return lerp(outMin, outMax, clamp((value - inMin) / Math.max(1e-5, inMax - inMin)));
+  }
+
+  function getScrollPosition() {
+    return window.scrollY || document.documentElement.scrollTop || 0;
+  }
+
+  function isHomePath() {
+    return normalizePath(window.location.pathname) === "/";
+  }
+
+  function setElementStyles(element: HTMLElement, styles: Record<string, string>) {
+    Object.entries(styles).forEach(([property, value]) => {
+      element.style[property as any] = value;
+    });
+  }
+
+  function clearElementStyles(element: HTMLElement | null | undefined, properties: string[]) {
+    if (!(element instanceof HTMLElement)) return;
+    properties.forEach((property) => element.style.removeProperty(property));
+  }
+
+  type FusionRect = {
+    left: number;
+    top: number;
+    right: number;
+    bottom: number;
+    width: number;
+    height: number;
+  };
+
+  function makeFusionRect(left: number, top: number, right: number, bottom: number): FusionRect {
+    return {
+      left,
+      top,
+      right,
+      bottom,
+      width: Math.max(0, right - left),
+      height: Math.max(0, bottom - top)
+    };
+  }
+
+  function rectFromDomRect(rect: DOMRect | DOMRectReadOnly): FusionRect {
+    return makeFusionRect(rect.left, rect.top, rect.right, rect.bottom);
+  }
+
+  function inflateFusionRect(rect: FusionRect, inline = 0, block = 0) {
+    return makeFusionRect(rect.left - inline, rect.top - block, rect.right + inline, rect.bottom + block);
+  }
+
+  function getContentRect(element: HTMLElement) {
+    const childRects = Array.from(element.children)
+      .filter((child): child is HTMLElement => child instanceof HTMLElement)
+      .map((child) => rectFromDomRect(child.getBoundingClientRect()))
+      .filter((rect) => rect.width > 0 && rect.height > 0);
+
+    if (!childRects.length) return rectFromDomRect(element.getBoundingClientRect());
+
+    return makeFusionRect(
+      Math.min(...childRects.map((rect) => rect.left)),
+      Math.min(...childRects.map((rect) => rect.top)),
+      Math.max(...childRects.map((rect) => rect.right)),
+      Math.max(...childRects.map((rect) => rect.bottom))
+    );
+  }
+
+  function getHomeFusionElements() {
+    const source = document.querySelector("[data-home-fusion-source]");
+    const sourceIdentity = document.querySelector("[data-home-fusion-identity]");
+    const sourceSocials = document.querySelector("[data-home-fusion-socials]");
+    const sourcePrimarySocial = document.querySelector("[data-home-fusion-primary-social='true']");
+    const identityProxy = document.querySelector("[data-home-fusion-identity-proxy]");
+    const socialProxy = document.querySelector("[data-home-fusion-social-proxy]");
+    const brand = document.querySelector(".brand");
+    const socialSlot = document.querySelector("[data-home-fusion-social-slot]");
+    const socialTarget = document.querySelector("[data-home-fusion-social-target]");
+
+    if (
+      !(source instanceof HTMLElement) ||
+      !(sourceIdentity instanceof HTMLElement) ||
+      !(identityProxy instanceof HTMLElement) ||
+      !(brand instanceof HTMLElement)
+    ) {
+      return null;
+    }
+
+    return {
+      source,
+      sourceIdentity,
+      sourceSocials: sourceSocials instanceof HTMLElement ? sourceSocials : undefined,
+      sourcePrimarySocial: sourcePrimarySocial instanceof HTMLElement ? sourcePrimarySocial : undefined,
+      secondarySocials: [...document.querySelectorAll<HTMLElement>("[data-home-fusion-socials] .social-link:not([data-home-fusion-primary-social='true'])")],
+      identityProxy,
+      socialProxy: socialProxy instanceof HTMLElement ? socialProxy : undefined,
+      brand,
+      brandAvatar: brand.querySelector("img") instanceof HTMLElement ? (brand.querySelector("img") as HTMLElement) : undefined,
+      brandTitle: brand.querySelector("span") instanceof HTMLElement ? (brand.querySelector("span") as HTMLElement) : undefined,
+      sourceAvatar: sourceIdentity.querySelector(".avatar") instanceof HTMLElement ? (sourceIdentity.querySelector(".avatar") as HTMLElement) : undefined,
+      sourceTitle: sourceIdentity.querySelector("h1") instanceof HTMLElement ? (sourceIdentity.querySelector("h1") as HTMLElement) : undefined,
+      socialSlot: socialSlot instanceof HTMLElement ? socialSlot : undefined,
+      socialTarget: socialTarget instanceof HTMLElement ? socialTarget : undefined
+    };
+  }
+
+  function getHomeFusionRange(source: HTMLElement) {
+    const sourceRect = source.getBoundingClientRect();
+    const scroll = getScrollPosition();
+    const sourceTop = sourceRect.top + scroll;
+    const header = document.querySelector("[data-site-header]");
+    const headerHeight = header instanceof HTMLElement ? header.getBoundingClientRect().height : 72;
+    const lead = clamp(window.innerHeight * 0.05, 32, 72);
+    const duration = clamp(window.innerHeight * 0.3, 220, 360);
+    const start = Math.max(0, sourceTop - headerHeight - lead);
+    return { start, end: start + duration };
+  }
+
+  function measureHomeFusionGeometry(elements: NonNullable<ReturnType<typeof getHomeFusionElements>>) {
+    const root = document.documentElement;
+    const previousRootVars = {
+      slotWidth: root.style.getPropertyValue("--home-social-slot-width"),
+      brandSlotWidth: root.style.getPropertyValue("--home-brand-slot-width"),
+      navGap: root.style.getPropertyValue("--home-nav-gap"),
+      brandProgress: root.style.getPropertyValue("--home-brand-progress"),
+      socialProgress: root.style.getPropertyValue("--home-social-target-progress")
+    };
+    const sourceIdentityInline = {
+      opacity: elements.sourceIdentity.style.opacity,
+      transform: elements.sourceIdentity.style.transform,
+      filter: elements.sourceIdentity.style.filter
+    };
+    const sourcePrimaryInline = elements.sourcePrimarySocial
+      ? {
+          opacity: elements.sourcePrimarySocial.style.opacity,
+          transform: elements.sourcePrimarySocial.style.transform,
+          filter: elements.sourcePrimarySocial.style.filter
+        }
+      : undefined;
+    const secondarySocialInline = elements.secondarySocials.map((element) => ({
+      element,
+      styles: {
+        opacity: element.style.opacity,
+        transform: element.style.transform,
+        filter: element.style.filter
+      }
+    }));
+    const brandInline = {
+      opacity: elements.brand.style.opacity,
+      transform: elements.brand.style.transform,
+      width: elements.brand.style.width,
+      maxWidth: elements.brand.style.maxWidth,
+      overflow: elements.brand.style.overflow
+    };
+
+    root.style.setProperty("--home-brand-progress", "1");
+    root.style.setProperty("--home-nav-gap", "18px");
+    root.style.setProperty("--home-social-target-progress", "1");
+    root.style.setProperty("--home-social-slot-width", "42px");
+    setElementStyles(elements.sourceIdentity, { opacity: "1", transform: "none", filter: "none" });
+    if (elements.sourcePrimarySocial) setElementStyles(elements.sourcePrimarySocial, { opacity: "1", transform: "none", filter: "none" });
+    elements.secondarySocials.forEach((chip) => setElementStyles(chip, { opacity: "1", transform: "none", filter: "none" }));
+    setElementStyles(elements.brand, { opacity: "1", transform: "none", width: "max-content", maxWidth: "none", overflow: "visible" });
+
+    const sourceIdentityRect = inflateFusionRect(getContentRect(elements.sourceIdentity), 14, 10);
+    const targetIdentityRect = elements.brand.getBoundingClientRect();
+    const sourceSocialRect = elements.sourcePrimarySocial?.getBoundingClientRect();
+    const targetSocialRect = elements.socialTarget?.getBoundingClientRect();
+    const secondarySocialRects = elements.secondarySocials.map((chip) => rectFromDomRect(chip.getBoundingClientRect()));
+    const sourceAvatarRect = elements.sourceAvatar?.getBoundingClientRect();
+    const targetAvatarRect = elements.brandAvatar?.getBoundingClientRect();
+    const sourceTitleRect = elements.sourceTitle?.getBoundingClientRect();
+    const targetTitleRect = elements.brandTitle?.getBoundingClientRect();
+    const sourceTitleStyles = elements.sourceTitle ? window.getComputedStyle(elements.sourceTitle) : undefined;
+    const targetTitleStyles = elements.brandTitle ? window.getComputedStyle(elements.brandTitle) : undefined;
+    const sourceTitleFontSize = parseFloat(sourceTitleStyles?.fontSize || "32") || 32;
+    const targetTitleFontSize = parseFloat(targetTitleStyles?.fontSize || "16") || 16;
+    const sourceTitleLineHeight =
+      sourceTitleStyles?.lineHeight === "normal" ? sourceTitleFontSize * 1.08 : parseFloat(sourceTitleStyles?.lineHeight || "") || sourceTitleFontSize * 1.08;
+    const targetTitleLineHeight =
+      targetTitleStyles?.lineHeight === "normal" ? targetTitleFontSize * 1.08 : parseFloat(targetTitleStyles?.lineHeight || "") || targetTitleFontSize * 1.08;
+
+    root.style.setProperty("--home-brand-progress", previousRootVars.brandProgress || "0");
+    root.style.setProperty("--home-social-target-progress", previousRootVars.socialProgress || "0");
+    if (previousRootVars.slotWidth) root.style.setProperty("--home-social-slot-width", previousRootVars.slotWidth);
+    else root.style.removeProperty("--home-social-slot-width");
+    if (previousRootVars.brandSlotWidth) root.style.setProperty("--home-brand-slot-width", previousRootVars.brandSlotWidth);
+    else root.style.removeProperty("--home-brand-slot-width");
+    if (previousRootVars.navGap) root.style.setProperty("--home-nav-gap", previousRootVars.navGap);
+    else root.style.removeProperty("--home-nav-gap");
+    setElementStyles(elements.sourceIdentity, sourceIdentityInline);
+    if (elements.sourcePrimarySocial && sourcePrimaryInline) setElementStyles(elements.sourcePrimarySocial, sourcePrimaryInline);
+    secondarySocialInline.forEach(({ element, styles }) => setElementStyles(element, styles));
+    setElementStyles(elements.brand, brandInline);
+
+    return {
+      sourceIdentityRect,
+      targetIdentityRect,
+      sourceSocialRect,
+      targetSocialRect,
+      secondarySocialRects,
+      sourceAvatarSize: sourceAvatarRect?.height || 56,
+      targetAvatarSize: targetAvatarRect?.height || 34,
+      sourceTitleWidth: sourceTitleRect?.width || Math.max(0, sourceIdentityRect.width - (sourceAvatarRect?.width || 56) - 14 - 28),
+      targetTitleWidth: targetTitleRect?.width || Math.max(0, targetIdentityRect.width - (targetAvatarRect?.width || 34) - 10),
+      sourceTitleFontSize,
+      targetTitleFontSize,
+      sourceTitleLineHeight,
+      targetTitleLineHeight
+    };
+  }
+
+  function measureFoldedBrandWidth() {
+    const brand = document.querySelector(".brand");
+    if (!(brand instanceof HTMLElement)) return 0;
+
+    const previous = {
+      opacity: brand.style.opacity,
+      transform: brand.style.transform,
+      width: brand.style.width,
+      maxWidth: brand.style.maxWidth,
+      overflow: brand.style.overflow
+    };
+
+    setElementStyles(brand, {
+      opacity: "1",
+      transform: "none",
+      width: "max-content",
+      maxWidth: "none",
+      overflow: "visible"
+    });
+
+    const width = brand.getBoundingClientRect().width;
+    setElementStyles(brand, previous);
+    return Math.max(1, width);
+  }
+
+  function clearHomeFusionProxyStyles() {
+    const identityProxy = document.querySelector("[data-home-fusion-identity-proxy]");
+    const socialProxy = document.querySelector("[data-home-fusion-social-proxy]");
+    clearElementStyles(identityProxy instanceof HTMLElement ? identityProxy : undefined, ["opacity", "width", "height", "transform", "border-radius", "pointer-events"]);
+    clearElementStyles(socialProxy instanceof HTMLElement ? socialProxy : undefined, ["opacity", "width", "height", "transform", "border-radius", "pointer-events"]);
+  }
+
+  function setHomeFusionBrandInteractive(interactive: boolean) {
+    const brand = document.querySelector(".brand");
+    if (!(brand instanceof HTMLElement)) return;
+
+    if (interactive) {
+      brand.removeAttribute("tabindex");
+      brand.removeAttribute("aria-hidden");
+      brand.removeAttribute("inert");
+      return;
+    }
+
+    brand.tabIndex = -1;
+    brand.setAttribute("aria-hidden", "true");
+    brand.setAttribute("inert", "");
+  }
+
+  function applyFoldedHomeFusionState() {
+    const root = document.documentElement;
+    const socialSlot = document.querySelector("[data-home-fusion-social-slot]");
+
+    root.dataset.homeFusion = "true";
+    root.dataset.homeFusionState = "folded";
+    root.style.setProperty("--home-fusion-progress", "1");
+    root.style.setProperty("--home-brand-progress", "1");
+    root.style.setProperty("--home-brand-slot-width", `${measureFoldedBrandWidth()}px`);
+    root.style.setProperty("--home-nav-gap", "18px");
+    root.style.setProperty("--home-social-target-progress", socialSlot instanceof HTMLElement ? "1" : "0");
+    root.style.setProperty("--home-social-slot-width", socialSlot instanceof HTMLElement ? "42px" : "0px");
+    clearHomeFusionProxyStyles();
+    setHomeFusionBrandInteractive(true);
+
+    if (socialSlot instanceof HTMLElement) {
+      socialSlot.tabIndex = 0;
+      socialSlot.setAttribute("aria-hidden", "false");
+    }
+  }
+
+  function renderHomeFusion() {
+    const root = document.documentElement;
+
+    if (!isHomePath()) {
+      applyFoldedHomeFusionState();
+      return;
+    }
+
+    const elements = getHomeFusionElements();
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (!elements) {
+      clearHomeFusion();
+      return;
+    }
+
+    const scroll = getScrollPosition();
+    const { start, end } = getHomeFusionRange(elements.source);
+    const rawProgress = clamp((scroll - start) / Math.max(1, end - start));
+    const progress = reduceMotion ? (rawProgress > 0.08 ? 1 : 0) : rawProgress;
+    const state = progress <= 0.01 ? "expanded" : progress >= 0.92 ? "folded" : "merging";
+    const geometry = measureHomeFusionGeometry(elements);
+
+    root.dataset.homeFusion = "true";
+    root.dataset.homeFusionState = state;
+    root.style.setProperty("--home-fusion-progress", progress.toFixed(4));
+    setHomeFusionBrandInteractive(state === "folded");
+
+    const sourceSurfaceAlpha = 1 - easeOut(mapRange(progress, 0.005, 0.10));
+    const identityProxyIn = ease(mapRange(progress, 0.005, 0.045));
+    const identityMove = ease(mapRange(progress, 0.05, 0.66));
+    const identityContent = identityMove;
+    const identitySourceFade = identityProxyIn;
+    const identityTarget = ease(mapRange(progress, 0.72, 0.90));
+    const identityExtra = identityContent;
+    const socialProxyIn = ease(mapRange(progress, 0.04, 0.10));
+    const socialSourceFade = ease(mapRange(progress, 0.02, 0.12));
+    const socialMove = ease(mapRange(progress, 0.12, 0.68));
+    const brandSlot = easeOut(mapRange(progress, 0.36, 0.82));
+    const socialSlot = easeOut(mapRange(progress, 0.34, 0.78));
+    const socialTarget = ease(mapRange(progress, 0.68, 0.90));
+    const navExpand = Math.max(brandSlot, socialSlot);
+
+    elements.source.style.setProperty("--home-fusion-source-surface-alpha", `${(sourceSurfaceAlpha * 100).toFixed(2)}%`);
+    root.style.setProperty("--home-nav-gap", `${lerp(10, 18, navExpand)}px`);
+    root.style.setProperty("--home-brand-progress", identityTarget.toFixed(4));
+    root.style.setProperty("--home-brand-slot-width", `${lerp(0, geometry.targetIdentityRect.width, brandSlot)}px`);
+    root.style.setProperty("--home-social-target-progress", socialTarget.toFixed(4));
+    root.style.setProperty("--home-social-slot-width", `${lerp(0, 42, socialSlot)}px`);
+
+    setElementStyles(elements.sourceIdentity, {
+      opacity: (1 - identitySourceFade).toFixed(4),
+      transform: "none",
+      filter: "none",
+      visibility: identitySourceFade > 0.98 ? "hidden" : "",
+      pointerEvents: progress > 0.08 ? "none" : ""
+    });
+
+    if (elements.sourceSocials) {
+      setElementStyles(elements.sourceSocials, {
+        opacity: (1 - socialSourceFade).toFixed(4),
+        transform: "none",
+        filter: "none",
+        visibility: socialSourceFade > 0.98 ? "hidden" : "",
+        pointerEvents: socialSourceFade > 0.45 ? "none" : ""
+      });
+    }
+
+    elements.secondarySocials.forEach((chip, index) => {
+      const chipRect = geometry.secondarySocialRects[index];
+      const stackTarget = geometry.sourceSocialRect;
+      const itemProgress = easeOut(mapRange(progress, 0.03 + index * 0.018, 0.22 + index * 0.026));
+      const stackX =
+        chipRect && stackTarget ? stackTarget.left + stackTarget.width / 2 - (chipRect.left + chipRect.width / 2) : 0;
+      const stackY =
+        chipRect && stackTarget ? stackTarget.top + stackTarget.height / 2 - (chipRect.top + chipRect.height / 2) : -14;
+      const stackOffsetY = stackTarget ? (index % 2 === 0 ? -1 : 1) * Math.min(3, index + 1) : 0;
+      setElementStyles(chip, {
+        opacity: (1 - itemProgress).toFixed(4),
+        transform: `translate3d(${lerp(0, stackX, itemProgress)}px, ${lerp(0, stackY + stackOffsetY, itemProgress)}px, 0) scale(${lerp(1, 0.74, itemProgress)})`,
+        filter: `blur(${lerp(0, 6, itemProgress)}px)`,
+        pointerEvents: itemProgress > 0.45 ? "none" : ""
+      });
+    });
+
+    if (elements.sourcePrimarySocial) {
+      setElementStyles(elements.sourcePrimarySocial, {
+        opacity: (1 - socialSourceFade).toFixed(4),
+        transform: "none",
+        filter: "none",
+        visibility: socialSourceFade > 0.98 ? "hidden" : "",
+        pointerEvents: progress > 0.16 ? "none" : ""
+      });
+    }
+
+    const identityX = lerp(geometry.sourceIdentityRect.left, geometry.targetIdentityRect.left, identityMove);
+    const identityY = lerp(geometry.sourceIdentityRect.top, geometry.targetIdentityRect.top, identityMove);
+    const identityPaddingInline = lerp(14, 0, identityContent);
+    const identityPaddingBlock = lerp(10, 0, identityContent);
+    const identityAvatarSize = lerp(geometry.sourceAvatarSize, geometry.targetAvatarSize, identityContent);
+    const identityGap = lerp(14, 10, identityContent);
+    const identityTitleWidth = lerp(geometry.sourceTitleWidth, geometry.targetTitleWidth, identityContent);
+    const identityContentWidth = identityAvatarSize + identityGap + identityTitleWidth + identityPaddingInline * 2;
+    const identityProxyOut = ease(mapRange(progress, 0.72, 0.92));
+    const identityWidthSafety = lerp(10, 6, identityContent) * (1 - identityProxyOut);
+    const identityWidth = Math.max(
+      lerp(geometry.sourceIdentityRect.width, geometry.targetIdentityRect.width, identityMove),
+      identityContentWidth + identityWidthSafety
+    );
+    const identityHeight = Math.max(
+      lerp(geometry.sourceIdentityRect.height, geometry.targetIdentityRect.height, identityMove),
+      identityAvatarSize + identityPaddingBlock * 2
+    );
+    setElementStyles(elements.identityProxy, {
+      opacity: progress > 0.015 && progress < 0.96 ? (identityProxyIn * (1 - identityProxyOut)).toFixed(4) : "0",
+      width: `${Math.max(1, identityWidth)}px`,
+      height: `${Math.max(1, identityHeight)}px`,
+      transform: `translate3d(${identityX}px, ${identityY}px, 0)`,
+      borderRadius: `${lerp(28, 999, identityMove)}px`,
+      pointerEvents: "none"
+    });
+    elements.identityProxy.style.setProperty("--fusion-proxy-avatar-size", `${identityAvatarSize}px`);
+    elements.identityProxy.style.setProperty("--fusion-proxy-title-size", `${lerp(geometry.sourceTitleFontSize, geometry.targetTitleFontSize, identityContent)}px`);
+    elements.identityProxy.style.setProperty("--fusion-proxy-title-weight", `${lerp(850, 800, identityContent)}`);
+    elements.identityProxy.style.setProperty("--fusion-proxy-title-line-height", `${lerp(geometry.sourceTitleLineHeight, geometry.targetTitleLineHeight, identityContent)}px`);
+    elements.identityProxy.style.setProperty("--fusion-proxy-gap", `${identityGap}px`);
+    elements.identityProxy.style.setProperty("--fusion-proxy-padding-block", `${identityPaddingBlock}px`);
+    elements.identityProxy.style.setProperty("--fusion-proxy-padding-inline", `${identityPaddingInline}px`);
+    elements.identityProxy.style.setProperty("--fusion-proxy-extra-opacity", `${1 - identityExtra}`);
+    elements.identityProxy.style.setProperty("--fusion-proxy-surface-alpha", `${(70 * (1 - identityMove)).toFixed(2)}%`);
+    elements.identityProxy.style.setProperty("--fusion-proxy-border-alpha", `${(48 * (1 - identityMove)).toFixed(2)}%`);
+
+    if (elements.socialProxy && geometry.sourceSocialRect && geometry.targetSocialRect) {
+      const socialX = lerp(geometry.sourceSocialRect.left, geometry.targetSocialRect.left, socialMove);
+      const socialY = lerp(geometry.sourceSocialRect.top, geometry.targetSocialRect.top, socialMove);
+      const socialWidth = lerp(geometry.sourceSocialRect.width, geometry.targetSocialRect.width, socialMove);
+      const socialHeight = lerp(geometry.sourceSocialRect.height, geometry.targetSocialRect.height, socialMove);
+      const socialProxyOut = ease(mapRange(progress, 0.72, 0.92));
+      setElementStyles(elements.socialProxy, {
+        opacity: progress > 0.035 && progress < 0.96 ? (socialProxyIn * (1 - socialProxyOut)).toFixed(4) : "0",
+        width: `${Math.max(1, socialWidth)}px`,
+        height: `${Math.max(1, socialHeight)}px`,
+        transform: `translate3d(${socialX}px, ${socialY}px, 0)`,
+        borderRadius: "999px",
+        pointerEvents: "none"
+      });
+      elements.socialProxy.style.setProperty("--fusion-social-icon-size", `${lerp(20, 20, socialMove)}px`);
+      elements.socialProxy.style.setProperty("--fusion-social-padding-inline", "0px");
+      elements.socialProxy.style.setProperty("--fusion-social-surface-alpha", `${(58 * (1 - socialMove)).toFixed(2)}%`);
+      elements.socialProxy.style.setProperty("--fusion-social-border-alpha", `${(56 * (1 - socialMove)).toFixed(2)}%`);
+    } else if (elements.socialProxy) {
+      elements.socialProxy.style.opacity = "0";
+    }
+
+    if (elements.socialSlot) {
+      elements.socialSlot.tabIndex = progress >= 0.92 ? 0 : -1;
+      elements.socialSlot.setAttribute("aria-hidden", progress >= 0.92 ? "false" : "true");
+    }
+  }
+
+  function clearHomeFusion() {
+    const root = document.documentElement;
+    delete root.dataset.homeFusion;
+    delete root.dataset.homeFusionState;
+    root.style.removeProperty("--home-fusion-progress");
+    root.style.removeProperty("--home-brand-progress");
+    root.style.removeProperty("--home-brand-slot-width");
+    root.style.removeProperty("--home-nav-gap");
+    root.style.removeProperty("--home-social-target-progress");
+    root.style.removeProperty("--home-social-slot-width");
+
+    const socialSlot = document.querySelector("[data-home-fusion-social-slot]");
+    const source = document.querySelector("[data-home-fusion-source]");
+    clearHomeFusionProxyStyles();
+    setHomeFusionBrandInteractive(true);
+    if (source instanceof HTMLElement) source.style.removeProperty("--home-fusion-source-surface-alpha");
+    if (socialSlot instanceof HTMLElement) {
+      socialSlot.tabIndex = -1;
+      socialSlot.setAttribute("aria-hidden", "true");
+    }
+
+    const elements = getHomeFusionElements();
+    if (!elements) return;
+    clearElementStyles(elements.sourceIdentity, ["opacity", "transform", "filter", "visibility", "pointer-events"]);
+    clearElementStyles(elements.sourceSocials, ["opacity", "transform", "filter", "visibility", "pointer-events"]);
+    clearElementStyles(elements.sourcePrimarySocial, ["opacity", "transform", "filter", "visibility", "pointer-events"]);
+    elements.secondarySocials.forEach((chip) => clearElementStyles(chip, ["opacity", "transform", "filter", "visibility", "pointer-events"]));
+  }
+
+  function scheduleHomeFusionRender() {
+    if (headerWindow.__astroMieHomeFusionRaf) return;
+    headerWindow.__astroMieHomeFusionRaf = window.requestAnimationFrame(() => {
+      headerWindow.__astroMieHomeFusionRaf = undefined;
+      renderHomeFusion();
+    });
   }
 
   function closeNavMenus(except?: Element, restoreIndicator = true) {
@@ -519,6 +1060,7 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
     });
 
     updateHeaderScrollState();
+    renderHomeFusion();
     updateActiveNav();
   }
 
@@ -529,11 +1071,22 @@ function linkAttrs(href = "", explicitExternal = false, rel?: string) {
       "scroll",
       () => {
         if (headerWindow.__astroMieHeaderRaf) window.cancelAnimationFrame(headerWindow.__astroMieHeaderRaf);
-        headerWindow.__astroMieHeaderRaf = window.requestAnimationFrame(updateHeaderScrollState);
+        headerWindow.__astroMieHeaderRaf = window.requestAnimationFrame(() => {
+          updateHeaderScrollState();
+          scheduleHomeFusionRender();
+        });
       },
       { passive: true }
     );
-    window.addEventListener("resize", updateNavIndicator);
+    window.addEventListener("resize", () => {
+      updateNavIndicator();
+      window.clearTimeout(headerWindow.__astroMieHomeFusionResizeTimer);
+      headerWindow.__astroMieHomeFusionResizeTimer = window.setTimeout(renderHomeFusion, 80);
+    });
+    if (!headerWindow.__astroMieHomeFusionFontReady && "fonts" in document) {
+      headerWindow.__astroMieHomeFusionFontReady = true;
+      document.fonts?.ready.then(renderHomeFusion);
+    }
     document.addEventListener("click", (event) => {
       const target = event.target instanceof Element ? event.target : null;
       if (target?.closest("[data-nav-group]")) return;

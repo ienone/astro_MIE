@@ -48,8 +48,11 @@ body > .site-header {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 18px;
+  gap: var(--home-nav-gap, 18px);
+  width: max-content;
+  max-width: 100%;
   min-height: 66px;
+  margin: 0 auto;
   border-radius: 999px;
   padding: 10px 12px 10px 18px;
   transform: translateZ(0);
@@ -141,6 +144,18 @@ md-ripple {
 .brand {
   gap: 10px;
   font-weight: 800;
+  min-width: 0;
+  opacity: var(--home-brand-opacity, 1);
+  overflow: hidden;
+  transform: scale(var(--home-brand-scale, 1));
+  transform-origin: left center;
+  white-space: nowrap;
+}
+
+.brand span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .brand img {
@@ -153,6 +168,20 @@ md-ripple {
 .brand:hover img,
 .brand:focus-visible img {
   transform: scale(1.06) rotate(-3deg);
+}
+
+:root[data-home-fusion="true"] .brand {
+  width: var(--home-brand-slot-width, 0px);
+  --home-brand-opacity: var(--home-brand-progress, 0);
+  --home-brand-scale: calc(0.96 + (var(--home-brand-progress, 0) * 0.04));
+  pointer-events: none;
+  transition: none;
+  visibility: hidden;
+}
+
+:root[data-home-fusion-state="folded"] .brand {
+  pointer-events: auto;
+  visibility: visible;
 }
 
 .nav-links {
@@ -383,8 +412,173 @@ md-ripple {
 }
 
 .nav-actions {
+  position: relative;
   justify-content: flex-end;
   gap: 8px;
+}
+
+.nav-social-fusion-slot {
+  position: relative;
+  display: inline-grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: var(--home-social-slot-width, 0px);
+  min-width: var(--home-social-slot-width, 0px);
+  height: 42px;
+  overflow: hidden;
+  border-radius: var(--md-sys-shape-corner-full);
+  opacity: var(--home-social-target-progress, 0);
+  pointer-events: none;
+  transition:
+    background var(--motion-hover),
+    color var(--motion-hover),
+    transform var(--motion-hover);
+}
+
+:root[data-home-fusion-state="folded"] .nav-social-fusion-slot {
+  pointer-events: auto;
+}
+
+.nav-social-fusion-target {
+  display: inline-grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-on-surface);
+  transform: scale(calc(0.94 + (var(--home-social-target-progress, 0) * 0.06)));
+}
+
+.nav-social-fusion-target .icon {
+  width: 20px;
+  height: 20px;
+  transition: transform var(--motion-hover);
+}
+
+.nav-social-fusion-slot:hover .nav-social-fusion-target,
+.nav-social-fusion-slot:focus-visible .nav-social-fusion-target {
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+}
+
+.nav-social-fusion-slot:hover .icon,
+.nav-social-fusion-slot:focus-visible .icon {
+  transform: scale(1.06);
+}
+
+.nav-social-fusion-slot:active {
+  transform: scale(0.96);
+}
+
+.nav-social-fusion-slot:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--md-sys-color-secondary) 42%, transparent);
+  outline-offset: 2px;
+}
+
+.home-fusion-proxy-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+}
+
+.home-fusion-identity-proxy,
+.home-fusion-social-proxy {
+  position: fixed;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  min-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  will-change: transform, opacity, width, height;
+}
+
+.home-fusion-identity-proxy {
+  display: flex;
+  align-items: center;
+  gap: var(--fusion-proxy-gap, 14px);
+  border: 1px solid color-mix(in srgb, var(--md-sys-color-outline) var(--fusion-proxy-border-alpha, 48%), transparent);
+  background: color-mix(in srgb, var(--md-sys-color-surface-container-high) var(--fusion-proxy-surface-alpha, 70%), transparent);
+  box-shadow: var(--md-sys-elevation-level1);
+  padding: var(--fusion-proxy-padding-block, 10px) var(--fusion-proxy-padding-inline, 14px);
+  transform-origin: left top;
+  backdrop-filter: blur(16px) saturate(1.16);
+}
+
+.home-fusion-proxy-avatar {
+  flex: 0 0 auto;
+  width: var(--fusion-proxy-avatar-size, 56px);
+  height: var(--fusion-proxy-avatar-size, 56px);
+  border: 2px solid color-mix(in srgb, var(--md-sys-color-primary) 36%, var(--md-sys-color-surface));
+  border-radius: var(--md-sys-shape-corner-full);
+  background: var(--md-sys-color-surface-container-high);
+  object-fit: cover;
+}
+
+.home-fusion-proxy-copy {
+  display: grid;
+  min-width: 0;
+  gap: calc(var(--fusion-proxy-extra-opacity, 1) * 4px);
+  overflow: hidden;
+}
+
+.home-fusion-proxy-copy .eyebrow,
+.home-fusion-proxy-copy span {
+  opacity: var(--fusion-proxy-extra-opacity, 1);
+  transform: translate3d(0, calc((1 - var(--fusion-proxy-extra-opacity, 1)) * -5px), 0);
+}
+
+.home-fusion-proxy-copy .eyebrow {
+  max-height: calc(var(--fusion-proxy-extra-opacity, 1) * 1.4em);
+  overflow: hidden;
+  margin: 0;
+}
+
+.home-fusion-proxy-copy strong {
+  overflow: hidden;
+  color: var(--md-sys-color-on-surface);
+  font-size: var(--fusion-proxy-title-size, 2rem);
+  font-weight: var(--fusion-proxy-title-weight, 850);
+  line-height: var(--fusion-proxy-title-line-height, 1.08);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-fusion-proxy-copy span {
+  max-height: calc(var(--fusion-proxy-extra-opacity, 1) * 3em);
+  max-width: min(620px, 54vw);
+  overflow: hidden;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: 0.96rem;
+  line-height: 1.55;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-fusion-social-proxy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  border: 1px solid color-mix(in srgb, var(--md-sys-color-outline) var(--fusion-social-border-alpha, 56%), transparent);
+  border-radius: var(--md-sys-shape-corner-full);
+  background: color-mix(in srgb, var(--md-sys-color-surface-container-high) var(--fusion-social-surface-alpha, 58%), transparent);
+  box-shadow: var(--md-sys-elevation-level1);
+  color: var(--md-sys-color-on-surface);
+  padding-inline: var(--fusion-social-padding-inline, 12px);
+  transform-origin: left top;
+  backdrop-filter: blur(14px) saturate(1.16);
+}
+
+.home-fusion-social-proxy .icon {
+  width: var(--fusion-social-icon-size, 20px);
+  height: var(--fusion-social-icon-size, 20px);
+}
+
+.home-fusion-social-proxy-label {
+  display: none;
 }
 
 .icon-button,
