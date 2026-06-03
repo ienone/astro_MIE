@@ -18,7 +18,7 @@ interface Props {
 const {
   icon,
   class: className,
-  type = "button",
+  type,
   "aria-label": ariaLabel,
   "aria-controls": ariaControls,
   "aria-expanded": ariaExpanded,
@@ -27,12 +27,13 @@ const {
   ...attrs
 } = Astro.props;
 const hostClass = ["mie-material-icon-button", className].filter(Boolean).join(" ");
+const isLink = typeof attrs.href === "string" && attrs.href.length > 0;
 ---
 
 <md-filled-tonal-icon-button
   {...attrs}
   class={hostClass}
-  type={type}
+  type={isLink ? undefined : type ?? "button"}
   aria-label={ariaLabel}
   aria-controls={ariaControls}
   aria-expanded={ariaExpanded}
