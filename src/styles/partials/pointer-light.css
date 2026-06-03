@@ -1,0 +1,92 @@
+[data-pointer-light] {
+  --pointer-light-x: 50%;
+  --pointer-light-y: 50%;
+  --pointer-light-opacity: 0;
+  --pointer-light-edge-opacity: 0;
+  --pointer-light-color: var(--md-sys-color-primary);
+  --pointer-light-container: var(--md-sys-color-primary-container);
+  position: relative;
+  isolation: isolate;
+}
+
+[data-pointer-light]::after {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  background:
+    radial-gradient(
+      circle 180px at var(--pointer-light-x) var(--pointer-light-y),
+      color-mix(in srgb, var(--pointer-light-container) 36%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      circle 76px at var(--pointer-light-x) var(--pointer-light-y),
+      color-mix(in srgb, var(--pointer-light-color) 20%, transparent),
+      transparent 72%
+    );
+  content: "";
+  opacity: var(--pointer-light-opacity);
+  pointer-events: none;
+  transition: opacity var(--motion-pointer-light, 190ms cubic-bezier(0.2, 0, 0, 1));
+}
+
+[data-pointer-light]::before {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  border: 1px solid transparent;
+  border-radius: inherit;
+  background:
+    radial-gradient(
+        circle 130px at var(--pointer-light-x) var(--pointer-light-y),
+        color-mix(in srgb, var(--pointer-light-color) 62%, transparent),
+        transparent 58%
+      )
+      border-box;
+  content: "";
+  mask:
+    linear-gradient(#000 0 0) padding-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  -webkit-mask:
+    linear-gradient(#000 0 0) padding-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  opacity: var(--pointer-light-edge-opacity);
+  pointer-events: none;
+  transition: opacity var(--motion-pointer-light, 190ms cubic-bezier(0.2, 0, 0, 1));
+}
+
+[data-pointer-light="surface"] {
+  --pointer-light-container: var(--md-sys-color-tertiary-container);
+}
+
+[data-pointer-light="card"] {
+  --pointer-light-container: var(--md-sys-color-primary-container);
+}
+
+[data-pointer-light="control"] {
+  --pointer-light-container: var(--md-sys-color-secondary-container);
+}
+
+[data-pointer-light-active="true"] {
+  --pointer-light-opacity: 1;
+  --pointer-light-edge-opacity: 0.8;
+}
+
+[data-pointer-light] > :not(md-ripple) {
+  position: relative;
+  z-index: 5;
+}
+
+[data-pointer-light] > md-ripple {
+  z-index: 6;
+}
+
+@media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
+  [data-pointer-light]::before,
+  [data-pointer-light]::after {
+    display: none;
+  }
+}

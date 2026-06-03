@@ -164,11 +164,18 @@
   --motion-fast: 160ms ease;
   --motion-medium: 260ms cubic-bezier(0.2, 0, 0, 1);
   --motion-page: 420ms cubic-bezier(0.2, 0, 0, 1);
+  --motion-route: var(--motion-page);
   --motion-route-duration: 620ms;
   --motion-route-back-duration: 540ms;
   --motion-route-ease: cubic-bezier(0.16, 1, 0.3, 1);
   --motion-route-back-ease: cubic-bezier(0.2, 0, 0, 1);
   --motion-route-fade: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --motion-shared: var(--motion-route-duration) var(--motion-route-ease);
+  --motion-scroll: 360ms var(--md-sys-motion-easing-emphasized);
+  --motion-scene: 560ms cubic-bezier(0.2, 0, 0, 1);
+  --motion-flip: 420ms cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-pointer-light: 190ms cubic-bezier(0.2, 0, 0, 1);
+  --motion-micro-interaction: var(--motion-fast);
   --motion-hover: 180ms cubic-bezier(0.2, 0, 0, 1);
   --motion-enter: 560ms cubic-bezier(0.2, 0, 0, 1);
   --motion-emphasized: 460ms cubic-bezier(0.2, 0, 0, 1);

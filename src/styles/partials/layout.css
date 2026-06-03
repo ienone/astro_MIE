@@ -7,8 +7,8 @@
   opacity: 0;
   transform: translateY(22px) scale(0.985);
   transition:
-    opacity var(--motion-enter),
-    transform var(--motion-enter);
+    opacity var(--motion-scene, var(--motion-enter)),
+    transform var(--motion-scene, var(--motion-enter));
   transition-delay: calc(var(--reveal-index, 0) * 46ms);
   will-change: opacity, transform;
 }
@@ -17,6 +17,10 @@
   opacity: 1;
   transform: translateY(0) scale(1);
   will-change: auto;
+}
+
+html[data-scroll-motion="gsap"] [data-reveal="ready"] {
+  transition: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

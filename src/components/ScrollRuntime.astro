@@ -1,0 +1,131 @@
+<script>
+  // @ts-nocheck
+  const runtimeWindow = window as Window &
+    typeof globalThis & {
+      __astroMieScrollBound?: boolean;
+      __astroMieScroll?: {
+        state: {
+          scroll: number;
+          limit: number;
+          progress: number;
+          velocity: number;
+          direction: 1 | -1 | 0;
+          isScrolling: boolean | "native";
+        };
+        subscribe: (callback: (state: Window["__astroMieScroll"]["state"]) => void) => () => void;
+        scrollTo: (target: number | string | HTMLElement, options?: Record<string, unknown>) => void;
+        resize: () => void;
+      };
+    };
+
+  function getScrollLimit() {
+    const doc = document.documentElement;
+    const body = document.body;
+    return Math.max(0, Math.max(doc.scrollHeight, body?.scrollHeight ?? 0) - window.innerHeight);
+  }
+
+  function resolveScrollTarget(target: number | string | HTMLElement, offset = -92) {
+    if (typeof target === "number") return target;
+    if (target instanceof HTMLElement) return target.getBoundingClientRect().top + window.scrollY + offset;
+    if (typeof target === "string") {
+      if (target === "top" || target === "start" || target === "#") return 0;
+      if (target === "bottom" || target === "end") return getScrollLimit();
+      const element = document.querySelector(target);
+      if (element instanceof HTMLElement) return element.getBoundingClientRect().top + window.scrollY + offset;
+    }
+    return window.scrollY;
+  }
+
+  function createScrollState() {
+    const limit = getScrollLimit();
+    const scroll = Math.min(limit, Math.max(0, window.scrollY || document.documentElement.scrollTop || 0));
+    return {
+      scroll,
+      limit,
+      progress: limit > 0 ? scroll / limit : 1,
+      velocity: 0,
+      direction: 0,
+      isScrolling: false
+    };
+  }
+
+  function setupScrollRuntime() {
+    if (runtimeWindow.__astroMieScrollBound && runtimeWindow.__astroMieScroll) {
+      runtimeWindow.__astroMieScroll.resize();
+      return;
+    }
+
+    const subscribers = new Set<(state: Window["__astroMieScroll"]["state"]) => void>();
+    const state = createScrollState();
+    let raf = 0;
+    let lastScroll = state.scroll;
+    let lastTime = performance.now();
+    let settleTimer = 0;
+
+    function publish() {
+      document.documentElement.style.setProperty("--mie-scroll-progress", String(state.progress));
+      document.documentElement.style.setProperty("--mie-scroll-velocity", String(state.velocity || 0));
+      document.documentElement.dataset.mieScrolling = String(Boolean(state.isScrolling));
+      document.documentElement.dataset.scrollDirection = state.direction > 0 ? "down" : state.direction < 0 ? "up" : "none";
+      subscribers.forEach((callback) => callback(state));
+    }
+
+    function readScrollState(scrolling = true) {
+      raf = 0;
+      const now = performance.now();
+      const next = createScrollState();
+      const delta = next.scroll - lastScroll;
+      const elapsed = Math.max(16, now - lastTime);
+
+      Object.assign(state, next, {
+        velocity: delta / elapsed,
+        direction: delta > 0 ? 1 : delta < 0 ? -1 : state.direction,
+        isScrolling: scrolling ? "native" : false
+      });
+
+      lastScroll = next.scroll;
+      lastTime = now;
+      publish();
+    }
+
+    function scheduleScrollUpdate() {
+      if (!raf) raf = window.requestAnimationFrame(() => readScrollState(true));
+      window.clearTimeout(settleTimer);
+      settleTimer = window.setTimeout(() => {
+        readScrollState(false);
+      }, 120);
+    }
+
+    runtimeWindow.__astroMieScroll = {
+      state,
+      subscribe(callback) {
+        subscribers.add(callback);
+        callback(state);
+        return () => subscribers.delete(callback);
+      },
+      scrollTo(target, options = {}) {
+        const top = Math.min(getScrollLimit(), Math.max(0, resolveScrollTarget(target, Number(options.offset ?? -92))));
+        window.scrollTo({
+          top,
+          left: 0,
+          behavior: options.immediate ? "auto" : (options.behavior as ScrollBehavior | undefined) || "smooth"
+        });
+      },
+      resize() {
+        readScrollState(false);
+      }
+    };
+
+    runtimeWindow.__astroMieScrollBound = true;
+    document.documentElement.dataset.mieScrollRuntime = "native";
+    window.addEventListener("scroll", scheduleScrollUpdate, { passive: true });
+    window.addEventListener("resize", () => runtimeWindow.__astroMieScroll?.resize());
+    document.addEventListener("astro:after-swap", () => window.requestAnimationFrame(() => runtimeWindow.__astroMieScroll?.resize()));
+    document.addEventListener("astro:page-load", () => window.requestAnimationFrame(() => runtimeWindow.__astroMieScroll?.resize()));
+
+    readScrollState(false);
+    document.dispatchEvent(new CustomEvent("astro-mie:scroll-ready", { detail: state }));
+  }
+
+  setupScrollRuntime();
+</script>

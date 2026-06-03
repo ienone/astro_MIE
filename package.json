@@ -18,6 +18,7 @@
     "@material/web": "^2.4.1",
     "astro": "^6.3.7",
     "astro-expressive-code": "^0.42.0",
+    "gsap": "^3.15.0",
     "katex": "^0.16.25",
     "photoswipe": "^5.4.4",
     "rehype-katex": "^7.0.1",

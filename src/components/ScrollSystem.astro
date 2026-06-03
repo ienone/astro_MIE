@@ -39,7 +39,12 @@
       stateTimer: 0,
       raf: 0,
       resizeObserver: undefined,
+      fallbackScrollBound: false,
       metrics: undefined,
+      elements: undefined,
+      markerItems: [],
+      sceneHero: undefined,
+      sceneHeroBottom: 0,
       themeProperties: []
     });
 
@@ -55,7 +60,36 @@
     return scrollbarReducedMotionQuery.matches;
   }
 
+  function getUnifiedScrollState() {
+    return (
+      scrollbarWindow.__astroMieScroll?.state ?? {
+        scroll: window.scrollY,
+        limit: Math.max(0, document.documentElement.scrollHeight - window.innerHeight),
+        progress: 0,
+        velocity: 0,
+        direction: 0,
+        isScrolling: false
+      }
+    );
+  }
+
+  function scrollPageTo(target, options = {}) {
+    if (scrollbarWindow.__astroMieScroll) {
+      scrollbarWindow.__astroMieScroll.scrollTo(target, options);
+      return;
+    }
+
+    window.scrollTo({
+      top: Number(target) || 0,
+      left: 0,
+      behavior: options.immediate ? "auto" : options.behavior || "smooth"
+    });
+  }
+
   function getScrollbarElements() {
+    const cached = scrollbarState.elements;
+    if (cached?.root?.isConnected && cached?.track?.isConnected && cached?.thumb?.isConnected) return cached;
+
     const root = document.querySelector("[data-mie-scrollbar]");
     const track = document.querySelector("[data-mie-scrollbar-track]");
     const thumb = document.querySelector("[data-mie-scrollbar-thumb]");
@@ -63,7 +97,8 @@
     const tooltip = document.querySelector("[data-mie-scrollbar-tooltip]");
 
     if (!(root instanceof HTMLElement) || !(track instanceof HTMLElement) || !(thumb instanceof HTMLElement)) return {};
-    return { root, track, thumb, markers, tooltip };
+    scrollbarState.elements = { root, track, thumb, markers, tooltip };
+    return scrollbarState.elements;
   }
 
   function syncScrollbarTheme(root) {
@@ -104,6 +139,7 @@
     scrollbarState.hoverMarker = undefined;
     scrollbarState.tooltipHover = false;
     scrollbarState.progressMarkerId = "";
+    scrollbarState.markerItems = [];
     if (markers instanceof HTMLElement) markers.textContent = "";
     if (tooltip instanceof HTMLElement) tooltip.dataset.visible = "false";
   }
@@ -111,17 +147,20 @@
   function getPageMetrics(track) {
     const doc = document.documentElement;
     const body = document.body;
-    const scrollHeight = Math.max(doc.scrollHeight, body?.scrollHeight ?? 0);
     const viewportHeight = window.innerHeight || doc.clientHeight;
-    const maxScroll = Math.max(0, scrollHeight - viewportHeight);
+    const scrollState = getUnifiedScrollState();
+    const maxScroll = Math.max(0, scrollState.limit || Math.max(doc.scrollHeight, body?.scrollHeight ?? 0) - viewportHeight);
+    const scrollTop = clampScrollbarValue(scrollState.scroll || window.scrollY, 0, maxScroll);
+    const scrollHeight = maxScroll + viewportHeight;
     const trackRect = track.getBoundingClientRect();
-    const progress = maxScroll > 0 ? clampScrollbarValue(window.scrollY / maxScroll, 0, 1) : 0;
+    const progress = maxScroll > 0 ? clampScrollbarValue(scrollTop / maxScroll, 0, 1) : 0;
     const thumbOffset = trackRect.height * progress;
 
     return {
       scrollHeight,
       viewportHeight,
       maxScroll,
+      scrollTop,
       trackTop: trackRect.top,
       trackHeight: trackRect.height,
       thumbTravel: trackRect.height,
@@ -238,31 +277,34 @@
   }
 
   function getMarkerById(markers, id) {
-    if (!(markers instanceof HTMLElement) || !id) return undefined;
-    return [...markers.querySelectorAll("[data-scrollbar-marker-id]")].find(
-      (marker) => marker instanceof HTMLElement && marker.dataset.scrollbarMarkerId === id
-    );
+    if (!id) return undefined;
+    return scrollbarState.markerItems.find((item) => item.marker?.dataset.scrollbarMarkerId === id)?.marker;
   }
 
   function getCrossedMarker(markers, previousThumbOffset, metrics) {
-    if (!(markers instanceof HTMLElement) || !Number.isFinite(previousThumbOffset)) return undefined;
+    if (!Number.isFinite(previousThumbOffset)) return undefined;
 
     const low = Math.min(previousThumbOffset, metrics.thumbOffset) - 1;
     const high = Math.max(previousThumbOffset, metrics.thumbOffset) + 1;
-    const crossed = [...markers.querySelectorAll("[data-scrollbar-marker-id]")]
-      .filter((marker) => marker instanceof HTMLElement)
-      .map((marker) => ({ marker, offset: getMarkerOffset(marker, metrics) }))
-      .filter(({ offset }) => offset >= low && offset <= high)
-      .sort((a, b) => Math.abs(a.offset - metrics.thumbOffset) - Math.abs(b.offset - metrics.thumbOffset))[0]?.marker;
+    let crossed;
+    let distance = Number.POSITIVE_INFINITY;
+
+    scrollbarState.markerItems.forEach((item) => {
+      const offset = item.ratio * metrics.trackHeight;
+      if (offset < low || offset > high) return;
+
+      const nextDistance = Math.abs(offset - metrics.thumbOffset);
+      if (nextDistance < distance) {
+        distance = nextDistance;
+        crossed = item.marker;
+      }
+    });
 
     return crossed;
   }
 
   function updateActiveMarker(markers, metrics) {
-    if (!(markers instanceof HTMLElement)) return;
-    const markerList = [...markers.querySelectorAll("[data-scrollbar-marker-id]")].filter(
-      (marker) => marker instanceof HTMLElement
-    );
+    const markerList = scrollbarState.markerItems;
 
     if (!markerList.length) {
       scrollbarState.activeId = "";
@@ -275,8 +317,9 @@
     let progressMarker;
     let progressDistance = Number.POSITIVE_INFINITY;
 
-    markerList.forEach((marker) => {
-      const markerOffset = getMarkerOffset(marker, metrics);
+    markerList.forEach((item) => {
+      const marker = item.marker;
+      const markerOffset = item.ratio * metrics.trackHeight;
       const distance = Math.abs(markerOffset - metrics.thumbOffset);
       const isRead = metrics.maxScroll <= 0 || markerOffset <= activeOffset;
       const canLockAtProgress =
@@ -293,7 +336,7 @@
       }
     });
 
-    markerList.forEach((marker) => {
+    markerList.forEach(({ marker }) => {
       marker.dataset.active = String(marker === active);
       marker.dataset.atProgress = String(marker === progressMarker);
     });
@@ -310,14 +353,19 @@
   }
 
   function updateScrollbarScene(root) {
-    const hero = document.querySelector(".article-hero");
-    if (!(hero instanceof HTMLElement)) {
+    if (!(scrollbarState.sceneHero instanceof HTMLElement) || !scrollbarState.sceneHero.isConnected) {
       delete root.dataset.scrollbarScene;
       return;
     }
 
-    const rect = hero.getBoundingClientRect();
-    root.dataset.scrollbarScene = rect.bottom > 96 ? "hero" : "content";
+    root.dataset.scrollbarScene = scrollbarState.sceneHeroBottom - getUnifiedScrollState().scroll > 96 ? "hero" : "content";
+  }
+
+  function refreshScrollbarSceneCache() {
+    const hero = document.querySelector(".article-hero");
+    scrollbarState.sceneHero = hero instanceof HTMLElement ? hero : undefined;
+    scrollbarState.sceneHeroBottom =
+      hero instanceof HTMLElement ? hero.getBoundingClientRect().bottom + getUnifiedScrollState().scroll : 0;
   }
 
   function updateScrollbar(show = false) {
@@ -382,10 +430,7 @@
   function jumpToPointer(clientY, metrics) {
     const y = clientY - metrics.trackTop;
     const ratio = metrics.trackHeight > 0 ? clampScrollbarValue(y / metrics.trackHeight, 0, 1) : 0;
-    window.scrollTo({
-      top: ratio * metrics.maxScroll,
-      behavior: "smooth"
-    });
+    scrollPageTo(ratio * metrics.maxScroll, { duration: 0.72 });
   }
 
   function scrollToMarker(marker) {
@@ -395,10 +440,7 @@
     const metrics = getPageMetrics(track);
     const markerOffset = getMarkerOffset(marker, metrics);
     const ratio = metrics.trackHeight > 0 ? clampScrollbarValue(markerOffset / metrics.trackHeight, 0, 1) : 0;
-    window.scrollTo({
-      top: ratio * metrics.maxScroll,
-      behavior: "smooth"
-    });
+    scrollPageTo(ratio * metrics.maxScroll, { duration: 0.72 });
   }
 
   function isScrollbarThumbHit(clientY, metrics) {
@@ -409,9 +451,7 @@
   function setImmediatePageScroll(top) {
     const doc = document.documentElement;
     const body = document.body;
-    doc.scrollTop = top;
-    if (body) body.scrollTop = top;
-    window.scrollTo({ top, left: 0, behavior: "auto" });
+    scrollPageTo(top, { immediate: true, force: true });
   }
 
   function startScrollbarDrag(clientY, root, metrics) {
@@ -421,7 +461,7 @@
     scrollbarState.hoverMarker = undefined;
     scrollbarState.tooltipHover = false;
     scrollbarState.dragStartY = clientY;
-    scrollbarState.dragStartScroll = window.scrollY;
+    scrollbarState.dragStartScroll = getUnifiedScrollState().scroll;
     scrollbarState.dragMetrics = metrics;
     scrollbarState.dragHtmlScrollBehavior = doc.style.scrollBehavior;
     scrollbarState.dragBodyScrollBehavior = body?.style.scrollBehavior ?? "";
@@ -471,6 +511,7 @@
     if (!(markers instanceof HTMLElement) || !(track instanceof HTMLElement)) return;
 
     markers.textContent = "";
+    scrollbarState.markerItems = [];
     if (prefersReducedScrollbarMotion()) return;
 
     const metrics = getPageMetrics(track);
@@ -482,7 +523,7 @@
 
       const fullLabel = normalizeMarkerLabel(heading.textContent || id);
       const shortLabel = shortenMarkerLabel(fullLabel);
-      const top = heading.getBoundingClientRect().top + window.scrollY;
+      const top = heading.getBoundingClientRect().top + getUnifiedScrollState().scroll;
       const rawRatio = top / denominator;
       const marker = document.createElement("button");
 
@@ -525,6 +566,10 @@
       });
 
       markers.append(marker);
+      scrollbarState.markerItems.push({
+        marker,
+        ratio: clampScrollbarValue(rawRatio, 0, 1)
+      });
     });
 
     updateScrollbar();
@@ -535,6 +580,7 @@
     if (!(root instanceof HTMLElement) || !(track instanceof HTMLElement) || !(thumb instanceof HTMLElement)) return;
 
     syncScrollbarTheme(root);
+    refreshScrollbarSceneCache();
 
     if (prefersReducedScrollbarMotion()) {
       disableCustomScrollbarForReducedMotion(root);
@@ -551,7 +597,7 @@
         if (scrollbarState.dragging || prefersReducedScrollbarMotion()) return;
         window.clearTimeout(scrollbarState.settleTimer);
         root.dataset.scrollbarState = "hover";
-        const progressMarker = getMarkerById(document.querySelector("[data-mie-scrollbar-markers]"), scrollbarState.progressMarkerId);
+        const progressMarker = getMarkerById(undefined, scrollbarState.progressMarkerId);
         if (progressMarker instanceof HTMLElement) showTooltip(progressMarker, { persistent: true });
       });
 
@@ -622,15 +668,24 @@
   if (!scrollbarWindow.__astroMieScrollbarBound) {
     scrollbarWindow.__astroMieScrollbarBound = true;
 
-    window.addEventListener(
-      "scroll",
-      () => {
-        scheduleScrollbarUpdate(true);
-      },
-      { passive: true }
-    );
+    const subscribeScrollbarToScrollRuntime = () => {
+      if (scrollbarWindow.__astroMieScroll && !scrollbarWindow.__astroMieScrollbarScrollUnsubscribe) {
+        scrollbarWindow.__astroMieScrollbarScrollUnsubscribe = scrollbarWindow.__astroMieScroll.subscribe(() => {
+          scheduleScrollbarUpdate(true);
+        });
+      }
+
+      if (!scrollbarWindow.__astroMieScroll && !scrollbarState.fallbackScrollBound) {
+        scrollbarState.fallbackScrollBound = true;
+        window.addEventListener("scroll", () => scheduleScrollbarUpdate(true), { passive: true });
+      }
+    };
+
+    subscribeScrollbarToScrollRuntime();
+    document.addEventListener("astro-mie:scroll-ready", subscribeScrollbarToScrollRuntime);
 
     window.addEventListener("resize", () => {
+      refreshScrollbarSceneCache();
       rebuildScrollMarkers();
       scheduleScrollbarUpdate(true);
     });

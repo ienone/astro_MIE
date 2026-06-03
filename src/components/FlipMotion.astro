@@ -1,0 +1,49 @@
+<script>
+  // @ts-nocheck
+  import { gsap } from "gsap";
+  import { Flip } from "gsap/Flip";
+
+  gsap.registerPlugin(Flip);
+
+  const flipWindow = window;
+  const reduceFlipMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  function setupFlipGroups() {
+    if (reduceFlipMotion.matches) return;
+
+    document.querySelectorAll("[data-flip-group]").forEach((group) => {
+      if (!(group instanceof HTMLElement) || group.dataset.flipReady === "true") return;
+
+      const targets = () => [...group.children].filter((child) => child instanceof HTMLElement);
+      let previousState = Flip.getState(targets());
+      let raf = 0;
+
+      group.dataset.flipReady = "true";
+
+      const observer = new ResizeObserver(() => {
+        if (raf) window.cancelAnimationFrame(raf);
+        raf = window.requestAnimationFrame(() => {
+          const nextTargets = targets();
+          if (!nextTargets.length) return;
+          Flip.from(previousState, {
+            targets: nextTargets,
+            duration: 0.42,
+            ease: "power3.out",
+            absolute: true,
+            nested: true,
+            prune: true
+          });
+          previousState = Flip.getState(nextTargets);
+        });
+      });
+
+      observer.observe(group);
+      flipWindow.__astroMieFlipObservers ??= [];
+      flipWindow.__astroMieFlipObservers.push(observer);
+    });
+  }
+
+  document.addEventListener("astro:page-load", setupFlipGroups);
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", setupFlipGroups, { once: true });
+  else setupFlipGroups();
+</script>

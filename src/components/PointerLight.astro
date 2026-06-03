@@ -1,0 +1,95 @@
+<script is:inline>
+  function setupPointerLight() {
+    const pointerWindow = window;
+    if (pointerWindow.__astroMiePointerLightBound) return;
+
+    const hoverQuery = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const reduceMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const state = {
+      target: undefined,
+      rect: undefined,
+      rectUpdatedAt: 0,
+      x: 0,
+      y: 0,
+      raf: 0,
+      enabled: false
+    };
+
+    function canUsePointerLight() {
+      return hoverQuery.matches && !reduceMotionQuery.matches;
+    }
+
+    function applyAvailability() {
+      state.enabled = canUsePointerLight();
+      document.documentElement.dataset.pointerLight = state.enabled ? "ready" : "off";
+      if (!state.enabled && state.target instanceof HTMLElement) {
+        state.target.dataset.pointerLightActive = "false";
+        state.target = undefined;
+        state.rect = undefined;
+      }
+    }
+
+    function refreshTargetRect() {
+      state.rect = state.target instanceof HTMLElement ? state.target.getBoundingClientRect() : undefined;
+      state.rectUpdatedAt = performance.now();
+    }
+
+    function scheduleUpdate() {
+      if (state.raf || !(state.target instanceof HTMLElement)) return;
+      state.raf = window.requestAnimationFrame(() => {
+        state.raf = 0;
+        const target = state.target;
+        const rect = state.rect;
+        if (!(target instanceof HTMLElement) || !rect) return;
+        target.style.setProperty("--pointer-light-x", `${state.x - rect.left}px`);
+        target.style.setProperty("--pointer-light-y", `${state.y - rect.top}px`);
+      });
+    }
+
+    document.addEventListener(
+      "pointermove",
+      (event) => {
+        if (!state.enabled || event.pointerType !== "mouse") return;
+        const nextTarget = event.target instanceof Element ? event.target.closest("[data-pointer-light]") : null;
+
+        if (nextTarget !== state.target) {
+          if (state.target instanceof HTMLElement) state.target.dataset.pointerLightActive = "false";
+          state.target = nextTarget instanceof HTMLElement ? nextTarget : undefined;
+          refreshTargetRect();
+          if (state.target instanceof HTMLElement) state.target.dataset.pointerLightActive = "true";
+        } else if (performance.now() - state.rectUpdatedAt > 120) {
+          refreshTargetRect();
+        }
+
+        if (!(state.target instanceof HTMLElement)) return;
+        state.x = event.clientX;
+        state.y = event.clientY;
+        scheduleUpdate();
+      },
+      { passive: true }
+    );
+
+    document.addEventListener(
+      "pointerleave",
+      (event) => {
+        const target = event.target instanceof HTMLElement ? event.target.closest("[data-pointer-light]") : null;
+        if (!(target instanceof HTMLElement)) return;
+        target.dataset.pointerLightActive = "false";
+        if (target === state.target) {
+          state.target = undefined;
+          state.rect = undefined;
+        }
+      },
+      true
+    );
+
+    window.addEventListener("resize", refreshTargetRect);
+    hoverQuery.addEventListener?.("change", applyAvailability);
+    reduceMotionQuery.addEventListener?.("change", applyAvailability);
+    document.addEventListener("astro:page-load", applyAvailability);
+    pointerWindow.__astroMiePointerLightBound = true;
+    applyAvailability();
+  }
+
+  setupPointerLight();
+</script>

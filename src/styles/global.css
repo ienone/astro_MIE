@@ -1,6 +1,7 @@
 ﻿@import "./partials/tokens.css";
 @import "./partials/base.css";
 @import "./partials/scrollbar.css";
+@import "./partials/pointer-light.css";
 @import "./partials/header.css";
 @import "./partials/layout.css";
 @import "./partials/home.css";
